@@ -2,12 +2,14 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bound JSON Generator</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     body { font-family: sans-serif; padding: 1rem; }
     .station { border: 1px solid #ccc; padding: .5rem; margin-bottom: .5rem; }
     button { margin: .3rem 0; }
+    .map { height: 200px; margin-top: .5rem; display: none; }
   </style>
 </head>
 <body>
@@ -23,6 +25,7 @@
   <hr>
   <button id="generate">JSON generieren & herunterladen</button>
 
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="generator.js"></script>
 </body>
 </html>
