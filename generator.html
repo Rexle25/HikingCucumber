@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bound JSON Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    .station { border: 1px solid #ccc; padding: .5rem; margin-bottom: .5rem; }
+    button { margin: .3rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Bound JSON Generator</h1>
+
+  <label>
+    Bound-Titel:<br>
+    <input type="text" id="boundTitle" placeholder="Meine Gurkenmission">
+  </label>
+
+  <div id="stations"></div>
+  <button id="addStation">➕ Station hinzufügen</button>
+  <hr>
+  <button id="generate">JSON generieren & herunterladen</button>
+
+  <script src="generator.js"></script>
+</body>
+</html>
