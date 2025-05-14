@@ -1,3 +1,4 @@
+// Helper: neue Station-Form erstellen
 function createStationForm(id) {
   const div = document.createElement('div');
   div.className = 'station';
@@ -8,6 +9,7 @@ function createStationForm(id) {
       <select class="type">
         <option value="question">Quiz</option>
         <option value="gps">GPS</option>
+        <option value="gpsSound">GPS mit Sound</option>
       </select>
     </label><br>
     <label>Text:<br><input class="text" placeholder="Aufgaben-Text"></label><br>
@@ -35,45 +37,42 @@ function createStationForm(id) {
   let marker = null;
 
   typeSelect.onchange = e => {
-    const isQuestion = e.target.value === 'question';
+    const type = e.target.value;
+    const isQuestion = type === 'question';
+    const isGPS = type === 'gps' || type === 'gpsSound';
     questionFields.style.display = isQuestion ? '' : 'none';
-    gpsFields.style.display = isQuestion ? 'none' : '';
+    gpsFields.style.display      = isGPS ? '' : 'none';
+    mapDiv.style.display         = isGPS ? 'block' : 'none';
 
-    if (!isQuestion) {
-      mapDiv.style.display = 'block';
-      if (!leafletMap) {
-        setTimeout(() => {
-          leafletMap = L.map(mapDiv).setView([46.948, 7.447], 13);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-          }).addTo(leafletMap);
+    if (isGPS && !leafletMap) {
+      setTimeout(() => {
+        leafletMap = L.map(mapDiv).setView([46.948, 7.447], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(leafletMap);
 
-          leafletMap.on('click', function (e) {
-            const latInput = div.querySelector('.lat');
-            const lngInput = div.querySelector('.lng');
-            latInput.value = e.latlng.lat.toFixed(6);
-            lngInput.value = e.latlng.lng.toFixed(6);
+        leafletMap.on('click', e => {
+          const latInput = div.querySelector('.lat');
+          const lngInput = div.querySelector('.lng');
+          latInput.value = e.latlng.lat.toFixed(6);
+          lngInput.value = e.latlng.lng.toFixed(6);
 
-            if (marker) {
-              marker.setLatLng(e.latlng);
-            } else {
-              marker = L.marker(e.latlng, { draggable: true }).addTo(leafletMap);
-              marker.on('dragend', () => {
-                const pos = marker.getLatLng();
-                latInput.value = pos.lat.toFixed(6);
-                lngInput.value = pos.lng.toFixed(6);
-              });
-            }
-          });
-        }, 0);
-      }
-    } else {
-      mapDiv.style.display = 'none';
+          if (marker) {
+            marker.setLatLng(e.latlng);
+          } else {
+            marker = L.marker(e.latlng, { draggable: true }).addTo(leafletMap);
+            marker.on('dragend', () => {
+              const pos = marker.getLatLng();
+              latInput.value = pos.lat.toFixed(6);
+              lngInput.value = pos.lng.toFixed(6);
+            });
+          }
+        });
+      }, 0);
     }
   };
 
   div.querySelector('.remove').onclick = () => div.remove();
-
   return div;
 }
 
@@ -88,31 +87,32 @@ document.getElementById('addStation').onclick = () => {
 document.getElementById('generate').onclick = () => {
   const title = document.getElementById('boundTitle').value.trim();
   const stations = Array.from(stationsDiv.children).map(div => {
-    const type = div.querySelector('.type').value;
-    const text = div.querySelector('.text').value.trim();
+    const type     = div.querySelector('.type').value;
+    const text     = div.querySelector('.text').value.trim();
     const imageUrl = div.querySelector('.imageUrl').value.trim();
     const obj = {
       id: Number(div.querySelector('h3').textContent.split(' ')[1]),
-      type, text
+      type,
+      text
     };
     if (imageUrl) obj.imageUrl = imageUrl;
     if (type === 'question') {
       obj.answer = div.querySelector('.answer').value.trim();
-    } else {
-      obj.lat = parseFloat(div.querySelector('.lat').value);
-      obj.lng = parseFloat(div.querySelector('.lng').value);
+    } else if (type === 'gps' || type === 'gpsSound') {
+      obj.lat    = parseFloat(div.querySelector('.lat').value);
+      obj.lng    = parseFloat(div.querySelector('.lng').value);
       obj.radius = Number(div.querySelector('.radius').value);
     }
     return obj;
   });
 
   const boundData = { title, stations };
-  const jsonStr = JSON.stringify(boundData, null, 2);
+  const jsonStr   = JSON.stringify(boundData, null, 2);
 
   const blob = new Blob([jsonStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
   a.download = 'bounds.json';
   a.click();
   URL.revokeObjectURL(url);
