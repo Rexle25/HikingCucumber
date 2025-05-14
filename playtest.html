@@ -40,23 +40,40 @@
 
   <div id="gameArea"></div>
 
-  <!-- Ping-Sound -->
+  <!-- Sheikah-Ping-Sound -->
   <audio id="pingSound" src="https://freesound.org/data/previews/341/341695_5260877-lq.mp3"></audio>
 
   <script>
-    // 1. Global State
+    // 1. Globaler State
     let stations = [], currentIdx = 0;
     let watchId = null, heading = null, soundInterval = null;
 
-    // 2. Gerätedrehung (Heading) erfassen
-    window.addEventListener('deviceorientationabsolute', e => {
-      if (e.absolute && e.alpha !== null) {
-        heading = (360 - e.alpha) % 360;
-      }
-    });
+    // 2. Kompass-Erlaubnis (iOS 13+) und Audio-Unlock
+    document.getElementById('startBtn').onclick = async () => {
+      const audio = document.getElementById('pingSound');
 
-    // 3. Bound starten
-    document.getElementById('startBtn').onclick = () => {
+      // 2.1 DeviceOrientation-Permission anfordern
+      if (DeviceOrientationEvent.requestPermission) {
+        try {
+          const resp = await DeviceOrientationEvent.requestPermission();
+          if (resp !== 'granted') {
+            alert('Kompass-Erlaubnis verweigert – kein Sound-Feedback.'); 
+          }
+        } catch {
+          alert('Kompass-API nicht verfügbar.');
+        }
+      }
+
+      // 2.2 Audio-Unlock (Autoplay-Policy umgehen)
+      // Einmal stumm abspielen, um play() später zu erlauben :contentReference[oaicite:0]{index=0}
+      try {
+        audio.muted = true;
+        await audio.play();
+        audio.pause();
+        audio.muted = false;
+      } catch {}
+
+      // 3. JSON parsen & Bound starten
       try {
         const bound = JSON.parse(document.getElementById('textInput').value);
         document.getElementById('titel').textContent = bound.title;
@@ -70,27 +87,24 @@
       }
     };
 
-    // 4. Station rendern + GPS-Logik
+    // 4. Station rendern + Logik
     function renderStation() {
       const area = document.getElementById('gameArea');
       area.innerHTML = '';
-      stopWatch();
-      stopSound();
+      stopWatch(); stopSound();
 
       if (currentIdx >= stations.length) {
         area.innerHTML = '<h2>🎉 Bound abgeschlossen!</h2>';
         return;
       }
-
       const st = stations[currentIdx];
 
-      // Bild-Hinweis
+      // Bild-Hinweis (optional)
       if (st.imageUrl) {
         const img = document.createElement('img');
         img.src = st.imageUrl;
         area.appendChild(img);
       }
-
       // Text
       const p = document.createElement('p');
       p.textContent = st.text;
@@ -150,10 +164,10 @@
       }
     }
 
-    // 5. Geolocation-Watcher starten/stoppen
+    // 5. Geolocation-Watcher starten/stoppen :contentReference[oaicite:1]{index=1}
     function startWatch() {
       stopWatch();
-      watchId = navigator.geolocation.watchPosition(() => {}, err => {}, { enableHighAccuracy: true });
+      watchId = navigator.geolocation.watchPosition(() => {}, () => {}, { enableHighAccuracy: true });
     }
     function stopWatch() {
       if (watchId !== null) {
@@ -162,15 +176,15 @@
       }
     }
 
-    // 6. Sound-Feedback (Sheikah Sensor) alle 1 s
+    // 6. Sheikah-Sensor: Sound-Feedback alle 1 s :contentReference[oaicite:2]{index=2}
     function startSound(st) {
       stopSound();
       soundInterval = setInterval(() => {
         navigator.geolocation.getCurrentPosition(pos => {
           if (heading === null) return;
           const bear = bearing(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
-          const angleDiff = Math.abs(shortestAngleDiff(heading, bear));
-          if (angleDiff <= 36) {
+          const diff  = Math.abs(shortestAngleDiff(heading, bear));
+          if (diff <= 36) {
             document.getElementById('pingSound').play();
           }
         });
@@ -183,32 +197,38 @@
       }
     }
 
-    // 7. Hilfsfunktionen
+    // 7. DeviceOrientation-Event: Heading aktualisieren :contentReference[oaicite:3]{index=3}
+    window.addEventListener('deviceorientationabsolute', e => {
+      if (e.absolute && e.alpha !== null) {
+        heading = (360 - e.alpha) % 360;
+      }
+    });
 
-    // Distanz in Meter (Haversine-Formel)
+    // 8. Hilfsfunktionen
+
+    // Distanz in Meter (Haversine) :contentReference[oaicite:4]{index=4}
     function distance(lat1, lon1, lat2, lon2) {
       const R = 6371000;
-      const φ1 = lat1 * Math.PI / 180;
-      const φ2 = lat2 * Math.PI / 180;
-      const Δφ = (lat2 - lat1) * Math.PI / 180;
-      const Δλ = (lon2 - lon1) * Math.PI / 180;
+      const φ1 = lat1 * Math.PI/180;
+      const φ2 = lat2 * Math.PI/180;
+      const Δφ = (lat2-lat1) * Math.PI/180;
+      const Δλ = (lon2-lon1) * Math.PI/180;
       const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    // Peilung berechnen (Azimut)
+    // Peilung berechnen (Azimut) :contentReference[oaicite:5]{index=5}
     function bearing(lat1, lon1, lat2, lon2) {
-      const φ1 = lat1 * Math.PI / 180;
-      const φ2 = lat2 * Math.PI / 180;
-      const Δλ = (lon2 - lon1) * Math.PI / 180;
-      const y = Math.sin(Δλ) * Math.cos(φ2);
-      const x = Math.cos(φ1)*Math.sin(φ2) -
-                Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
-      return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+      const φ1 = lat1 * Math.PI/180, φ2 = lat2 * Math.PI/180;
+      const Δλ = (lon2-lon1) * Math.PI/180;
+      const y = Math.sin(Δλ)*Math.cos(φ2);
+      const x = Math.cos(φ1)*Math.sin(φ2)
+              - Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
+      return (Math.atan2(y,x)*180/Math.PI + 360) % 360;
     }
 
-    // Kürzeste Winkel-Differenz zwischen zwei Winkeln
-    function shortestAngleDiff(a, b) {
+    // Kürzeste Winkel-Differenz :contentReference[oaicite:6]{index=6}
+    function shortestAngleDiff(a,b) {
       return ((b - a + 540) % 360) - 180;
     }
   </script>
