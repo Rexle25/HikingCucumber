@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Wandercode Play</title>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    textarea { width: 100%; height: 150px; }
+    #gameArea > * { margin: .5rem 0; }
+    img { max-width: 100%; }
+  </style>
+</head>
+<body>
+
+  <h1 id="titel">Gib dein Bound-JSON ein und starte:</h1>
+  <textarea id="textInput">
+{
+  "title": "Meine Gurkenmission",
+  "stations": [
+    {
+      "id": 1,
+      "type": "question",
+      "text": "Wie viele Löcher hat eine Socke?",
+      "answer": "5",
+      "imageUrl": "https://via.placeholder.com/150"
+    },
+    {
+      "id": 2,
+      "type": "gps",
+      "text": "Gehe zur Gurkenzentrale in Bern.",
+      "lat": 46.948,
+      "lng": 7.447,
+      "radius": 50,
+      "imageUrl": "https://via.placeholder.com/150"
+    }
+  ]
+}
+  </textarea><br>
+  <button id="startBtn">Bound starten</button>
+
+  <div id="gameArea"></div>
+
+  <script>
+    let stations = [];
+    let currentIdx = 0;
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      // 1. JSON parsen
+      try {
+        const text = document.getElementById('textInput').value;
+        const bound = JSON.parse(text);
+        document.getElementById('titel').textContent = bound.title;
+        stations = bound.stations;
+        currentIdx = 0;
+        document.getElementById('textInput').style.display = 'none';
+        document.getElementById('startBtn').style.display = 'none';
+        // 2. erste Station rendern
+        renderStation();
+      } catch (e) {
+        alert('Ungültiges JSON: ' + e.message);
+      }
+    });
+
+    function renderStation() {
+      const area = document.getElementById('gameArea');
+      area.innerHTML = '';  // alte Station löschen
+
+      // Ende?
+      if (currentIdx >= stations.length) {
+        area.innerHTML = '<h2>🎉 Bound abgeschlossen!</h2>';
+        return;
+      }
+
+      const st = stations[currentIdx];
+
+      // Bild-Hinweis (optional)
+      if (st.imageUrl) {
+        const img = document.createElement('img');
+        img.src = st.imageUrl;
+        area.appendChild(img);
+      }
+
+      // Text
+      const p = document.createElement('p');
+      p.textContent = st.text;
+      area.appendChild(p);
+
+      // Quiz-Station
+      if (st.type === 'question') {
+        const input = document.createElement('input');
+        const btn  = document.createElement('button');
+        btn.textContent = 'Antwort prüfen';
+        btn.addEventListener('click', () => {
+          if (input.value.trim().toLowerCase() === st.answer.toLowerCase()) {
+            currentIdx++;
+            renderStation();
+          } else {
+            alert('Falsch – versuch’s nochmal.');
+          }
+        });
+        area.append(input, btn);
+
+      // GPS-Station
+      } else if (st.type === 'gps') {
+        const btn = document.createElement('button');
+        btn.textContent = 'Standort prüfen';
+        btn.addEventListener('click', () => {
+          if (!navigator.geolocation) {
+            return alert('GPS nicht unterstützt.');
+          }
+          navigator.geolocation.getCurrentPosition(pos => {
+            const dLat = pos.coords.latitude  - st.lat;
+            const dLng = pos.coords.longitude - st.lng;
+            const dist = Math.hypot(dLat, dLng) * 111000; // grob in Meter
+            if (dist <= st.radius) {
+              currentIdx++;
+              renderStation();
+            } else {
+              alert(`Noch ca. ${Math.round(dist)} m bis zum Ziel.`);
+            }
+          }, () => alert('GPS-Fehler'));
+        });
+        area.appendChild(btn);
+      }
+    }
+  </script>
+
+</body>
+</html>
