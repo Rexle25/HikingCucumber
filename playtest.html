@@ -8,6 +8,14 @@
     textarea { width: 100%; height: 150px; }
     #gameArea > * { margin: .5rem 0; }
     img { max-width: 100%; }
+    #debugPanel { 
+      background: #f9f9f9; 
+      border: 1px solid #ccc; 
+      padding: .5rem; 
+      margin-top: 1rem; 
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -44,6 +52,14 @@
   <audio id="pingSound" preload="auto"
          src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_17cba0354b.mp3?filename=ping-82822.mp3">
   </audio>
+
+  <!-- Debug-Panel -->
+  <div id="debugPanel">
+    <div id="headingDebug">Heading: –</div>
+    <div id="bearingDebug">Bearing: –</div>
+    <div id="deltaDebug">Delta: –</div>
+    <div id="pingDebug">Ping-Status: –</div>
+  </div>
 
   <script>
     // 1. Globaler State
@@ -180,10 +196,14 @@
       }
     }
 
-    // 5. Sheikah-Sensor: Dauerpiepen bei richtiger Richtung
+    // 5. Sheikah-Sensor: Dauerpiepen bei richtiger Richtung + Debug
     function startSound(st) {
       stopSound();
-      const audio = document.getElementById('pingSound');
+      const audio   = document.getElementById('pingSound');
+      const hdgEl   = document.getElementById('headingDebug');
+      const brgEl   = document.getElementById('bearingDebug');
+      const deltaEl = document.getElementById('deltaDebug');
+      const pingEl  = document.getElementById('pingDebug');
 
       soundInterval = setInterval(() => {
         navigator.geolocation.getCurrentPosition(pos => {
@@ -192,23 +212,32 @@
           const bear = bearing(lat, lng, st.lat, st.lng);
           const diff = shortestAngleDiff(heading, bear);
 
+          hdgEl.textContent   = `Heading:      ${heading.toFixed(1)}°`;
+          brgEl.textContent   = `Ziel-Bearing: ${bear.toFixed(1)}°`;
+          deltaEl.textContent = `Differenz:    ${diff.toFixed(1)}°`;
+
           if (diff <= 36) {
             if (audio.paused) audio.play().catch(() => {});
+            pingEl.textContent = '🔊 Piepen aktiv';
           } else {
             if (!audio.paused) audio.pause();
+            pingEl.textContent = '🔇 Piepen aus';
           }
-        }, () => {}, {
+        }, err => {
+          console.warn('Geo-Fehler', err);
+        }, {
           enableHighAccuracy: true,
           maximumAge: 0,
           timeout: 5000
         });
-      }, 500);
+      }, 500); // alle 0.5 s prüfen
     }
     function stopSound() {
       if (soundInterval !== null) {
         clearInterval(soundInterval);
         soundInterval = null;
       }
+      document.getElementById('pingDebug').textContent = '';
     }
 
     // 6. Kompass-Heading aktualisieren (zwei Events)
@@ -223,6 +252,7 @@
     function toRad(deg){ return deg * Math.PI/180; }
     function toDeg(rad){ return rad * 180/Math.PI; }
 
+    // Haversine-Formel (Distanz in Metern)
     function distance(lat1, lon1, lat2, lon2) {
       const R = 6371000;
       const φ1 = toRad(lat1), φ2 = toRad(lat2);
@@ -231,15 +261,17 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
+    // Peilung (Azimut) berechnen
     function bearing(lat1, lon1, lat2, lon2) {
       const φ1 = toRad(lat1), φ2 = toRad(lat2);
       const Δλ = toRad(lon2 - lon1);
       const y = Math.sin(Δλ)*Math.cos(φ2);
-      const x = Math.cos(φ1)*Math.sin(φ2) -
-                Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
+      const x = Math.cos(φ1)*Math.sin(φ2)
+              - Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
       return (toDeg(Math.atan2(y, x)) + 360) % 360;
     }
 
+    // Kleinster Winkel-Unterschied
     function shortestAngleDiff(a, b) {
       const d = Math.abs(a - b) % 360;
       return d > 180 ? 360 - d : d;
