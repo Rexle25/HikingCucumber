@@ -1,15 +1,27 @@
 <!DOCTYPE html>
+<html lang="de">
 <head>
+    <meta charset="UTF-8">
     <title>Wandercode Play</title>
 </head>
 <body>
-    <h1>Füge deinen JSON Text der Schnitzeljagd die du spielen willst ein. </h1>
-    <input type="text" id="textInput">
+    <h1 id="titel">Füge deinen JSON-Text der Schnitzeljagd ein:</h1>
+
+    <textarea id="textInput" rows="10" cols="50">
+
+
+    <button onclick="parseJSON()">JSON anwenden</button>
 
     <script>
-
-        const input = document.getElementById('fileInput');
-        const data = JSON.parse(input);
+        function parseJSON() {
+            const input = document.getElementById('textInput').value;
+            try {
+                const boundData = JSON.parse(input);
+                document.getElementById('titel').innerHTML = boundData.title;
+            } catch (e) {
+                alert("Ungültiges JSON! Fehler: " + e.message);
+            }
+        }
     </script>
-
 </body>
+</html>
