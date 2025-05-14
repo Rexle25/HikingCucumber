@@ -8,6 +8,14 @@
     textarea { width: 100%; height: 150px; }
     #gameArea > * { margin: .5rem 0; }
     img { max-width: 100%; }
+    #debugPanel { 
+      background: #f9f9f9; 
+      border: 1px solid #ccc; 
+      padding: .5rem; 
+      margin-top: 1rem; 
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -41,23 +49,33 @@
   <div id="gameArea"></div>
 
   <!-- Sheikah-Ping-Sound -->
-  <audio id="pingSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_17cba0354b.mp3?filename=ping-82822.mp3"></audio>
+  <audio id="pingSound" preload="auto"
+         src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_17cba0354b.mp3?filename=ping-82822.mp3">
+  </audio>
+
+  <!-- Debug-Panel -->
+  <div id="debugPanel">
+    <div id="headingDebug">Heading: –</div>
+    <div id="bearingDebug">Bearing: –</div>
+    <div id="deltaDebug">Delta: –</div>
+    <div id="pingDebug">Ping-Status: –</div>
+  </div>
 
   <script>
     // 1. Globaler State
     let stations = [], currentIdx = 0;
     let watchId = null, heading = null, soundInterval = null;
 
-    // 2. Kompass-Erlaubnis (iOS 13+) und Audio-Unlock
+    // 2. Start-Button: Kompass-Permission + Audio-Unlock + Bound-Start
     document.getElementById('startBtn').onclick = async () => {
       const audio = document.getElementById('pingSound');
 
-      // 2.1 DeviceOrientation-Permission anfordern
+      // 2.1 Kompass-API (iOS 13+)
       if (DeviceOrientationEvent.requestPermission) {
         try {
           const resp = await DeviceOrientationEvent.requestPermission();
           if (resp !== 'granted') {
-            alert('Kompass-Erlaubnis verweigert – kein Sound-Feedback.'); 
+            alert('Kompass-Erlaubnis verweigert – kein Sound-Feedback.');
           }
         } catch {
           alert('Kompass-API nicht verfügbar.');
@@ -65,7 +83,6 @@
       }
 
       // 2.2 Audio-Unlock (Autoplay-Policy umgehen)
-      // Einmal stumm abspielen, um play() später zu erlauben :contentReference[oaicite:0]{index=0}
       try {
         audio.muted = true;
         await audio.play();
@@ -73,7 +90,7 @@
         audio.muted = false;
       } catch {}
 
-      // 3. JSON parsen & Bound starten
+      // 2.3 JSON parsen & Bound initialisieren
       try {
         const bound = JSON.parse(document.getElementById('textInput').value);
         document.getElementById('titel').textContent = bound.title;
@@ -87,7 +104,7 @@
       }
     };
 
-    // 4. Station rendern + Logik
+    // 3. Station rendern + Logik
     function renderStation() {
       const area = document.getElementById('gameArea');
       area.innerHTML = '';
@@ -99,26 +116,27 @@
       }
       const st = stations[currentIdx];
 
-      // Bild-Hinweis (optional)
+      // Bild-Hinweis
       if (st.imageUrl) {
         const img = document.createElement('img');
         img.src = st.imageUrl;
         area.appendChild(img);
       }
+
       // Text
       const p = document.createElement('p');
       p.textContent = st.text;
       area.appendChild(p);
 
+      // Stationstyp
       if (st.type === 'question') {
-        // Quiz-Station
+        // Quiz
         const inp = document.createElement('input');
         const btn = document.createElement('button');
         btn.textContent = 'Antwort prüfen';
         btn.onclick = () => {
           if (inp.value.trim().toLowerCase() === st.answer.toLowerCase()) {
-            currentIdx++;
-            renderStation();
+            currentIdx++; renderStation();
           } else {
             alert('Falsch – versuch’s nochmal.');
           }
@@ -126,7 +144,7 @@
         area.append(inp, btn);
 
       } else if (st.type === 'gps') {
-        // Normaler GPS-Stationstyp
+        // normaler GPS-Check
         startWatch();
         const btn = document.createElement('button');
         btn.textContent = 'Ziel erreicht?';
@@ -134,8 +152,7 @@
           navigator.geolocation.getCurrentPosition(pos => {
             const d = distance(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
             if (d <= st.radius) {
-              currentIdx++;
-              renderStation();
+              currentIdx++; renderStation();
             } else {
               alert(`Noch ${Math.round(d)} m bis zum Ziel.`);
             }
@@ -144,7 +161,7 @@
         area.appendChild(btn);
 
       } else if (st.type === 'gpsSound') {
-        // GPS mit Sound-Feedback
+        // GPS-Check + Sheikah-Ping
         startWatch();
         startSound(st);
         const btn = document.createElement('button');
@@ -153,8 +170,7 @@
           navigator.geolocation.getCurrentPosition(pos => {
             const d = distance(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
             if (d <= st.radius) {
-              currentIdx++;
-              renderStation();
+              currentIdx++; renderStation();
             } else {
               alert(`Noch ${Math.round(d)} m bis zum Ziel.`);
             }
@@ -164,10 +180,14 @@
       }
     }
 
-    // 5. Geolocation-Watcher starten/stoppen :contentReference[oaicite:1]{index=1}
+    // 4. Geolocation-Watcher starten/stoppen
     function startWatch() {
       stopWatch();
-      watchId = navigator.geolocation.watchPosition(() => {}, () => {}, { enableHighAccuracy: true });
+      watchId = navigator.geolocation.watchPosition(() => {}, () => {}, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 5000
+      });
     }
     function stopWatch() {
       if (watchId !== null) {
@@ -176,60 +196,85 @@
       }
     }
 
-    // 6. Sheikah-Sensor: Sound-Feedback alle 1 s :contentReference[oaicite:2]{index=2}
+    // 5. Sheikah-Sensor: Dauerpiepen bei richtiger Richtung + Debug
     function startSound(st) {
       stopSound();
+      const audio   = document.getElementById('pingSound');
+      const hdgEl   = document.getElementById('headingDebug');
+      const brgEl   = document.getElementById('bearingDebug');
+      const deltaEl = document.getElementById('deltaDebug');
+      const pingEl  = document.getElementById('pingDebug');
+
       soundInterval = setInterval(() => {
         navigator.geolocation.getCurrentPosition(pos => {
           if (heading === null) return;
-          const bear = bearing(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
-          const diff  = Math.abs(shortestAngleDiff(heading, bear));
+          const lat = pos.coords.latitude, lng = pos.coords.longitude;
+          const bear = bearing(lat, lng, st.lat, st.lng);
+          const diff = shortestAngleDiff(heading, bear);
+
+          hdgEl.textContent   = `Heading:      ${heading.toFixed(1)}°`;
+          brgEl.textContent   = `Ziel-Bearing: ${bear.toFixed(1)}°`;
+          deltaEl.textContent = `Differenz:    ${diff.toFixed(1)}°`;
+
           if (diff <= 36) {
-            document.getElementById('pingSound').play();
+            if (audio.paused) audio.play().catch(() => {});
+            pingEl.textContent = '🔊 Piepen aktiv';
+          } else {
+            if (!audio.paused) audio.pause();
+            pingEl.textContent = '🔇 Piepen aus';
           }
+        }, err => {
+          console.warn('Geo-Fehler', err);
+        }, {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 5000
         });
-      }, 1000);
+      }, 500); // alle 0.5 s prüfen
     }
     function stopSound() {
       if (soundInterval !== null) {
         clearInterval(soundInterval);
         soundInterval = null;
       }
+      document.getElementById('pingDebug').textContent = '';
     }
 
-    // 7. DeviceOrientation-Event: Heading aktualisieren :contentReference[oaicite:3]{index=3}
-    window.addEventListener('deviceorientationabsolute', e => {
-      if (e.absolute && e.alpha !== null) {
-        heading = (360 - e.alpha) % 360;
-      }
+    // 6. Kompass-Heading aktualisieren (zwei Events)
+    ['deviceorientationabsolute', 'deviceorientation'].forEach(evt => {
+      window.addEventListener(evt, e => {
+        if (e.alpha != null) heading = (360 - e.alpha) % 360;
+      });
     });
 
-    // 8. Hilfsfunktionen
+    // 7. Hilfsfunktionen
 
-    // Distanz in Meter (Haversine) :contentReference[oaicite:4]{index=4}
+    function toRad(deg){ return deg * Math.PI/180; }
+    function toDeg(rad){ return rad * 180/Math.PI; }
+
+    // Haversine-Formel (Distanz in Metern)
     function distance(lat1, lon1, lat2, lon2) {
       const R = 6371000;
-      const φ1 = lat1 * Math.PI/180;
-      const φ2 = lat2 * Math.PI/180;
-      const Δφ = (lat2-lat1) * Math.PI/180;
-      const Δλ = (lon2-lon1) * Math.PI/180;
+      const φ1 = toRad(lat1), φ2 = toRad(lat2);
+      const Δφ = toRad(lat2 - lat1), Δλ = toRad(lon2 - lon1);
       const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    // Peilung berechnen (Azimut) :contentReference[oaicite:5]{index=5}
+    // Peilung (Azimut) berechnen
     function bearing(lat1, lon1, lat2, lon2) {
-      const φ1 = lat1 * Math.PI/180, φ2 = lat2 * Math.PI/180;
-      const Δλ = (lon2-lon1) * Math.PI/180;
+      const φ1 = toRad(lat1), φ2 = toRad(lat2);
+      const Δλ = toRad(lon2 - lon1);
       const y = Math.sin(Δλ)*Math.cos(φ2);
       const x = Math.cos(φ1)*Math.sin(φ2)
               - Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
-      return (Math.atan2(y,x)*180/Math.PI + 360) % 360;
+      return (toDeg(Math.atan2(y, x)) + 360) % 360;
     }
 
-    // Kürzeste Winkel-Differenz :contentReference[oaicite:6]{index=6}
-    function shortestAngleDiff(a,b) {
-      return ((b - a + 540) % 360) - 180;
+    // Kleinster Winkel-Unterschied
+    function shortestAngleDiff(a, b) {
+      const d = Math.abs(a - b) % 360;
+      return d > 180 ? 360 - d : d;
     }
   </script>
 </body>
