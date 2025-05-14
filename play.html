@@ -10,18 +10,18 @@
     <textarea id="textInput" rows="10" cols="50">
 
 
-    <button onclick="parseJSON()">JSON anwenden</button>
 
     <script>
         function parseJSON() {
             const input = document.getElementById('textInput').value;
-            try {
-                const boundData = JSON.parse(input);
-                document.getElementById('titel').innerHTML = boundData.title;
-            } catch (e) {
-                alert("Ungültiges JSON! Fehler: " + e.message);
-            }
+            const boundData = JSON.parse(input);
+            document.getElementById('titel').innerHTML = boundData.title;
+          
         }
+    </script>
+
+    <script>
+
     </script>
 </body>
 </html>
