@@ -26,7 +26,7 @@
     },
     {
       "id": 2,
-      "type": "gps",
+      "type": "gpsSound",
       "text": "Gehe zur Gurkenzentrale in Bern.",
       "lat": 46.948,
       "lng": 7.447,
@@ -48,10 +48,9 @@
     let stations = [], currentIdx = 0;
     let watchId = null, heading = null, soundInterval = null;
 
-    // 2. Gerätedrehung (Heading) erfassen :contentReference[oaicite:0]{index=0}
+    // 2. Gerätedrehung (Heading) erfassen
     window.addEventListener('deviceorientationabsolute', e => {
       if (e.absolute && e.alpha !== null) {
-        // alpha = Drehung um Z-Achse in Grad
         heading = (360 - e.alpha) % 360;
       }
     });
@@ -59,9 +58,10 @@
     // 3. Bound starten
     document.getElementById('startBtn').onclick = () => {
       try {
-        const bound = JSON.parse(document.getElementById('textInput').value); :contentReference[oaicite:1]{index=1}
+        const bound = JSON.parse(document.getElementById('textInput').value);
         document.getElementById('titel').textContent = bound.title;
-        stations = bound.stations; currentIdx = 0;
+        stations = bound.stations;
+        currentIdx = 0;
         document.getElementById('textInput').style.display = 'none';
         document.getElementById('startBtn').style.display = 'none';
         renderStation();
@@ -70,70 +70,104 @@
       }
     };
 
-    // 4. Station rendert + gpsSound aktivieren/deaktivieren
+    // 4. Station rendern + GPS-Logik
     function renderStation() {
       const area = document.getElementById('gameArea');
-      area.innerHTML = ''; 
-      stopWatch(); stopSound();
+      area.innerHTML = '';
+      stopWatch();
+      stopSound();
 
       if (currentIdx >= stations.length) {
-        area.innerHTML = '<h2>🎉 Bound abgeschlossen!</h2>'; return;
+        area.innerHTML = '<h2>🎉 Bound abgeschlossen!</h2>';
+        return;
       }
+
       const st = stations[currentIdx];
+
+      // Bild-Hinweis
       if (st.imageUrl) {
         const img = document.createElement('img');
         img.src = st.imageUrl;
         area.appendChild(img);
       }
-      area.appendChild(Object.assign(document.createElement('p'), { textContent: st.text }));
+
+      // Text
+      const p = document.createElement('p');
+      p.textContent = st.text;
+      area.appendChild(p);
 
       if (st.type === 'question') {
-        // Quiz wie gehabt
+        // Quiz-Station
         const inp = document.createElement('input');
         const btn = document.createElement('button');
         btn.textContent = 'Antwort prüfen';
         btn.onclick = () => {
           if (inp.value.trim().toLowerCase() === st.answer.toLowerCase()) {
-            currentIdx++; renderStation();
-          } else alert('Falsch – versuch’s nochmal.');
+            currentIdx++;
+            renderStation();
+          } else {
+            alert('Falsch – versuch’s nochmal.');
+          }
         };
         area.append(inp, btn);
 
       } else if (st.type === 'gps') {
-        // GPS + Sound Feedback einschalten
-        startWatch(st); 
-        startSound(st);
-
-        // Button zum Abschluss prüfen
+        // Normaler GPS-Stationstyp
+        startWatch();
         const btn = document.createElement('button');
         btn.textContent = 'Ziel erreicht?';
         btn.onclick = () => {
-          navigator.geolocation.getCurrentPosition(pos => { :contentReference[oaicite:2]{index=2}
+          navigator.geolocation.getCurrentPosition(pos => {
             const d = distance(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
             if (d <= st.radius) {
-              currentIdx++; renderStation();
-            } else alert(`Noch ${Math.round(d)} m bis zum Ziel.`);
+              currentIdx++;
+              renderStation();
+            } else {
+              alert(`Noch ${Math.round(d)} m bis zum Ziel.`);
+            }
+          }, () => alert('GPS-Fehler'));
+        };
+        area.appendChild(btn);
+
+      } else if (st.type === 'gpsSound') {
+        // GPS mit Sound-Feedback
+        startWatch();
+        startSound(st);
+        const btn = document.createElement('button');
+        btn.textContent = 'Ziel erreicht?';
+        btn.onclick = () => {
+          navigator.geolocation.getCurrentPosition(pos => {
+            const d = distance(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
+            if (d <= st.radius) {
+              currentIdx++;
+              renderStation();
+            } else {
+              alert(`Noch ${Math.round(d)} m bis zum Ziel.`);
+            }
           }, () => alert('GPS-Fehler'));
         };
         area.appendChild(btn);
       }
     }
 
-    // 5. Geolocation-Watcher starten/stoppen :contentReference[oaicite:3]{index=3}
-    function startWatch(st) {
+    // 5. Geolocation-Watcher starten/stoppen
+    function startWatch() {
       stopWatch();
-      watchId = navigator.geolocation.watchPosition(() => {}, err=>{}, { enableHighAccuracy:true });
+      watchId = navigator.geolocation.watchPosition(() => {}, err => {}, { enableHighAccuracy: true });
     }
     function stopWatch() {
-      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-      watchId = null;
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
     }
 
-    // 6. Sound-Feedback (Sheikah Sensor) alle 1 s :contentReference[oaicite:4]{index=4}
+    // 6. Sound-Feedback (Sheikah Sensor) alle 1 s
     function startSound(st) {
+      stopSound();
       soundInterval = setInterval(() => {
         navigator.geolocation.getCurrentPosition(pos => {
-          if (heading===null) return;
+          if (heading === null) return;
           const bear = bearing(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
           const angleDiff = Math.abs(shortestAngleDiff(heading, bear));
           if (angleDiff <= 36) {
@@ -143,32 +177,38 @@
       }, 1000);
     }
     function stopSound() {
-      clearInterval(soundInterval);
-      soundInterval = null;
+      if (soundInterval !== null) {
+        clearInterval(soundInterval);
+        soundInterval = null;
+      }
     }
 
     // 7. Hilfsfunktionen
 
-    // Haversine-Distanz in Meter :contentReference[oaicite:5]{index=5}
+    // Distanz in Meter (Haversine-Formel)
     function distance(lat1, lon1, lat2, lon2) {
-      const R=6371000;
-      const φ1=lat1*Math.PI/180, φ2=lat2*Math.PI/180;
-      const Δφ=(lat2-lat1)*Math.PI/180, Δλ=(lon2-lon1)*Math.PI/180;
-      const a=Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
-      return R*2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const R = 6371000;
+      const φ1 = lat1 * Math.PI / 180;
+      const φ2 = lat2 * Math.PI / 180;
+      const Δφ = (lat2 - lat1) * Math.PI / 180;
+      const Δλ = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    // Peilung berechnen :contentReference[oaicite:6]{index=6}
+    // Peilung berechnen (Azimut)
     function bearing(lat1, lon1, lat2, lon2) {
-      const φ1=lat1*Math.PI/180, φ2=lat2*Math.PI/180;
-      const Δλ=(lon2-lon1)*Math.PI/180;
-      const y=Math.sin(Δλ)*Math.cos(φ2);
-      const x=Math.cos(φ1)*Math.sin(φ2) - Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
-      return (Math.atan2(y,x)*180/Math.PI+360)%360;
+      const φ1 = lat1 * Math.PI / 180;
+      const φ2 = lat2 * Math.PI / 180;
+      const Δλ = (lon2 - lon1) * Math.PI / 180;
+      const y = Math.sin(Δλ) * Math.cos(φ2);
+      const x = Math.cos(φ1)*Math.sin(φ2) -
+                Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
+      return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
     }
 
-    // Kürzeste Winkel-Differenz :contentReference[oaicite:7]{index=7}
-    function shortestAngleDiff(a,b) {
+    // Kürzeste Winkel-Differenz zwischen zwei Winkeln
+    function shortestAngleDiff(a, b) {
       return ((b - a + 540) % 360) - 180;
     }
   </script>
