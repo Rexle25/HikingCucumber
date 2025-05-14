@@ -41,11 +41,7 @@
   <div id="gameArea"></div>
 
   <!-- Sheikah-Ping-Sound -->
-  <audio id="pingSound" src="https://freesound.org/data/previews/341/341695_5260877-lq.mp3"></audio>
-
-
-  <div id="debug" style="color: darkorange; font-weight: bold; margin-top: 1rem;"></div>
-
+  <audio id="pingSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_17cba0354b.mp3?filename=ping-82822.mp3"></audio>
 
   <script>
     // 1. Globaler State
@@ -180,30 +176,20 @@
       }
     }
 
+    // 6. Sheikah-Sensor: Sound-Feedback alle 1 s :contentReference[oaicite:2]{index=2}
     function startSound(st) {
-    stopSound();
-    soundInterval = setInterval(() => {
+      stopSound();
+      soundInterval = setInterval(() => {
         navigator.geolocation.getCurrentPosition(pos => {
-        if (heading === null) return;
-        const bear = bearing(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
-        const diff  = Math.abs(shortestAngleDiff(heading, bear));
-        const debugEl = document.getElementById('debug');
-
-        if (diff <= 36) {
-            // Hier würde der Ping ausgelöst
-            debugEl.textContent = `PING ausgelöst! Winkel-Differenz: ${Math.round(diff)}°`;
-            document.getElementById('pingSound').play().catch(() => {
-            // Falls Audio blockiert, zeigen wir das hier an
-            debugEl.textContent += ' (Audio blockiert)';
-            });
-        } else {
-            // Andernfalls klaren wir die Debug-Zeile
-            debugEl.textContent = '';
-        }
+          if (heading === null) return;
+          const bear = bearing(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
+          const diff  = Math.abs(shortestAngleDiff(heading, bear));
+          if (diff <= 36) {
+            document.getElementById('pingSound').play();
+          }
         });
-    }, 1000);
+      }, 1000);
     }
-
     function stopSound() {
       if (soundInterval !== null) {
         clearInterval(soundInterval);
