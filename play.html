@@ -7,54 +7,88 @@
 <body>
     <h1 id="titel">Füge deinen JSON-Text der Schnitzeljagd ein:</h1>
 
-    <input type="text", id="textInput">
+    <!-- Komma entfernt -->
+    <input type="text" id="textInput">
 
-
+    <button onclick="parseJSON()">JSON anwenden und Schnitzeljagd (neu)starten</button>
+    <button onclick="Laden()">Schnitzeljagd weiterspielen</button>
 
     <script>
+        // 'data' muss veränderbar sein → let statt const
+        let data = null;
+        let index = 0;
+
         function parseJSON() {
             const input = document.getElementById('textInput').value;
-            const boundData = JSON.parse(input);
-            
-            let index = 1;
+            data = JSON.parse(input);
+            index = 0;           // beim Neustart immer von vorne
+            document.getElementById('titel').innerText = data.title || '';
             Start();
-          
         }
 
         function Start() {
-
-
-
+            Abschnitt();
         }
 
         function Speichern() {
-            localStorage.setItem(json, boundData);
-            localStorage.setItem(id, index);
-
+            // Schlüssel als Strings, und JSON.stringify
+            localStorage.setItem("json", JSON.stringify(data));
+            localStorage.setItem("id", index.toString());
         }
 
         function Laden() {
-            boundData = localStorage.getItem(json);
-            index = localStorage.getItem(id);
-            Start();
-
-        }
-        function Abschnitt()  {
-            let aktuelleAufgabe = boundDa
-        }
-    </script>
-
-    <button onclick="parseJSON()">JSON anwenden und Schnitzeljagd (neu)starten</button>
-
-    <button onclick="Laden()">Schnitzeljagd weiterspielen</button>
-
-
-
-    <script>
-        function GPS() {
-            
+            const savedJson = localStorage.getItem("json");
+            const savedId   = localStorage.getItem("id");
+            if (savedJson && savedId !== null) {
+                data  = JSON.parse(savedJson);
+                index = parseInt(savedId, 10);
+                document.getElementById('titel').innerText = data.title || '';
+                Start();
+            } else {
+                alert("Kein gespeicherter Spielstand gefunden.");
+            }
         }
 
+        function Abschnitt() {
+            // Stelle sicher, dass data geladen ist
+            if (!data || !data.stations || !data.stations[index]) return;
+
+            const station = data.stations[index];
+            const type    = station.type;
+
+            switch (type) {
+                case "info":
+                    info(station);
+                    break;
+                case "question":
+                    question(station);
+                    break;
+                case "gps":
+                    gps(station);
+                    break;
+                default:
+                    console.warn("Unbekannter Typ:", type);
+            }
+        }
+
+        // Alle Funktionen bekommen jetzt 'station' übergeben
+        function info(station) {
+            const text = document.createElement("p");
+            text.innerText = station.text;
+            document.body.appendChild(text);
+        }
+
+        function question(station) {
+            const text = document.createElement("p");
+            text.innerText = station.text;
+            document.body.appendChild(text);
+        }
+
+        function gps(station) {
+            const text = document.createElement("p");
+            text.innerText = station.text;
+            document.body.appendChild(text);
+        }
     </script>
 </body>
 </html>
