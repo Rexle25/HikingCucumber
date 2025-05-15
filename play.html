@@ -3,39 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <title>Wandercode Play</title>
+    <style>
+      body { font-family: sans-serif; padding: 1rem; }
+      #inhalt p { margin: .5rem 0; }
+      #inhalt button, #inhalt input { margin: .3rem 0; display: block; }
+    </style>
 </head>
 <body>
     <h1 id="titel">Füge deinen JSON-Text der Schnitzeljagd ein:</h1>
 
-    <!-- Komma entfernt -->
-    <input type="text" id="textInput">
+    <input type="text" id="textInput" placeholder='{"title":"Test",...}' style="width:100%">
 
-    <button onclick="parseJSON()">JSON anwenden und Schnitzeljagd (neu)starten</button>
+    <button onclick="parseJSON()">JSON anwenden und Schnitzeljagd (neu) starten</button>
     <button onclick="Laden()">Schnitzeljagd weiterspielen</button>
 
+    <!-- Hier werden die Stationen gerendert -->
+    <div id="inhalt"></div>
+
     <script>
-        // 'data' muss veränderbar sein → let statt const
         let data = null;
         let index = 0;
 
+        // 1) JSON einlesen und Start
         function parseJSON() {
             const input = document.getElementById('textInput').value;
             data = JSON.parse(input);
-            index = 0;           // beim Neustart immer von vorne
+            index = 0;
             document.getElementById('titel').innerText = data.title || '';
-            Start();
-        }
-
-        function Start() {
+            Speichern();
             Abschnitt();
         }
 
+        // 2) Fortschritt speichern
         function Speichern() {
-            // Schlüssel als Strings, und JSON.stringify
             localStorage.setItem("json", JSON.stringify(data));
             localStorage.setItem("id", index.toString());
         }
 
+        // 3) Fortschritt laden
         function Laden() {
             const savedJson = localStorage.getItem("json");
             const savedId   = localStorage.getItem("id");
@@ -43,66 +48,142 @@
                 data  = JSON.parse(savedJson);
                 index = parseInt(savedId, 10);
                 document.getElementById('titel').innerText = data.title || '';
-                Start();
+                Abschnitt();
             } else {
                 alert("Kein gespeicherter Spielstand gefunden.");
             }
         }
 
+        // 4) Aktuelle Station rendern
         function Abschnitt() {
-            // Stelle sicher, dass data geladen ist
-            if (!data || !data.stations || !data.stations[index]) return;
+            const container = document.getElementById('inhalt');
+            container.innerHTML = '';  // Alten Inhalt löschen
 
+            if (!data || !data.stations || !data.stations[index]) {
+                container.innerText = "Keine Station mehr.";
+                return;
+            }
             const station = data.stations[index];
             const type    = station.type;
 
             switch (type) {
                 case "info":
-                    info(station);
+                    renderInfo(station, container);
                     break;
                 case "question":
-                    question(station);
+                    renderQuestion(station, container);
                     break;
                 case "gps":
-                    gps(station);
+                    renderGPS(station, container);
                     break;
                 default:
-                    console.warn("Unbekannter Typ:", type);
+                    container.innerText = "Unbekannter Typ: " + type;
             }
         }
 
-        // Alle Funktionen bekommen jetzt 'station' übergeben
-        function info(station) {
-            const text = document.createElement("p");
-            text.innerText = station.text;
-            document.body.appendChild(text);
-            const nextButton = document.createElement("button");
-            nextButton.innerHTML = "Weiter";
-            document.body.appendChild(nextButton);
-            nextButton.onclick = weiter();
+        // 4a) Info-Station
+        function renderInfo(station, container) {
+            const p = document.createElement("p");
+            p.innerText = station.text;
+            container.appendChild(p);
+
+            const msg = document.createElement("p");
+            msg.innerText = "Du hast diese Station geschafft!";
+            container.appendChild(msg);
+
+            const btn = document.createElement("button");
+            btn.innerText = "Weiter";
+            btn.onclick = () => Weiter();
+            container.appendChild(btn);
         }
 
-        function question(station) {
-            const text = document.createElement("p");
-            text.innerText = station.text;
-            document.body.appendChild(text);
+        // 4b) Question-Station
+        function renderQuestion(station, container) {
+            const p = document.createElement("p");
+            p.innerText = station.text;
+            container.appendChild(p);
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.placeholder = "Antwort eingeben";
+            container.appendChild(input);
+
+            const checkBtn = document.createElement("button");
+            checkBtn.innerText = "Antwort prüfen";
+            checkBtn.onclick = () => {
+                if (input.value.trim().toLowerCase() === station.answer.toLowerCase()) {
+                    container.innerHTML = '';  // Frage entfernen
+                    const msg = document.createElement("p");
+                    msg.innerText = "Du hast diese Station geschafft!";
+                    container.appendChild(msg);
+                    const btn = document.createElement("button");
+                    btn.innerText = "Weiter";
+                    btn.onclick = () => Weiter();
+                    container.appendChild(btn);
+                } else {
+                    alert("Falsch! Versuch’s nochmal.");
+                }
+            };
+            container.appendChild(checkBtn);
         }
 
-        function gps(station) {
-            const text = document.createElement("p");
-            text.innerText = station.text;
-            document.body.appendChild(text);
+        // 4c) GPS-Station
+        function renderGPS(station, container) {
+            const p = document.createElement("p");
+            p.innerText = station.text;
+            container.appendChild(p);
+
+            if (navigator.geolocation) {
+                const checkBtn = document.createElement("button");
+                checkBtn.innerText = "Position prüfen";
+                checkBtn.onclick = () => {
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        const d = distance(
+                            pos.coords.latitude,
+                            pos.coords.longitude,
+                            station.lat,
+                            station.lng
+                        );
+                        if (d <= station.radius) {
+                            container.innerHTML = '';
+                            const msg = document.createElement("p");
+                            msg.innerText = "Du hast diese Station geschafft!";
+                            container.appendChild(msg);
+                            const btn = document.createElement("button");
+                            btn.innerText = "Weiter";
+                            btn.onclick = () => Weiter();
+                            container.appendChild(btn);
+                        } else {
+                            alert(`Du bist ${Math.round(d)} m entfernt. Geh näher ran.`);
+                        }
+                    }, () => alert("GPS-Fehler"));
+                };
+                container.appendChild(checkBtn);
+            } else {
+                container.appendChild(document.createTextNode("GPS nicht unterstützt."));
+            }
         }
 
-        function weiter() {
-            text.remove();
+        // 5) Entfernung berechnen (Haversine)
+        function distance(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const toRad = a => a * Math.PI/180;
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat/2)**2 +
+                      Math.cos(toRad(lat1)) *
+                      Math.cos(toRad(lat2)) *
+                      Math.sin(dLon/2)**2;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // 6) Nächste Station
+        function Weiter() {
             index++;
             Speichern();
             Abschnitt();
-
         }
-
-    
     </script>
 </body>
 </html>
