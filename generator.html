@@ -3,224 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <title>Schnitzeljagd-JSON-Generator</title>
-  <!-- Leaflet-CSS für die Kartenanzeige -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 1rem;
-      max-width: 800px;
-      margin: auto;
-    }
-    h1 {
-      text-align: center;
-    }
-    .station {
-      border: 1px solid #ccc;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 6px;
-      background: #fafafa;
-    }
-    label {
-      display: block;
-      margin: 0.5rem 0;
-    }
-    .map {
-      height: 200px;
-      margin-top: 0.5rem;
-    }
-    button {
-      margin-top: 0.5rem;
-    }
+    body { font-family:sans-serif; padding:1rem; max-width:800px; margin:auto }
+    .station { border:1px solid #ccc; padding:1rem; margin:1rem 0; border-radius:6px; background:#fafafa }
+    label, button { display:block; margin:0.5rem 0 }
+    .map { height:200px; margin-top:0.5rem }
   </style>
 </head>
 <body>
-
   <h1>JSON-Generator für deine Schnitzeljagd</h1>
-
-  <!-- Eingabe des Titels -->
   <label>
-    <strong>Titel der Schnitzeljagd</strong><br>
-    <input type="text" id="boundTitle" placeholder="Meine Schnitzeljagd" style="width:100%;">
+    Titel der Schnitzeljagd:
+    <input type="text" id="boundTitle" style="width:100%" placeholder="Meine Schnitzeljagd">
   </label>
-
-  <!-- Container für alle Stationen -->
   <div id="stations"></div>
-
-  <!-- Buttons für Hinzufügen und Generieren -->
   <button id="addStation">➕ Station hinzufügen</button>
-  <button id="generate">✨ JSON generieren &amp; herunterladen</button>
+  <button id="generate">✨ JSON generieren & herunterladen</button>
 
-  <!-- Leaflet-JS für die Kartenfunktionalität -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // ======================================================
-    // 1) Hilfsfunktion: Erzeuge das Formular für eine Station
-    // ======================================================
-    function createStationForm(id) {
-      // Haupt-DIV für diese Station
-      const container = document.createElement('div');
-      container.className = 'station';
-
-      // HTML-Basis für die Station
-      container.innerHTML = `
+    function createStationForm(id){
+      const c=document.createElement('div');c.className='station';
+      c.innerHTML=`
         <h3>Station ${id}</h3>
-
-        <!-- Auswahl des Stationstyps -->
-        <label>
-          Typ:
-          <select class="type" style="width:100%;">
+        <label>Typ:
+          <select class="type" style="width:100%">
             <option value="info">Info</option>
             <option value="question">Question</option>
             <option value="foto">Foto</option>
-            <option value="gps">GPS (Hinweis)</option>
-            <option value="gpsmap">GPSmap (sichtbare Karte)</option>
+            <option value="gps">GPS</option>
+            <option value="gpsmap">GPSmap</option>
           </select>
         </label>
-
-        <!-- Gemeinsames Texteingabefeld -->
-        <label>
-          Text / Hinweis:<br>
-          <input class="text" placeholder="Anleitung oder Frage" style="width:100%;">
-        </label>
-
-        <!-- Eingabefeld nur bei 'question' -->
-        <div class="answerFields" style="display:none;">
-          <label>
-            Antwort:<br>
-            <input class="answer" style="width:100%;">
-          </label>
+        <label>Text/Hinweis:<input class="text" style="width:100%"></label>
+        <div class="answerFields" style="display:none">
+          <label>Antwort:<input class="answer" style="width:100%"></label>
         </div>
-
-        <!-- Hinweis nur bei 'foto' -->
-        <div class="fotoFields" style="display:none;">
-          <small>Der Spieler macht später ein Foto mit dem Gerät.</small>
+        <div class="fotoFields" style="display:none">
+          <label>Foto-URL (optional):<input class="imageUrl" style="width:100%" placeholder="https://"></label>
         </div>
-
-        <!-- Felder nur bei GPS-Varianten -->
-        <div class="gpsFields" style="display:none;">
-          <label>
-            Radius (Meter):<br>
-            <input type="number" class="radius" value="50" style="width:100%;">
-          </label>
-          <!-- Karte für Koordinatenauswahl -->
+        <label>Bild-URL (optional):<input class="imageUrl" style="width:100%" placeholder="https://"></label>
+        <label>Sound-URL (optional):<input class="soundUrl" style="width:100%" placeholder="https://"></label>
+        <div class="gpsFields" style="display:none">
+          <label>Radius (m):<input type="number" class="radius" value="50" style="width:100%"></label>
           <div class="map"></div>
-          <!-- Manuelle Lat/Lng-Eingabe als Fallback -->
-          <label>
-            Latitude:<br>
-            <input type="number" step="any" class="lat" style="width:100%;">
-          </label>
-          <label>
-            Longitude:<br>
-            <input type="number" step="any" class="lng" style="width:100%;">
-          </label>
+          <label>Lat:<input type="number" step="any" class="lat" style="width:100%"></label>
+          <label>Lng:<input type="number" step="any" class="lng" style="width:100%"></label>
         </div>
-
-        <!-- Button zum Entfernen dieser Station -->
         <button class="remove">✖ Station entfernen</button>
       `;
-
-      // Elemente referenzieren
-      const typeEl  = container.querySelector('.type');
-      const ansF    = container.querySelector('.answerFields');
-      const fotoF   = container.querySelector('.fotoFields');
-      const gpsF    = container.querySelector('.gpsFields');
-      const mapDiv  = container.querySelector('.map');
-      let map, marker;
-
-      // Wenn der Typ geändert wird, zeige/verberge passende Felder
-      typeEl.onchange = () => {
-        ansF.style.display  = 'none';
-        fotoF.style.display = 'none';
-        gpsF.style.display   = 'none';
-
-        const val = typeEl.value;
-        if (val === 'question')          ansF.style.display = '';
-        if (val === 'foto')              fotoF.style.display = '';
-        if (val === 'gps' || val === 'gpsmap') {
-          gpsF.style.display = '';
-
-          // Karte initialisieren bei erstem Aufruf
-          if (!map) {
-            map = L.map(mapDiv).setView([47, 8], 8);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-              attribution: '© OpenStreetMap'
-            }).addTo(map);
-
-            // Klick auf Karte setzt Marker und Felder
-            map.on('click', e => {
-              const { lat, lng } = e.latlng;
-              if (!marker) {
-                marker = L.marker(e.latlng, { draggable:true }).addTo(map);
-                marker.on('dragend', ev => {
-                  const p = ev.target.getLatLng();
-                  container.querySelector('.lat').value = p.lat.toFixed(6);
-                  container.querySelector('.lng').value = p.lng.toFixed(6);
+      const t=c.querySelector('.type'),
+            ans=c.querySelector('.answerFields'),
+            foto=c.querySelector('.fotoFields'),
+            gps=c.querySelector('.gpsFields'),
+            mapDiv=c.querySelector('.map');
+      let map,marker;
+      t.onchange=()=>{
+        ans.style.display=foto.style.display=gps.style.display='none';
+        if(t.value==='question') ans.style.display='';
+        if(t.value==='foto')    foto.style.display='';
+        if(t.value==='gps'||t.value==='gpsmap'){
+          gps.style.display='';
+          if(!map){
+            map=L.map(mapDiv).setView([47,8],8);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);
+            map.on('click',e=>{
+              const{lat,lng}=e.latlng;
+              if(!marker){
+                marker=L.marker(e.latlng,{draggable:true}).addTo(map);
+                marker.on('dragend',ev=>{
+                  const p=ev.target.getLatLng();
+                  c.querySelector('.lat').value=p.lat.toFixed(6);
+                  c.querySelector('.lng').value=p.lng.toFixed(6);
                 });
-              } else {
-                marker.setLatLng(e.latlng);
-              }
-              container.querySelector('.lat').value = lat.toFixed(6);
-              container.querySelector('.lng').value = lng.toFixed(6);
+              } else marker.setLatLng(e.latlng);
+              c.querySelector('.lat').value=lat.toFixed(6);
+              c.querySelector('.lng').value=lng.toFixed(6);
             });
           }
         }
       };
-
-      // Entfernen-Button
-      container.querySelector('.remove').onclick = () => container.remove();
-
-      return container;
+      c.querySelector('.remove').onclick=()=>c.remove();
+      return c;
     }
 
-    // ======================================================
-    // 2) Haupt-Logik: Stationen verwalten & JSON generieren
-    // ======================================================
-    const stationsDiv  = document.getElementById('stations');
-    let stationCounter = 0;
+    const stationsDiv=document.getElementById('stations');
+    let count=0;
+    document.getElementById('addStation').onclick=()=>stationsDiv.appendChild(createStationForm(++count));
 
-    // Button: Neue Station hinzufügen
-    document.getElementById('addStation').onclick = () => {
-      stationCounter++;
-      stationsDiv.appendChild(createStationForm(stationCounter));
-    };
-
-    // Button: JSON zusammenstellen & herunterladen
-    document.getElementById('generate').onclick = () => {
-      const title    = document.getElementById('boundTitle').value.trim();
-      const stations = Array.from(stationsDiv.children).map(div => {
-        // Auslesen aller Felder
-        const type  = div.querySelector('.type').value;
-        const text  = div.querySelector('.text').value.trim();
-        const obj   = {
-          id:   Number(div.querySelector('h3').textContent.split(' ')[1]),
-          type,
-          text
-        };
-
-        // Je nach Typ ergänzen wir Eigenschaften
-        if (type === 'question') {
-          obj.answer = div.querySelector('.answer').value.trim();
+    document.getElementById('generate').onclick=()=>{
+      const title=document.getElementById('boundTitle').value.trim();
+      const stations=Array.from(stationsDiv.children).map(div=>{
+        const type=div.querySelector('.type').value,
+              text=div.querySelector('.text').value.trim(),
+              img=div.querySelector('.imageUrl').value.trim(),
+              snd=div.querySelector('.soundUrl').value.trim(),
+              obj={ id:Number(div.querySelector('h3').textContent.split(' ')[1]), type, text };
+        if(type==='question') obj.answer=div.querySelector('.answer').value.trim();
+        if(type==='foto')     obj.imageUrl=img;
+        if(type==='gps'||type==='gpsmap'){
+          obj.lat=parseFloat(div.querySelector('.lat').value);
+          obj.lng=parseFloat(div.querySelector('.lng').value);
+          obj.radius=Number(div.querySelector('.radius').value);
         }
-        if (type === 'gps' || type === 'gpsmap') {
-          obj.lat    = parseFloat(div.querySelector('.lat').value);
-          obj.lng    = parseFloat(div.querySelector('.lng').value);
-          obj.radius = Number(div.querySelector('.radius').value);
-        }
-
+        if(img && type!=='foto') obj.imageUrl=img;
+        if(snd) obj.soundUrl=snd;
         return obj;
       });
-
-      // Zusammenbauen und als Datei anbieten
-      const boundData = { title, stations };
-      const jsonStr   = JSON.stringify(boundData, null, 2);
-      const blob      = new Blob([jsonStr], { type:'application/json' });
-      const url       = URL.createObjectURL(blob);
-      const a         = document.createElement('a');
-      a.href          = url;
-      a.download      = 'bounds.json';
-      a.click();
+      const bound={ title, stations };
+      const str=JSON.stringify(bound,null,2);
+      const blob=new Blob([str],{type:'application/json'}),
+            url=URL.createObjectURL(blob),
+            a=document.createElement('a');
+      a.href=url; a.download='bounds.json'; a.click();
       URL.revokeObjectURL(url);
     };
   </script>
