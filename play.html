@@ -76,6 +76,10 @@
             const text = document.createElement("p");
             text.innerText = station.text;
             document.body.appendChild(text);
+            const nextButton = document.createElement("button");
+            nextButton.innerHTML = "Weiter";
+            document.body.appendChild(nextButton);
+            nextButton.onclick = weiter();
         }
 
         function question(station) {
@@ -89,6 +93,14 @@
             text.innerText = station.text;
             document.body.appendChild(text);
         }
+
+        function weiter() {
+            text.remove();
+            index++;
+
+        }
+
+    
     </script>
 </body>
 </html>
