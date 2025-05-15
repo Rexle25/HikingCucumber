@@ -15,12 +15,14 @@
         function parseJSON() {
             const input = document.getElementById('textInput').value;
             const boundData = JSON.parse(input);
-            document.getElementById('titel').innerHTML = boundData.title;
+            
             let index = 1;
+            Start();
           
         }
 
         function Start() {
+
 
 
         }
@@ -34,7 +36,11 @@
         function Laden() {
             boundData = localStorage.getItem(json);
             index = localStorage.getItem(id);
+            Start();
 
+        }
+        function Abschnitt()  {
+            let aktuelleAufgabe = boundDa
         }
     </script>
 
