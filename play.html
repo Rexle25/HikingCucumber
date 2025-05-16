@@ -100,12 +100,27 @@
       }
     }
 
-    function renderInfo(station, container) {
+        function renderInfo(station, container) {
+      // 1) Text anzeigen
       const p = document.createElement('p');
       p.innerText = station.text;
       container.appendChild(p);
-      finish(container);
+
+      // 2) Weiter-Button erstellen
+      const btn = document.createElement('button');
+      btn.innerText = 'Weiter';
+      container.appendChild(btn);
+
+      // 3) Handler: erst bei Klick finish() aufrufen
+      btn.onclick = () => {
+        // alte Inhalte entfernen
+        container.innerHTML = '';
+        // Erfolgsnachricht und neuer Weiter-Button über finish()
+        finish(container);
+      };
     }
+
+
 
     function renderQuestion(station, container) {
       const p = document.createElement('p');
