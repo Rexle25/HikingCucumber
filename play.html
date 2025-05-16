@@ -83,11 +83,44 @@
         }
 
         function question(station) {
-            const text = document.createElement("p");
-            text.innerText = station.text;
-            document.body.appendChild(text);
-            let input = document.createElement("input");
+            const frageText = document.createElement("p");
+            frageText.innerText = station.text;
+            document.body.appendChild(frageText);
+
+            const input = document.createElement("input");
             input.type = "text";
+            input.placeholder = "Antwort eingeben";
+            document.body.appendChild(input);
+
+            const button = document.createElement("button");
+            button.innerText = "Antwort prüfen";
+            document.body.appendChild(button);
+
+            const feedback = document.createElement("p");
+            document.body.appendChild(feedback);
+
+            button.onclick = function () {
+              let userInput = input.value;
+              let correctAnswer = station.answer;
+
+
+              if (userInput === correctAnswer) {
+                frageText.remove();
+                input.remove();
+                button.remove();
+                feedback.remove();
+                weiter();
+              } else {
+                feedback.innerText = "Falsche Antwort. Versuch’s nochmal!";
+                feedback.style.color = "red";
+              }
+
+            
+
+            }
+
+
+            
             
         }
 
