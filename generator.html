@@ -1,124 +1,190 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Schnitzeljagd-JSON-Generator</title>
+  <title>Treasure Hunt JSON Generator</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <style>
-    body { font-family:sans-serif; padding:1rem; max-width:800px; margin:auto }
-    .station { border:1px solid #ccc; padding:1rem; margin:1rem 0; border-radius:6px; background:#fafafa }
-    label, button { display:block; margin:0.5rem 0 }
-    .map { height:200px; margin-top:0.5rem }
+    body { font-family: sans-serif; padding: 1rem; max-width: 800px; margin: auto; }
+    .station { border: 1px solid #ccc; padding: 1rem; margin: 1rem 0; border-radius: 6px; background: #fafafa; }
+    label, button, input, textarea { display: block; margin: 0.5rem 0; width: 100%; }
+    .map { height: 200px; margin-top: 0.5rem; }
   </style>
 </head>
 <body>
-  <h1>JSON-Generator für deine Schnitzeljagd</h1>
+
+  <h1>JSON Generator for Your Treasure Hunt</h1>
+
+  <!-- Load existing JSON via file -->
   <label>
-    Titel der Schnitzeljagd:
-    <input type="text" id="boundTitle" style="width:100%" placeholder="Meine Schnitzeljagd">
+    Load JSON File:
+    <input type="file" id="loadFile" accept=".json">
   </label>
+  <!-- Or paste into textarea -->
+  <label>
+    Or Paste JSON Here:
+    <textarea id="jsonTextarea" rows="6" placeholder='{"title":"My Hunt","stations":[...]}'></textarea>
+  </label>
+  <button id="loadJsonBtn">Load & Edit</button>
+
+  <hr>
+
+  <label>
+    Hunt Title:
+    <input type="text" id="huntTitle" placeholder="My Treasure Hunt">
+  </label>
+
   <div id="stations"></div>
-  <button id="addStation">➕ Station hinzufügen</button>
-  <button id="generate">✨ JSON generieren & herunterladen</button>
+
+  <button id="addStation">➕ Add Station</button>
+  <button id="generate">✨ Generate & Download JSON</button>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    function createStationForm(id){
-      const c=document.createElement('div');c.className='station';
-      c.innerHTML=`
+    let stationsData = [];
+    let stationCount = 0;
+
+    // Create form for one station
+    function createStationForm(id, station = {}) {
+      const c = document.createElement('div');
+      c.className = 'station';
+      c.innerHTML = `
         <h3>Station ${id}</h3>
-        <label>Typ:
-          <select class="type" style="width:100%">
+        <label>Type:
+          <select class="type">
             <option value="info">Info</option>
             <option value="question">Question</option>
-            <option value="foto">Foto</option>
             <option value="gps">GPS</option>
-            <option value="gpsmap">GPSmap</option>
           </select>
         </label>
-        <label>Text/Hinweis:<input class="text" style="width:100%"></label>
+        <label>Text / Clue:
+          <input class="text" placeholder="Enter text or clue">
+        </label>
         <div class="answerFields" style="display:none">
-          <label>Antwort:<input class="answer" style="width:100%"></label>
+          <label>Answer:
+            <input class="answer" placeholder="Correct answer">
+          </label>
         </div>
-        <div class="fotoFields" style="display:none">
-          <label>Foto-URL (optional):<input class="imageUrl" style="width:100%" placeholder="https://"></label>
-        </div>
-        <label>Bild-URL (optional):<input class="imageUrl" style="width:100%" placeholder="https://"></label>
-        <label>Sound-URL (optional):<input class="soundUrl" style="width:100%" placeholder="https://"></label>
         <div class="gpsFields" style="display:none">
-          <label>Radius (m):<input type="number" class="radius" value="50" style="width:100%"></label>
+          <label>Radius (m):
+            <input type="number" class="radius" value="50">
+          </label>
           <div class="map"></div>
-          <label>Lat:<input type="number" step="any" class="lat" style="width:100%"></label>
-          <label>Lng:<input type="number" step="any" class="lng" style="width:100%"></label>
+          <label>Latitude:
+            <input type="number" step="any" class="lat" placeholder="e.g. 46.948">
+          </label>
+          <label>Longitude:
+            <input type="number" step="any" class="lng" placeholder="e.g. 7.447">
+          </label>
         </div>
-        <button class="remove">✖ Station entfernen</button>
+        <button class="remove">✖ Remove Station</button>
       `;
-      const t=c.querySelector('.type'),
-            ans=c.querySelector('.answerFields'),
-            foto=c.querySelector('.fotoFields'),
-            gps=c.querySelector('.gpsFields'),
-            mapDiv=c.querySelector('.map');
-      let map,marker;
-      t.onchange=()=>{
-        ans.style.display=foto.style.display=gps.style.display='none';
-        if(t.value==='question') ans.style.display='';
-        if(t.value==='foto')    foto.style.display='';
-        if(t.value==='gps'||t.value==='gpsmap'){
-          gps.style.display='';
-          if(!map){
-            map=L.map(mapDiv).setView([47,8],8);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);
-            map.on('click',e=>{
-              const{lat,lng}=e.latlng;
-              if(!marker){
-                marker=L.marker(e.latlng,{draggable:true}).addTo(map);
-                marker.on('dragend',ev=>{
-                  const p=ev.target.getLatLng();
-                  c.querySelector('.lat').value=p.lat.toFixed(6);
-                  c.querySelector('.lng').value=p.lng.toFixed(6);
+      const typeEl = c.querySelector('.type');
+      const ansF   = c.querySelector('.answerFields');
+      const gpsF   = c.querySelector('.gpsFields');
+      const mapDiv = c.querySelector('.map');
+      let map, marker;
+
+      // Initialize values if provided
+      if (station.type) typeEl.value = station.type;
+      if (station.text) c.querySelector('.text').value = station.text;
+      if (station.answer) c.querySelector('.answer').value = station.answer;
+      if (station.radius) c.querySelector('.radius').value = station.radius;
+      if (station.lat) c.querySelector('.lat').value = station.lat;
+      if (station.lng) c.querySelector('.lng').value = station.lng;
+
+      // Show/hide fields
+      function refreshFields() {
+        ansF.style.display = gpsF.style.display = 'none';
+        if (typeEl.value === 'question') ansF.style.display = '';
+        if (typeEl.value === 'gps') {
+          gpsF.style.display = '';
+          if (!map) {
+            map = L.map(mapDiv).setView([47,8],8);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OSM' }).addTo(map);
+            map.on('click', e => {
+              const { lat, lng } = e.latlng;
+              if (!marker) {
+                marker = L.marker(e.latlng, { draggable:true }).addTo(map);
+                marker.on('dragend', ev => {
+                  const p = ev.target.getLatLng();
+                  c.querySelector('.lat').value = p.lat.toFixed(6);
+                  c.querySelector('.lng').value = p.lng.toFixed(6);
                 });
               } else marker.setLatLng(e.latlng);
-              c.querySelector('.lat').value=lat.toFixed(6);
-              c.querySelector('.lng').value=lng.toFixed(6);
+              c.querySelector('.lat').value = lat.toFixed(6);
+              c.querySelector('.lng').value = lng.toFixed(6);
             });
           }
         }
-      };
-      c.querySelector('.remove').onclick=()=>c.remove();
+      }
+      typeEl.onchange = refreshFields;
+      refreshFields();
+
+      // Remove station
+      c.querySelector('.remove').onclick = () => c.remove();
+
       return c;
     }
 
-    const stationsDiv=document.getElementById('stations');
-    let count=0;
-    document.getElementById('addStation').onclick=()=>stationsDiv.appendChild(createStationForm(++count));
-
-    document.getElementById('generate').onclick=()=>{
-      const title=document.getElementById('boundTitle').value.trim();
-      const stations=Array.from(stationsDiv.children).map(div=>{
-        const type=div.querySelector('.type').value,
-              text=div.querySelector('.text').value.trim(),
-              img=div.querySelector('.imageUrl').value.trim(),
-              snd=div.querySelector('.soundUrl').value.trim(),
-              obj={ id:Number(div.querySelector('h3').textContent.split(' ')[1]), type, text };
-        if(type==='question') obj.answer=div.querySelector('.answer').value.trim();
-        if(type==='foto')     obj.imageUrl=img;
-        if(type==='gps'||type==='gpsmap'){
-          obj.lat=parseFloat(div.querySelector('.lat').value);
-          obj.lng=parseFloat(div.querySelector('.lng').value);
-          obj.radius=Number(div.querySelector('.radius').value);
-        }
-        if(img && type!=='foto') obj.imageUrl=img;
-        if(snd) obj.soundUrl=snd;
-        return obj;
-      });
-      const bound={ title, stations };
-      const str=JSON.stringify(bound,null,2);
-      const blob=new Blob([str],{type:'application/json'}),
-            url=URL.createObjectURL(blob),
-            a=document.createElement('a');
-      a.href=url; a.download='bounds.json'; a.click();
-      URL.revokeObjectURL(url);
+    // Add station button
+    document.getElementById('addStation').onclick = () => {
+      stationsDiv.appendChild(createStationForm(++stationCount));
     };
+
+    // Generate JSON
+    document.getElementById('generate').onclick = () => {
+      const title = document.getElementById('huntTitle').value.trim();
+      const stations = Array.from(stationsDiv.children).map(div => {
+        const type = div.querySelector('.type').value;
+        const text = div.querySelector('.text').value.trim();
+        const st = { id: Number(div.querySelector('h3').textContent.split(' ')[1]), type, text };
+        if (type === 'question') st.answer = div.querySelector('.answer').value.trim();
+        if (type === 'gps') {
+          st.lat    = parseFloat(div.querySelector('.lat').value);
+          st.lng    = parseFloat(div.querySelector('.lng').value);
+          st.radius = Number(div.querySelector('.radius').value);
+        }
+        return st;
+      });
+      const result = { title, stations };
+      const blob = new Blob([JSON.stringify(result, null, 2)], { type:'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'hunt.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+
+    // Load JSON from textarea or file
+    const stationsDiv = document.getElementById('stations');
+    document.getElementById('loadJsonBtn').onclick = () => {
+      let text = document.getElementById('jsonTextarea').value.trim();
+      const fileInput = document.getElementById('loadFile');
+      if (!text && fileInput.files.length) {
+        const reader = new FileReader();
+        reader.onload = e => initFromJson(e.target.result);
+        reader.readAsText(fileInput.files[0]);
+      } else {
+        initFromJson(text);
+      }
+    };
+
+    function initFromJson(jsonText) {
+      let obj;
+      try {
+        obj = JSON.parse(jsonText);
+      } catch {
+        return alert('Invalid JSON!');
+      }
+      document.getElementById('huntTitle').value = obj.title || '';
+      stationsDiv.innerHTML = '';
+      stationCount = 0;
+      for (const st of (obj.stations||[])) {
+        stationCount++;
+        stationsDiv.appendChild(createStationForm(stationCount, st));
+      }
+    }
   </script>
 </body>
 </html>

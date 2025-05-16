@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Play</title>
   <style>
     body { font-family: sans-serif; padding: 1rem; max-width: 600px; margin: auto; }
-    #inhalt p, #inhalt button, #inhalt input, #inhalt img, #inhalt audio {
+    #content p, #content button, #content input, #content img, #content audio {
       display: block; margin: .5rem 0;
     }
-    #textInput { width: 100%; margin-bottom: .5rem; }
+    #jsonInput { width: 100%; margin-bottom: .5rem; }
   </style>
 
-    <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1 id="titel">Füge deinen JSON-Text der Schnitzeljagd ein:</h1>
-  <input type="text" id="textInput" placeholder='{"title":"Test", "stations":[...]}'>
-  <button id="jsonbutton" onclick="parseJSON()">JSON anwenden und Schnitzeljagd (neu) starten</button>
-  <button id="loadbutton" onclick="Laden()">Schnitzeljagd weiterspielen</button>
+  <h1 id="title">Paste your treasure hunt JSON here:</h1>
+  <input type="text" id="jsonInput" placeholder='{"title":"Test", "stations":[...]}'>
+  <button id="applyJsonBtn" onclick="parseJSON()">Apply JSON and Start Hunt (new)</button>
+  <button id="loadBtn" onclick="loadProgress()">Continue Hunt</button>
 
-  <!-- Hier rendern wir alle Stationen -->
-  <div id="inhalt"></div>
+  <!-- This is where we render all stations -->
+  <div id="content"></div>
 
   <script>
     let data = null;
@@ -29,64 +29,64 @@
 
     function parseJSON() {
       try {
-        data = JSON.parse(document.getElementById('textInput').value);
+        data = JSON.parse(document.getElementById('jsonInput').value);
       } catch (e) {
-        return alert('Ungültiges JSON!');
+        return alert('Invalid JSON!');
       }
       index = 0;
-      document.getElementById('titel').innerText = data.title || '';
-      // Eingabe-Elemente entfernen
-      document.getElementById('textInput').remove();
-      document.getElementById('jsonbutton').remove();
-      document.getElementById('loadbutton').remove();
-      Speichern();
-      Abschnitt();
+      document.getElementById('title').innerText = data.title || '';
+      // Remove input widgets after starting
+      document.getElementById('jsonInput').remove();
+      document.getElementById('applyJsonBtn').remove();
+      document.getElementById('loadBtn').remove();
+      saveProgress();
+      renderStation();
     }
 
-    function Speichern() {
+    function saveProgress() {
       localStorage.setItem("json", JSON.stringify(data));
-      localStorage.setItem("id", index.toString());
+      localStorage.setItem("index", index.toString());
     }
 
-    function Laden() {
-      const sj = localStorage.getItem("json");
-      const si = localStorage.getItem("id");
-      if (!sj || si === null) {
-        return alert("Kein gespeicherter Spielstand gefunden.");
+    function loadProgress() {
+      const savedJson = localStorage.getItem("json");
+      const savedIndex = localStorage.getItem("index");
+      if (!savedJson || savedIndex === null) {
+        return alert("No saved progress found.");
       }
-      data = JSON.parse(sj);
-      index = parseInt(si, 10);
-      document.getElementById('titel').innerText = data.title || '';
-      // Entferne auch die Eingabe-Widgets, falls noch da
-      const ti = document.getElementById('textInput');
-      const jb = document.getElementById('jsonbutton');
-      const lb = document.getElementById('loadbutton');
-      if (ti) ti.remove();
-      if (jb) jb.remove();
+      data = JSON.parse(savedJson);
+      index = parseInt(savedIndex, 10);
+      document.getElementById('title').innerText = data.title || '';
+      // Remove input widgets if still present
+      const ji = document.getElementById('jsonInput');
+      const aj = document.getElementById('applyJsonBtn');
+      const lb = document.getElementById('loadBtn');
+      if (ji) ji.remove();
+      if (aj) aj.remove();
       if (lb) lb.remove();
-      Abschnitt();
+      renderStation();
     }
 
-    function Abschnitt() {
-      const container = document.getElementById('inhalt');
-      container.innerHTML = '';  // alten Inhalt weg
+    function renderStation() {
+      const container = document.getElementById('content');
+      container.innerHTML = '';  // clear old content
       if (!data || !data.stations || !data.stations[index]) {
-        return container.innerText = '🎉 Alles geschafft!';
+        return container.innerText = '🎉 All done!';
       }
       const station = data.stations[index];
-      // Bild und Sound, falls vorhanden
+      // Image and sound if provided
       if (station.imageUrl) {
         const img = document.createElement('img');
         img.src = station.imageUrl;
         container.appendChild(img);
       }
       if (station.soundUrl) {
-        const au = document.createElement('audio');
-        au.src = station.soundUrl;
-        au.controls = true;
-        container.appendChild(au);
+        const audio = document.createElement('audio');
+        audio.src = station.soundUrl;
+        audio.controls = true;
+        container.appendChild(audio);
       }
-      // Typ-spezifisch rendern
+      // Render by type
       switch (station.type) {
         case 'info':
           renderInfo(station, container);
@@ -98,31 +98,27 @@
           renderGPS(station, container);
           break;
         default:
-          container.innerText = 'Unbekannter Typ: ' + station.type;
+          container.innerText = 'Unknown type: ' + station.type;
       }
     }
 
-        function renderInfo(station, container) {
-      // 1) Text anzeigen
+    function renderInfo(station, container) {
+      // 1) Display text
       const p = document.createElement('p');
       p.innerText = station.text;
       container.appendChild(p);
 
-      // 2) Weiter-Button erstellen
+      // 2) Create Next button
       const btn = document.createElement('button');
-      btn.innerText = 'Weiter';
+      btn.innerText = 'Next';
       container.appendChild(btn);
 
-      // 3) Handler: erst bei Klick finish() aufrufen
+      // 3) On click, clear and finish
       btn.onclick = () => {
-        // alte Inhalte entfernen
         container.innerHTML = '';
-        // Erfolgsnachricht und neuer Weiter-Button über finish()
         finish(container);
       };
     }
-
-
 
     function renderQuestion(station, container) {
       const p = document.createElement('p');
@@ -131,22 +127,22 @@
 
       const input = document.createElement('input');
       input.type = 'text';
-      input.placeholder = 'Antwort eingeben';
+      input.placeholder = 'Enter answer';
       container.appendChild(input);
 
       const btn = document.createElement('button');
-      btn.innerText = 'Antwort prüfen';
+      btn.innerText = 'Check answer';
       container.appendChild(btn);
 
-      const fb = document.createElement('p');
-      container.appendChild(fb);
+      const feedback = document.createElement('p');
+      container.appendChild(feedback);
 
       btn.onclick = () => {
         if (input.value.trim().toLowerCase() === station.answer.trim().toLowerCase()) {
           finish(container);
         } else {
-          fb.innerText = 'Falsche Antwort. Versuch’s nochmal!';
-          fb.style.color = 'red';
+          feedback.innerText = 'Incorrect answer. Please try again!';
+          feedback.style.color = 'red';
         }
       };
     }
@@ -157,11 +153,11 @@
       container.appendChild(p);
 
       if (!navigator.geolocation) {
-        return container.appendChild(document.createTextNode('GPS nicht unterstützt.'));
+        return container.appendChild(document.createTextNode('Geolocation not supported.'));
       }
 
       const btn = document.createElement('button');
-      btn.innerText = 'Position prüfen';
+      btn.innerText = 'Check location';
       container.appendChild(btn);
 
       btn.onclick = () => {
@@ -175,24 +171,24 @@
           if (d <= station.radius) {
             finish(container);
           } else {
-            alert(`Du bist noch ${Math.round(d)} m entfernt.`);
+            alert(`You are still ${Math.round(d)} m away.`);
           }
-        }, () => alert('GPS-Fehler'));
+        }, () => alert('Geolocation error'));
       };
     }
 
     function finish(container) {
       container.innerHTML = '';
       const msg = document.createElement('p');
-      msg.innerText = 'Du hast diese Station geschafft!';
+      msg.innerText = 'You have completed this station!';
       container.appendChild(msg);
       const btn = document.createElement('button');
-      btn.innerText = 'Weiter';
+      btn.innerText = 'Next';
       container.appendChild(btn);
       btn.onclick = () => {
         index++;
-        Speichern();
-        Abschnitt();
+        saveProgress();
+        renderStation();
       };
     }
 
