@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://opengeopuzzle.netlify.app/sitemap.xml
