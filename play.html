@@ -1,126 +1,111 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Wandercode Play</title>
-  <style>
-    body { font-family: sans-serif; padding: 1rem; max-width:600px; margin:auto; }
-    #inhalt p, #inhalt img, #inhalt audio, #inhalt button, #inhalt input {
-      display: block; margin: .5rem 0;
-    }
-    #inhalt img { max-width:100%; }
-  </style>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Wandercode Play</title>
 </head>
 <body>
-  <h1 id="titel">Füge deinen JSON-Text der Schnitzeljagd ein:</h1>
-  <textarea id="textInput" rows="8" style="width:100%;" placeholder='{"title":"...","stations":[...]}'></textarea>
-  <button id="startBtn" onclick="parseJSON()">JSON anwenden und schnitzeln</button>
-  <button id="loadBtn" onclick="Laden()">Weitermachen</button>
+    <h1 id="titel">Füge deinen JSON-Text der Schnitzeljagd ein:</h1>
 
-  <div id="inhalt"></div>
+    <!-- Komma entfernt -->
+    <input type="text" id="textInput">
 
-  <script>
-    let data = null, index = 0;
+    <button onclick="parseJSON()">JSON anwenden und Schnitzeljagd (neu)starten</button>
+    <button onclick="Laden()">Schnitzeljagd weiterspielen</button>
 
-    function parseJSON() {
-      data = JSON.parse(document.getElementById('textInput').value);
-      index = 0;
-      document.getElementById('titel').innerText = data.title || '';
-      document.getElementById('textInput').style.display = 'none';
-      document.getElementById('startBtn').style.display = 'none';
-      document.getElementById('loadBtn').style.display = 'none';
-      Speichern();
-      Abschnitt();
-    }
+    <script>
+        // 'data' muss veränderbar sein → let statt const
+        let data = null;
+        let index = 0;
 
-    function Speichern() {
-      localStorage.setItem("json", JSON.stringify(data));
-      localStorage.setItem("id", index.toString());
-    }
+        function parseJSON() {
+            const input = document.getElementById('textInput').value;
+            data = JSON.parse(input);
+            index = 0;           // beim Neustart immer von vorne
+            document.getElementById('titel').innerText = data.title || '';
+            Start();
+        }
 
-    function Laden() {
-      const sj = localStorage.getItem("json"), si = localStorage.getItem("id");
-      if (sj && si!==null) {
-        data = JSON.parse(sj);
-        index = parseInt(si,10);
-        document.getElementById('titel').innerText = data.title||'';
-        document.getElementById('textInput').style.display = 'none';
-        document.getElementById('startBtn').style.display = 'none';
-        document.getElementById('loadBtn').style.display = 'none';
-        Abschnitt();
-      } else alert("Kein Spielstand.");
-    }
+        function Start() {
+            Abschnitt();
+        }
 
-    function Abschnitt() {
-      const c = document.getElementById('inhalt');
-      c.innerHTML = '';
-      if (!data||!data.stations||!data.stations[index]) {
-        c.innerText = "🔚 Fertig!";
-        return;
-      }
-      const s = data.stations[index];
-      if (s.imageUrl) {
-        const img = document.createElement("img");
-        img.src = s.imageUrl;
-        c.appendChild(img);
-      }
-      if (s.soundUrl) {
-        const au = document.createElement("audio");
-        au.src = s.soundUrl;
-        au.controls = true;
-        c.appendChild(au);
-      }
-      switch(s.type) {
-        case "info":    renderInfo(s,c);    break;
-        case "question":renderQuestion(s,c);break;
-        case "gps":     renderGPS(s,c);     break;
-        default:        c.innerText="Unbekannter Typ:"+s.type;
-      }
-    }
+        function Speichern() {
+            // Schlüssel als Strings, und JSON.stringify
+            localStorage.setItem("json", JSON.stringify(data));
+            localStorage.setItem("id", index.toString());
+        }
 
-    function renderInfo(st,c) {
-      const p=document.createElement("p");p.innerText=st.text;c.appendChild(p);
-      finishButton(c);
-    }
+        function Laden() {
+            const savedJson = localStorage.getItem("json");
+            const savedId   = localStorage.getItem("id");
+            if (savedJson && savedId !== null) {
+                data  = JSON.parse(savedJson);
+                index = parseInt(savedId, 10);
+                document.getElementById('titel').innerText = data.title || '';
+                Start();
+            } else {
+                alert("Kein gespeicherter Spielstand gefunden.");
+            }
+        }
 
-    function renderQuestion(st,c) {
-      const p=document.createElement("p");p.innerText=st.text;c.appendChild(p);
-      const inp=document.createElement("input");inp.type="text";c.appendChild(inp);
-      const btn=document.createElement("button");btn.innerText="Antwort prüfen";c.appendChild(btn);
-      btn.onclick=()=>{
-        if (inp.value.trim().toLowerCase()===st.answer.toLowerCase()) finishButton(c);
-        else alert("Falsch!");
-      };
-    }
+        function Abschnitt() {
+            // Stelle sicher, dass data geladen ist
+            if (!data || !data.stations || !data.stations[index]) return;
 
-    function renderGPS(st,c) {
-      const p=document.createElement("p");p.innerText=st.text;c.appendChild(p);
-      if (navigator.geolocation) {
-        const btn=document.createElement("button");btn.innerText="Position prüfen";c.appendChild(btn);
-        btn.onclick=()=>{
-          navigator.geolocation.getCurrentPosition(pos=>{
-            const d=distance(pos.coords.latitude,pos.coords.longitude,st.lat,st.lng);
-            if (d<=st.radius) finishButton(c);
-            else alert(`Noch ${Math.round(d)}m entfernt.`);
-          },()=>alert("GPS-Fehler"));
-        };
-      } else c.innerText="GPS nicht verfügbar";
-    }
+            const station = data.stations[index];
+            const type    = station.type;
 
-    function finishButton(container) {
-      container.innerHTML='';
-      const msg=document.createElement("p");msg.innerText="Du hast diese Station geschafft!";container.appendChild(msg);
-      const btn=document.createElement("button");btn.innerText="Weiter";container.appendChild(btn);
-      btn.onclick=()=>{ index++; Speichern(); Abschnitt(); };
-    }
+            switch (type) {
+                case "info":
+                    info(station);
+                    break;
+                case "question":
+                    question(station);
+                    break;
+                case "gps":
+                    gps(station);
+                    break;
+                default:
+                    console.warn("Unbekannter Typ:", type);
+            }
+        }
 
-    function distance(lat1,lon1,lat2,lon2){
-      const R=6371000, r=Math.PI/180;
-      const dLat=(lat2-lat1)*r, dLon=(lon2-lon1)*r;
-      const a=Math.sin(dLat/2)**2+Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin(dLon/2)**2;
-      return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-    }
-  </script>
+        // Alle Funktionen bekommen jetzt 'station' übergeben
+        function info(station) {
+            const text = document.createElement("p");
+            text.innerText = station.text;
+            document.body.appendChild(text);
+            const nextButton = document.createElement("button");
+            nextButton.innerHTML = "Weiter";
+            document.body.appendChild(nextButton);
+            nextButton.onclick = weiter();
+        }
+
+        function question(station) {
+            const text = document.createElement("p");
+            text.innerText = station.text;
+            document.body.appendChild(text);
+            let input = document.createElement("input");
+            input.type = "text";
+            
+        }
+
+        function gps(station) {
+            const text = document.createElement("p");
+            text.innerText = station.text;
+            document.body.appendChild(text);
+        }
+
+        function weiter() {
+            text.remove();
+            index++;
+            Speichern();
+            Abschnitt();
+
+        }
+
+    
+    </script>
 </body>
-</html>
+</html> 
