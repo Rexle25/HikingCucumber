@@ -145,16 +145,15 @@
 
   <script>
     /***************************************************************************
-     * Adventure-JSON Generator – ohne Alert-Meldungen bei leeren Feldern
+     * Adventure-JSON Generator – ohne Alerts
      *
-     * - Jeder Klick auf „Neue Station hinzufügen“ erzeugt ein eigenes Formular-Fieldset,
-     *   das mit einer Leaflet-Karte verbunden ist.
-     * - Fehlende Eingaben werden als leere Strings oder `null` übernommen.
+     * - „Neue Station hinzufügen“ erzeugt ein eigenes Formular-Fieldset mit Leaflet-Karte.
+     * - Fehlende Eingaben werden als leere Strings oder null übernommen.
      * - „Alle Stationen löschen“ leert alles, inklusive JSON-Ausgabe.
-     * - „JSON aktualisieren“ baut aus allen aktuellen Formularen das finale JSON.
+     * - „JSON aktualisieren“ baut das finale JSON ohne Validierungs-Popups.
      ****************************************************************************/
 
-    let stationCount = 0;            // Zähler für eindeutige IDs
+    let stationCount = 0;            // Nummeriert die Stationen
     const mapInstances = {};         // Speichert Leaflet-Map-Instanzen (key: stationIndex)
     const markerInstances = {};      // Speichert Marker pro Station (key: stationIndex)
 
@@ -168,7 +167,7 @@
     const advDescriptionInput = document.getElementById("advDescription");
 
     /*****************************************************************************
-     * Funktion: addStationForm
+     * addStationForm()
      * Fügt ein neues Fieldset für eine Station hinzu, inklusive Leaflet-Karte.
      *****************************************************************************/
     function addStationForm() {
@@ -237,7 +236,7 @@
         <!-- Karte für Koordinatenauswahl -->
         <label class="map-label">
           Klicke auf die Karte, um die Position der Station festzulegen 
-          (Latitude / Longitude wird übernommen oder bleibt ``).
+          (Latitude / Longitude wird übernommen oder bleibt null).
         </label>
         <div id="map-${idx}" class="map-container"></div>
         <p class="note">
@@ -250,7 +249,7 @@
 
       // 1) Delete-Button-Funktionalität
       fieldset.querySelector(".delete-station").addEventListener("click", () => {
-        // Karte und Marker entfernen, wenn vorhanden
+        // Karte und Marker entfernen (falls vorhanden)
         if (mapInstances[idx]) {
           mapInstances[idx].remove();
           delete mapInstances[idx];
@@ -264,13 +263,13 @@
       // 2) Dynamische Anzeige der Sub-Felder je Stationstyp
       const typeSelect = document.getElementById(`stationType-${idx}`);
       typeSelect.addEventListener("change", () => showRelevantFields(idx));
-      showRelevantFields(idx); // initial
+      showRelevantFields(idx); // initial aufrufen
 
       // 3) Leaflet-Karte initialisieren
       const mapDiv = document.getElementById(`map-${idx}`);
       const map = L.map(mapDiv).setView([47.3769, 8.5417], 13);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
+        attribution: "&copy; OpenStreetMap contributors"
       }).addTo(map);
       mapInstances[idx] = map;
 
@@ -284,13 +283,13 @@
         } else {
           markerInstances[idx] = L.marker(e.latlng).addTo(map);
         }
-        // Koordinaten-Display updaten
+        // Koordinaten-Display aktualisieren
         document.getElementById(`selectedCoords-${idx}`).textContent =
           lat.toFixed(5) + ", " + lng.toFixed(5);
         updateOutputJson();
       });
 
-      // 5) Bei jeder Änderung der Eingabefelder JSON erneuern
+      // 5) Bei jeder Änderung der Eingabefelder JSON automatisch aktualisieren
       const inputs = fieldset.querySelectorAll("input, textarea, select");
       inputs.forEach(inp => {
         inp.addEventListener("input", updateOutputJson);
@@ -298,49 +297,48 @@
     }
 
     /*****************************************************************************
-     * Funktion: showRelevantFields
-     * Zeigt innerhalb einer Station die passenden Unterfelder an.
-     * @param {number} idx – die Nummer der Station (1,2,3,...)
+     * showRelevantFields(idx)
+     * Zeigt innerhalb einer Station nur die relevanten Unterfelder an.
      *****************************************************************************/
     function showRelevantFields(idx) {
       const type = document.getElementById(`stationType-${idx}`).value;
-      document.getElementById(`fieldsInfo-${idx}`).style.display   = (type === "info")   ? "block" : "none";
+      document.getElementById(`fieldsInfo-${idx}`).style.display   = (type === "info") ? "block" : "none";
       document.getElementById(`fieldsRiddle-${idx}`).style.display = (type === "riddle") ? "block" : "none";
-      document.getElementById(`fieldsItem-${idx}`).style.display   = (type === "item")   ? "block" : "none";
+      document.getElementById(`fieldsItem-${idx}`).style.display   = (type === "item") ? "block" : "none";
     }
 
     /*****************************************************************************
-     * Funktion: clearAllStations
-     * Entfernt alle Station-Formulare und leert das JSON-Feld.
+     * clearAllStations()
+     * Entfernt alle Station-Fieldsets und leert das JSON-Feld.
      *****************************************************************************/
     function clearAllStations() {
-      // Alle Leaflet-Instanzen entfernen
+      // Leaflet-Instanzen entfernen
       Object.values(mapInstances).forEach(m => m.remove());
       Object.keys(mapInstances).forEach(k => delete mapInstances[k]);
       Object.keys(markerInstances).forEach(k => delete markerInstances[k]);
 
-      // Alle Station-Fieldsets aus dem DOM löschen
+      // Alle Station-Formulare löschen
       stationFormsDiv.innerHTML = "";
       // JSON-Ausgabe leeren
       outputJsonArea.value = "";
-      // Stationenzähler zurücksetzen
+      // Zähler zurücksetzen
       stationCount = 0;
     }
 
     /*****************************************************************************
-     * Funktion: updateOutputJson
-     * Liest alle aktuellen Station-Formulare aus und baut das finale JSON.
-     * Fehlende Eingaben werden nicht beanstandet, sondern als leere Strings oder `null` übernommen.
+     * updateOutputJson()
+     * Liest alle Station-Formulare aus und erzeugt das finale JSON.
+     * Fehlende Eingaben werden als leere Strings oder null übernommen.
      *****************************************************************************/
     function updateOutputJson() {
-      const title       = advTitleInput.value.trim();
+      const title = advTitleInput.value.trim();
       const description = advDescriptionInput.value.trim();
       const stationsArr = [];
 
-      // Für jede existierende Station-Form ID
+      // Für jede mögliche Station (1 bis stationCount)
       for (let i = 1; i <= stationCount; i++) {
         const form = document.getElementById(`station-form-${i}`);
-        if (!form) continue; // überspringen, wenn gelöscht
+        if (!form) continue; // überspringe gelöschte Stationen
 
         // Werte auslesen
         const idVal         = document.getElementById(`stationId-${i}`).value.trim();
@@ -352,7 +350,7 @@
                                 .split(",").map(s => s.trim()).filter(s => s);
         const coordsText    = document.getElementById(`selectedCoords-${i}`).textContent;
 
-        // Koordinaten parsen – oder `null`, wenn nicht gesetzt
+        // Koordinaten parsen – oder null, falls nicht gesetzt
         let lat = null;
         let lng = null;
         if (coordsText && coordsText !== "keine Koordinaten") {
@@ -365,35 +363,33 @@
           }
         }
 
-        // Basis-Objekt
+        // Basis-Objekt (leere Strings / null akzeptiert)
         const stationObj = {
-          id: idVal,                   // kann leer sein
-          type: typeVal,               // immer gesetzt (info | riddle | item)
+          id: idVal,
+          type: typeVal,
           optional: optionalVal,
-          itemsGiven: itemsGivenArr,   // evtl. leeres Array
-          requiresItems: requiresArr,  // evtl. leeres Array
-          lat: lat,                    // `number` oder `null`
-          lng: lng                     // `number` oder `null`
+          itemsGiven: itemsGivenArr,
+          requiresItems: requiresArr,
+          lat: lat,
+          lng: lng
         };
 
-        // Typ-spezifische Felder ergänzen
+        // Typ-spezifische Felder ergänzen, leere Strings werden übernommen
         if (typeVal === "info") {
           stationObj.text = document.getElementById(`stationTextInfo-${i}`).value.trim();
-        }
-        else if (typeVal === "riddle") {
+        } else if (typeVal === "riddle") {
           stationObj.text   = document.getElementById(`stationTextRiddle-${i}`).value.trim();
           stationObj.answer = document.getElementById(`stationAnswerRiddle-${i}`).value.trim();
-        }
-        else if (typeVal === "item") {
+        } else if (typeVal === "item") {
           stationObj.itemName = document.getElementById(`stationItemName-${i}`).value.trim();
           stationObj.itemDesc = document.getElementById(`stationItemDesc-${i}`).value.trim();
         }
 
-        // Station-Objekt hinzufügen (auch mit leeren Feldern)
+        // Station hinzufügen (auch wenn Felder leer oder null sind)
         stationsArr.push(stationObj);
       }
 
-      // Gesamt-JSON erzeugen
+      // Gesamt-JSON zusammensetzen und anzeigen
       const result = {
         title: title,
         description: description,
@@ -405,7 +401,7 @@
     // Event-Listener
     addStationBtn.addEventListener("click", () => {
       addStationForm();
-      updateOutputJson(); // JSON direkt aktualisieren
+      updateOutputJson(); // direktes Update
     });
     clearAllBtn.addEventListener("click", () => {
       clearAllStations();
