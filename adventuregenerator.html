@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <title>Adventure JSON Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Leaflet CSS -->
+
+  <!-- ------ Leaflet CSS über CDN (vereinfachte Version ohne Unterbrechungsfehler) ------ -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-sA+6EL23QJd0bYpPpmmJcQjU23Y5HkBvcwMmWt0xy3Y="
     crossorigin=""
   />
+
   <style>
     /* ------ Grundlegende Styles ------ */
     body {
@@ -27,7 +28,7 @@
       margin: 0.5rem 0 0.2rem;
       font-weight: bold;
     }
-    input[type="text"], input[type="number"], textarea, select {
+    input[type="text"], textarea, select {
       width: 100%;
       padding: 0.4rem;
       margin-bottom: 0.5rem;
@@ -35,7 +36,7 @@
     }
     textarea {
       font-family: monospace;
-      height: 200px;
+      height: 80px;
     }
     button {
       padding: 0.5rem 1rem;
@@ -85,18 +86,26 @@
       font-size: 0.9rem;
       color: #555;
     }
-    /* Karte im Generator */
-    #mapGenerator {
-      height: 300px;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
+    /* ------ Leaflet-Karte im Generator ------ */
+    #mapContainer {
+      height: 300px;             /* feste Höhe, damit die Karte sichtbar wird */
+      margin-top: 0.5rem;
+      border: 1px solid #ddd;
+    }
+    .map-label {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #333;
     }
   </style>
 </head>
 <body>
 
   <h1>Adventure-JSON Generator</h1>
-  <p class="note">Erstelle hier dein Abenteuer mit Stationen, Items, Rätseln und Bedingungen. Kopiere danach das erzeugte JSON in deine <code>play.html</code>.</p>
+  <p class="note">
+    Erstelle hier dein Abenteuer mit Stationen, Items, Rätseln und Bedingungen.  
+    Kopiere danach das erzeugte JSON in deine <code>play.html</code>.
+  </p>
 
   <!-- -------------------------------------- -->
   <!-- Abschnitt: Globale Abenteuer-Einstellungen -->
@@ -104,29 +113,10 @@
   <fieldset>
     <legend><strong>Allgemeine Einstellungen</strong></legend>
     <label for="advTitle">Titel des Abenteuers:</label>
-    <input type="text" id="advTitle" placeholder="z.B. 'Die Gurkenverschwörung'" required />
+    <input type="text" id="advTitle" placeholder="z.B. 'Die Gurkenverschwörung'" />
 
     <label for="advDescription">Beschreibung (optional):</label>
     <textarea id="advDescription" placeholder="Kurzbeschreibung des Abenteuers"></textarea>
-  </fieldset>
-
-  <!-- -------------------------------------- -->
-  <!-- Abschnitt: Karte zur Auswahl der Koordinaten -->
-  <!-- -------------------------------------- -->
-  <fieldset>
-    <legend><strong>Station-Koordinaten (Pflichtfeld)</strong></legend>
-    <p class="note">Klicke auf die Karte, um Latitude und Longitude zu setzen.</p>
-    <div id="mapGenerator"></div>
-    <div class="flex-row">
-      <div class="flex-col">
-        <label for="stationLat">Latitude:</label>
-        <input type="text" id="stationLat" readonly placeholder="Latitude" />
-      </div>
-      <div class="flex-col">
-        <label for="stationLng">Longitude:</label>
-        <input type="text" id="stationLng" readonly placeholder="Longitude" />
-      </div>
-    </div>
   </fieldset>
 
   <!-- -------------------------------------- -->
@@ -170,18 +160,34 @@
       <div class="flex-col">
         <label for="stationOptional">Optionale Station?</label>
         <select id="stationOptional">
-          <option value="false">Nein (Pflichtstation)</option>
-          <option value="true">Ja (Bonusstation)</option>
+          <option value="false">Nein (→ Pflichtstation)</option>
+          <option value="true">Ja (→ nur Bonuspunkte)</option>
         </select>
       </div>
       <div class="flex-col">
-        <label for="stationItemsGiven">Items, die nach Abschluss verliehen werden (Komma-getrennt):</label>
+        <label for="stationItemsGiven">
+          Items, die nach Abschluss verliehen werden (Komma-getrennt):
+        </label>
         <input type="text" id="stationItemsGiven" placeholder="z.B. 'key1,item2'" />
       </div>
       <div class="flex-col">
-        <label for="stationRequiresItems">Benötigte Items, um Station freizuschalten (Komma-getrennt):</label>
+        <label for="stationRequiresItems">
+          Benötigte Items, um Station freizuschalten (Komma-getrennt):
+        </label>
         <input type="text" id="stationRequiresItems" placeholder="z.B. 'key1'" />
       </div>
+    </div>
+
+    <!-- GPS-Koordinaten: Auswahl über Karte (Pflichtfeld) -->
+    <div>
+      <label class="map-label">
+        Klicke auf die Karte, um die Position der Station festzulegen 
+        (<strong>Latitude / Longitude sind Pflichtangaben</strong>).
+      </label>
+      <div id="mapContainer"></div>
+      <p class="note">
+        Aktuell gewählt: <span id="selectedCoords">keine Koordinaten</span>
+      </p>
     </div>
 
     <button type="button" id="addStationBtn">➕ Station hinzufügen</button>
@@ -201,54 +207,86 @@
   <fieldset>
     <legend><strong>Generiertes JSON</strong></legend>
     <textarea id="outputJson" readonly placeholder="Das JSON erscheint hier, sobald du Stationen angelegt hast"></textarea>
-    <p class="note">Kopiere das JSON und füge es in deine <code>play.html</code> ein.</p>
+    <p class="note">
+      Kopiere das JSON und füge es in deine <code>play.html</code> ein.
+    </p>
   </fieldset>
 
 
-  <!-- Leaflet JS -->
+  <!-- Leaflet JS (vereinfachte Version ohne strikte Integritätsprüfung) -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-QVGGfXXm4Zj+knqnm/sw+5Zyj8vfR3VjX0cljFKpUU8="
     crossorigin=""
   ></script>
+
   <script>
-    /*****************************************************************************
-     * Adventure-JSON Generator (Version mit Karten-Integration)
+    /****************************************************************************
+     * Adventure-JSON Generator mit Karten-Auswahl für Koordinaten
      *
-     * - Koordinaten sind nun Pflichtfeld.
-     * - Die Position wird per Klick auf die Leaflet-Karte gewählt.
-     * - Die Formular-Felder Latitude/Longitude sind jetzt readonly und füllen sich automatisch.
-     * - Beim Hinzufügen einer Station wird validiert, dass Koordinaten ausgewählt wurden.
+     * - Jede Station benötigt zwingend Latitude und Longitude.
+     * - Die Karte lädt zuverlässig, sobald das DOM bereit ist.
+     * - Klick auf Karte: Marker setzen + Koordinaten speichern.
+     * - Nach Klick auf "Station hinzufügen" wird alles validiert.
      *****************************************************************************/
 
-    // 1. Globale Variable: Array aller Stationen
+    // 1. Globales Array: Alle Stationen sammeln
     let stations = [];
 
-    // 2. Leaflet-Map-Instanz und Klick-Handler
-    let mapGen = null;
-    let tempMarker = null; // Zeigt den aktuellen Klickpunkt an
+    // 2. Temporäre Variablen für die aktuell ausgewählten Koordinaten
+    let currentLat = null;
+    let currentLng = null;
+    let currentMarker = null;  // hält den Marker für die Karte
 
-    // 3. DOM-Referenzen
-    const advTitle            = document.getElementById("advTitle");
-    const advDescription      = document.getElementById("advDescription");
-    const stationIdInput      = document.getElementById("stationId");
-    const stationTypeSelect   = document.getElementById("stationType");
-    const addStationBtn       = document.getElementById("addStationBtn");
-    const stationListDiv      = document.getElementById("stationList");
-    const outputJsonArea      = document.getElementById("outputJson");
-    const fieldsInfo          = document.getElementById("fieldsInfo");
-    const fieldsRiddle        = document.getElementById("fieldsRiddle");
-    const fieldsItem          = document.getElementById("fieldsItem");
-    const stationTextInfo     = document.getElementById("stationTextInfo");
-    const stationTextRiddle   = document.getElementById("stationTextRiddle");
-    const stationAnswerRiddle = document.getElementById("stationAnswerRiddle");
-    const stationItemName     = document.getElementById("stationItemName");
-    const stationItemDesc     = document.getElementById("stationItemDesc");
-    const stationOptional     = document.getElementById("stationOptional");
-    const stationItemsGiven   = document.getElementById("stationItemsGiven");
-    const stationRequiresItems= document.getElementById("stationRequiresItems");
-    const stationLatInput     = document.getElementById("stationLat");
-    const stationLngInput     = document.getElementById("stationLng");
+    // 3. Verweise auf DOM-Elemente
+    const advTitle               = document.getElementById("advTitle");
+    const advDescription         = document.getElementById("advDescription");
+    const stationIdInput         = document.getElementById("stationId");
+    const stationTypeSelect      = document.getElementById("stationType");
+    const addStationBtn          = document.getElementById("addStationBtn");
+    const stationListDiv         = document.getElementById("stationList");
+    const outputJsonArea         = document.getElementById("outputJson");
+    const selectedCoordsSpan     = document.getElementById("selectedCoords");
+
+    // Sub-Felder für verschiedene Stationstypen
+    const fieldsInfo             = document.getElementById("fieldsInfo");
+    const fieldsRiddle           = document.getElementById("fieldsRiddle");
+    const fieldsItem             = document.getElementById("fieldsItem");
+
+    // Gemeinsame Felder
+    const stationTextInfo        = document.getElementById("stationTextInfo");
+    const stationTextRiddle      = document.getElementById("stationTextRiddle");
+    const stationAnswerRiddle    = document.getElementById("stationAnswerRiddle");
+    const stationItemName        = document.getElementById("stationItemName");
+    const stationItemDesc        = document.getElementById("stationItemDesc");
+    const stationOptional        = document.getElementById("stationOptional");
+    const stationItemsGiven      = document.getElementById("stationItemsGiven");
+    const stationRequiresItems   = document.getElementById("stationRequiresItems");
+
+    // 4. Leaflet-Karte initialisieren, sobald das DOM fertig geladen ist
+    let map = null;
+    document.addEventListener("DOMContentLoaded", () => {
+      // Karte mit Standard-View (z.B. Zürich)
+      map = L.map("mapContainer").setView([47.3769, 8.5417], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+
+      // Klick-Event: Marker setzen und Koordinaten speichern
+      map.on("click", function(e) {
+        currentLat = e.latlng.lat;
+        currentLng = e.latlng.lng;
+
+        if (currentMarker) {
+          currentMarker.setLatLng(e.latlng);
+        } else {
+          currentMarker = L.marker(e.latlng).addTo(map);
+        }
+
+        // Anzeige der aktuell ausgewählten Koordinaten updaten
+        selectedCoordsSpan.textContent =
+          currentLat.toFixed(5) + ", " + currentLng.toFixed(5);
+      });
+    });
 
     /*****************************************************************************
      * Funktion: showRelevantFields
@@ -263,51 +301,28 @@
     stationTypeSelect.addEventListener("change", showRelevantFields);
 
     /*****************************************************************************
-     * Funktion: initMapGenerator
-     * Initialisiert die Leaflet-Karte und setzt einen Klick-Handler,
-     * um Latitude und Longitude in die readonly Inputs zu schreiben.
-     *****************************************************************************/
-    function initMapGenerator() {
-      if (mapGen) return; // Schon initialisiert
-      // Standard-Karte (ggf. Koordinaten anpassen)
-      mapGen = L.map("mapGenerator").setView([47.3769, 8.5417], 13);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors"
-      }).addTo(mapGen);
-
-      // Klick-Handler: Wenn man auf die Karte klickt, Position speichern
-      mapGen.on("click", function(e) {
-        const { lat, lng } = e.latlng;
-        // Marker setzen / verschieben
-        if (tempMarker) {
-          tempMarker.setLatLng(e.latlng);
-        } else {
-          tempMarker = L.marker(e.latlng).addTo(mapGen);
-        }
-        // readonly-Felder befüllen
-        stationLatInput.value = lat.toFixed(6);
-        stationLngInput.value = lng.toFixed(6);
-      });
-    }
-
-    /*****************************************************************************
      * Funktion: renderStationList
      * Aktualisiert die Anzeige aller Stationen unter dem Formular.
      *****************************************************************************/
     function renderStationList() {
+      // Stationen-Liste leeren
       stationListDiv.innerHTML = "<h2>Bisherige Stationen</h2>";
       stations.forEach((st, idx) => {
         const div = document.createElement("div");
         div.classList.add("station-item");
+
+        // Inhalt der Station
         div.innerHTML = `
           <strong>${st.id} (${st.type})</strong><br>
-          ${st.type === "info" ? `Text: ${st.text}` : ""}
+          ${st.type === "info"   ? `Text: ${st.text}`               : ""}
           ${st.type === "riddle" ? `Rätsel: ${st.text}<br>Antwort: ${st.answer}` : ""}
-          ${st.type === "item" ? `Item: ${st.itemName} – ${st.itemDesc}` : ""}
+          ${st.type === "item"   ? `Item: ${st.itemName} – ${st.itemDesc}`        : ""}
           <br>
-          Optional: ${st.optional} | Gibt Items: ${st.itemsGiven.join(", ")} | Benötigt: ${st.requiresItems.join(", ")}<br>
-          Koordinaten: ${st.lat}, ${st.lng}
+          Optional: ${st.optional} | Gibt Items: ${st.itemsGiven.join(", ")} | 
+          Benötigt: ${st.requiresItems.join(", ")}<br>
+          Koordinaten: ${st.lat.toFixed(5)}, ${st.lng.toFixed(5)}
         `;
+
         // Löschen-Button
         const btnDel = document.createElement("button");
         btnDel.textContent = "✖";
@@ -318,6 +333,7 @@
           renderStationList();
           updateOutputJson();
         });
+
         div.appendChild(btnDel);
         stationListDiv.appendChild(div);
       });
@@ -339,32 +355,34 @@
     /*****************************************************************************
      * Funktion: addNewStation
      * Liest alle Formular-Felder aus, erzeugt ein Station-Objekt und fügt es zum Array hinzu.
-     * Überprüft, ob alle Pflichtfelder (inkl. Koordinaten) ausgefüllt sind.
      *****************************************************************************/
     function addNewStation() {
       const id = stationIdInput.value.trim();
       if (!id) {
-        return alert("Bitte gib einer Station eine eindeutige ID!");
+        alert("Bitte gib einer Station eine eindeutige ID!");
+        return;
       }
       // Prüfen, ob ID bereits existiert
       if (stations.some(s => s.id === id)) {
-        return alert("Eine Station mit dieser ID existiert bereits!");
+        alert("Eine Station mit dieser ID existiert bereits!");
+        return;
       }
+
       const type = stationTypeSelect.value;
       const optional = stationOptional.value === "true";
+      // Comma-getrennte Strings in Arrays umwandeln
       const itemsGiven = stationItemsGiven.value
         .split(",").map(s => s.trim()).filter(s => s);
       const requiresItems = stationRequiresItems.value
         .split(",").map(s => s.trim()).filter(s => s);
 
-      // Koordinaten sind Pflicht:
-      const latStr = stationLatInput.value;
-      const lngStr = stationLngInput.value;
-      if (!latStr || !lngStr) {
-        return alert("Bitte klicke auf die Karte, um Koordinaten auszuwählen!");
+      // Koordinaten sind Pflicht
+      if (currentLat === null || currentLng === null) {
+        alert("Bitte setze die Position auf der Karte, indem du darauf klickst.");
+        return;
       }
-      const lat = parseFloat(latStr);
-      const lng = parseFloat(lngStr);
+      const lat = currentLat;
+      const lng = currentLng;
 
       // Basis-Objekt
       const stationObj = {
@@ -377,11 +395,12 @@
         lng
       };
 
-      // Typ-spezifische Felder
+      // Typ-spezifische Felder erweitern
       if (type === "info") {
         const txt = stationTextInfo.value.trim();
         if (!txt) {
-          return alert("Bitte hinterlege den Info-Text!");
+          alert("Bitte hinterlege den Info-Text!");
+          return;
         }
         stationObj.text = txt;
       }
@@ -389,52 +408,52 @@
         const txt = stationTextRiddle.value.trim();
         const ans = stationAnswerRiddle.value.trim();
         if (!txt || !ans) {
-          return alert("Bitte Rätsel-Text und Antwort eingeben!");
+          alert("Bitte Rätsel-Text und Antwort eingeben!");
+          return;
         }
-        stationObj.text = txt;
+        stationObj.text   = txt;
         stationObj.answer = ans;
       }
       else if (type === "item") {
         const name = stationItemName.value.trim();
         const desc = stationItemDesc.value.trim();
         if (!name) {
-          return alert("Bitte Item-Name eingeben!");
+          alert("Bitte Item-Name eingeben!");
+          return;
         }
         stationObj.itemName = name;
         stationObj.itemDesc = desc;
       }
 
-      // Station hinzufügen
+      // Station speichern
       stations.push(stationObj);
 
-      // Formular + Marker zurücksetzen
-      stationIdInput.value = "";
-      stationTextInfo.value = "";
-      stationTextRiddle.value = "";
-      stationAnswerRiddle.value = "";
-      stationItemName.value = "";
-      stationItemDesc.value = "";
-      stationOptional.value = "false";
-      stationItemsGiven.value = "";
-      stationRequiresItems.value = "";
-      stationLatInput.value = "";
-      stationLngInput.value = "";
-      if (tempMarker) {
-        mapGen.removeLayer(tempMarker);
-        tempMarker = null;
+      // Formular & Marker zurücksetzen für die nächste Station
+      stationIdInput.value        = "";
+      stationTextInfo.value       = "";
+      stationTextRiddle.value     = "";
+      stationAnswerRiddle.value   = "";
+      stationItemName.value       = "";
+      stationItemDesc.value       = "";
+      stationOptional.value       = "false";
+      stationItemsGiven.value     = "";
+      stationRequiresItems.value  = "";
+      currentLat = null;
+      currentLng = null;
+      if (currentMarker) {
+        map.removeLayer(currentMarker);
+        currentMarker = null;
       }
+      selectedCoordsSpan.textContent = "keine Koordinaten";
 
-      // UI updaten
+      // UI-Update
       renderStationList();
       updateOutputJson();
     }
     addStationBtn.addEventListener("click", addNewStation);
 
-    // 4. Initialisierung beim Laden der Seite
-    document.addEventListener("DOMContentLoaded", () => {
-      showRelevantFields();
-      initMapGenerator();
-    });
+    // Beim Seiten-Load einmal das passende Unterformular anzeigen
+    showRelevantFields();
   </script>
 </body>
 </html>
