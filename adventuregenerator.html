@@ -5,7 +5,7 @@
   <title>Adventure JSON Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ------ Leaflet CSS über CDN (vereinfachte Version ohne Unterbrechungsfehler) ------ -->
+  <!-- Leaflet CSS (CDN) -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -86,9 +86,9 @@
       font-size: 0.9rem;
       color: #555;
     }
-    /* ------ Leaflet-Karte im Generator ------ */
+    /* Leaflet-Karte im Generator */
     #mapContainer {
-      height: 300px;             /* feste Höhe, damit die Karte sichtbar wird */
+      height: 300px; /* feste Höhe, damit die Karte sichtbar wird */
       margin-top: 0.5rem;
       border: 1px solid #ddd;
     }
@@ -213,7 +213,7 @@
   </fieldset>
 
 
-  <!-- Leaflet JS (vereinfachte Version ohne strikte Integritätsprüfung) -->
+  <!-- Leaflet JS (CDN ohne strikte Integritätsprüfungen) -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     crossorigin=""
@@ -222,11 +222,7 @@
   <script>
     /****************************************************************************
      * Adventure-JSON Generator mit Karten-Auswahl für Koordinaten
-     *
-     * - Jede Station benötigt zwingend Latitude und Longitude.
-     * - Die Karte lädt zuverlässig, sobald das DOM bereit ist.
-     * - Klick auf Karte: Marker setzen + Koordinaten speichern.
-     * - Nach Klick auf "Station hinzufügen" wird alles validiert.
+     * (Formularfelder bleiben nach dem Hinzufügen erhalten)
      *****************************************************************************/
 
     // 1. Globales Array: Alle Stationen sammeln
@@ -355,6 +351,7 @@
     /*****************************************************************************
      * Funktion: addNewStation
      * Liest alle Formular-Felder aus, erzeugt ein Station-Objekt und fügt es zum Array hinzu.
+     * Dabei werden die Formularfelder NICHT zurückgesetzt.
      *****************************************************************************/
     function addNewStation() {
       const id = stationIdInput.value.trim();
@@ -428,23 +425,12 @@
       // Station speichern
       stations.push(stationObj);
 
-      // Formular & Marker zurücksetzen für die nächste Station
-      stationIdInput.value        = "";
-      stationTextInfo.value       = "";
-      stationTextRiddle.value     = "";
-      stationAnswerRiddle.value   = "";
-      stationItemName.value       = "";
-      stationItemDesc.value       = "";
-      stationOptional.value       = "false";
-      stationItemsGiven.value     = "";
-      stationRequiresItems.value  = "";
-      currentLat = null;
-      currentLng = null;
-      if (currentMarker) {
-        map.removeLayer(currentMarker);
-        currentMarker = null;
-      }
-      selectedCoordsSpan.textContent = "keine Koordinaten";
+      // **WICHTIG**: Die Formularfelder bleiben stehen, und auch der Marker bleibt bestehen,
+      // damit du beim Hinzufügen weiterer Stationen nicht alles neu eingeben musst.
+
+      // Stattdessen bleibt currentLat/currentLng erhalten – du kannst direkt
+      // an derselben Stelle einen neuen Klick machen, um Koordinaten zu ändern,
+      // oder auch mit denselben Koordinaten weiterarbeiten.
 
       // UI-Update
       renderStationList();
