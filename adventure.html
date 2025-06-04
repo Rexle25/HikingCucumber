@@ -150,10 +150,10 @@
      * - „Neue Station hinzufügen“ erzeugt ein eigenes Formular-Fieldset mit Leaflet-Karte.
      * - Fehlende Eingaben werden als leere Strings oder null übernommen.
      * - „Alle Stationen löschen“ leert alles, inklusive JSON-Ausgabe.
-     * - „JSON aktualisieren“ baut das finale JSON ohne Validierungs-Popups.
+     * - „JSON aktualisieren“ baut das finale JSON ohne jegliche Popup-Meldungen.
      ****************************************************************************/
 
-    let stationCount = 0;            // Nummeriert die Stationen
+    let stationCount = 0;            // Zähler für eindeutige IDs
     const mapInstances = {};         // Speichert Leaflet-Map-Instanzen (key: stationIndex)
     const markerInstances = {};      // Speichert Marker pro Station (key: stationIndex)
 
@@ -244,18 +244,16 @@
         </p>
       `;
 
-      // Füge das Fieldset in den Container ein
+      // Fieldset ins DOM einfügen
       stationFormsDiv.appendChild(fieldset);
 
       // 1) Delete-Button-Funktionalität
       fieldset.querySelector(".delete-station").addEventListener("click", () => {
-        // Karte und Marker entfernen (falls vorhanden)
         if (mapInstances[idx]) {
           mapInstances[idx].remove();
           delete mapInstances[idx];
           delete markerInstances[idx];
         }
-        // Fieldset aus DOM entfernen
         fieldset.remove();
         updateOutputJson();
       });
@@ -263,7 +261,7 @@
       // 2) Dynamische Anzeige der Sub-Felder je Stationstyp
       const typeSelect = document.getElementById(`stationType-${idx}`);
       typeSelect.addEventListener("change", () => showRelevantFields(idx));
-      showRelevantFields(idx); // initial aufrufen
+      showRelevantFields(idx); // initial
 
       // 3) Leaflet-Karte initialisieren
       const mapDiv = document.getElementById(`map-${idx}`);
@@ -273,23 +271,21 @@
       }).addTo(map);
       mapInstances[idx] = map;
 
-      // 4) Klick-Event: Marker setzen, Koordinaten anzeigen
+      // 4) Klick-Event: Marker setzen und Koordinaten anzeigen
       map.on("click", function(e) {
         const lat = e.latlng.lat;
         const lng = e.latlng.lng;
-        // Marker erstellen oder verschieben
         if (markerInstances[idx]) {
           markerInstances[idx].setLatLng(e.latlng);
         } else {
           markerInstances[idx] = L.marker(e.latlng).addTo(map);
         }
-        // Koordinaten-Display aktualisieren
         document.getElementById(`selectedCoords-${idx}`).textContent =
           lat.toFixed(5) + ", " + lng.toFixed(5);
         updateOutputJson();
       });
 
-      // 5) Bei jeder Änderung der Eingabefelder JSON automatisch aktualisieren
+      // 5) Automatisches JSON-Update bei jeder Eingabe
       const inputs = fieldset.querySelectorAll("input, textarea, select");
       inputs.forEach(inp => {
         inp.addEventListener("input", updateOutputJson);
@@ -298,18 +294,18 @@
 
     /*****************************************************************************
      * showRelevantFields(idx)
-     * Zeigt innerhalb einer Station nur die relevanten Unterfelder an.
+     * Zeigt nur die jeweiligen Unterfelder (Info, Riddle, Item).
      *****************************************************************************/
     function showRelevantFields(idx) {
       const type = document.getElementById(`stationType-${idx}`).value;
-      document.getElementById(`fieldsInfo-${idx}`).style.display   = (type === "info") ? "block" : "none";
+      document.getElementById(`fieldsInfo-${idx}`).style.display   = (type === "info")   ? "block" : "none";
       document.getElementById(`fieldsRiddle-${idx}`).style.display = (type === "riddle") ? "block" : "none";
-      document.getElementById(`fieldsItem-${idx}`).style.display   = (type === "item") ? "block" : "none";
+      document.getElementById(`fieldsItem-${idx}`).style.display   = (type === "item")   ? "block" : "none";
     }
 
     /*****************************************************************************
      * clearAllStations()
-     * Entfernt alle Station-Fieldsets und leert das JSON-Feld.
+     * Entfernt alle Station-Fieldsets und leert das Ausgabe-Feld.
      *****************************************************************************/
     function clearAllStations() {
       // Leaflet-Instanzen entfernen
@@ -317,40 +313,36 @@
       Object.keys(mapInstances).forEach(k => delete mapInstances[k]);
       Object.keys(markerInstances).forEach(k => delete markerInstances[k]);
 
-      // Alle Station-Formulare löschen
+      // Alle Fieldsets löschen
       stationFormsDiv.innerHTML = "";
-      // JSON-Ausgabe leeren
+      // JSON-Ausgabe löschen
       outputJsonArea.value = "";
-      // Zähler zurücksetzen
       stationCount = 0;
     }
 
     /*****************************************************************************
      * updateOutputJson()
-     * Liest alle Station-Formulare aus und erzeugt das finale JSON.
-     * Fehlende Eingaben werden als leere Strings oder null übernommen.
+     * Liest alle Formulardaten aus und erzeugt das finale JSON.
+     * Felder, die leer sind, werden als "" oder null übernommen.
      *****************************************************************************/
     function updateOutputJson() {
-      const title = advTitleInput.value.trim();
+      const title       = advTitleInput.value.trim();
       const description = advDescriptionInput.value.trim();
       const stationsArr = [];
 
-      // Für jede mögliche Station (1 bis stationCount)
       for (let i = 1; i <= stationCount; i++) {
         const form = document.getElementById(`station-form-${i}`);
-        if (!form) continue; // überspringe gelöschte Stationen
+        if (!form) continue;
 
-        // Werte auslesen
-        const idVal         = document.getElementById(`stationId-${i}`).value.trim();
-        const typeVal       = document.getElementById(`stationType-${i}`).value;
-        const optionalVal   = document.getElementById(`stationOptional-${i}`).value === "true";
+        const idVal       = document.getElementById(`stationId-${i}`).value.trim();
+        const typeVal     = document.getElementById(`stationType-${i}`).value;
+        const optionalVal = document.getElementById(`stationOptional-${i}`).value === "true";
         const itemsGivenArr = document.getElementById(`stationItemsGiven-${i}`).value
                                 .split(",").map(s => s.trim()).filter(s => s);
         const requiresArr   = document.getElementById(`stationRequiresItems-${i}`).value
                                 .split(",").map(s => s.trim()).filter(s => s);
-        const coordsText    = document.getElementById(`selectedCoords-${i}`).textContent;
+        const coordsText  = document.getElementById(`selectedCoords-${i}`).textContent;
 
-        // Koordinaten parsen – oder null, falls nicht gesetzt
         let lat = null;
         let lng = null;
         if (coordsText && coordsText !== "keine Koordinaten") {
@@ -363,7 +355,6 @@
           }
         }
 
-        // Basis-Objekt (leere Strings / null akzeptiert)
         const stationObj = {
           id: idVal,
           type: typeVal,
@@ -374,7 +365,6 @@
           lng: lng
         };
 
-        // Typ-spezifische Felder ergänzen, leere Strings werden übernommen
         if (typeVal === "info") {
           stationObj.text = document.getElementById(`stationTextInfo-${i}`).value.trim();
         } else if (typeVal === "riddle") {
@@ -385,11 +375,9 @@
           stationObj.itemDesc = document.getElementById(`stationItemDesc-${i}`).value.trim();
         }
 
-        // Station hinzufügen (auch wenn Felder leer oder null sind)
         stationsArr.push(stationObj);
       }
 
-      // Gesamt-JSON zusammensetzen und anzeigen
       const result = {
         title: title,
         description: description,
@@ -401,7 +389,7 @@
     // Event-Listener
     addStationBtn.addEventListener("click", () => {
       addStationForm();
-      updateOutputJson(); // direktes Update
+      updateOutputJson();
     });
     clearAllBtn.addEventListener("click", () => {
       clearAllStations();
