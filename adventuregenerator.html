@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Adventure JSON Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* ------ Grundlegende Styles ------ */
+    body {
+      font-family: sans-serif;
+      max-width: 900px;
+      margin: 1rem auto;
+      padding: 0 1rem;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin: 0.5rem 0 0.2rem;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="number"], textarea, select {
+      width: 100%;
+      padding: 0.4rem;
+      margin-bottom: 0.5rem;
+      box-sizing: border-box;
+    }
+    textarea {
+      font-family: monospace;
+      height: 200px;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      margin: 0.5rem 0;
+      cursor: pointer;
+    }
+    fieldset {
+      border: 1px solid #ccc;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .station-list {
+      margin-top: 1rem;
+      border-top: 1px solid #ddd;
+      padding-top: 1rem;
+    }
+    .station-item {
+      border: 1px dashed #aaa;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    .station-item button.delete {
+      position: absolute;
+      top: 0.2rem;
+      right: 0.2rem;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .station-item button.delete:hover {
+      background: #c0392b;
+    }
+    .flex-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .flex-col {
+      flex: 1;
+      min-width: 200px;
+    }
+    .note {
+      font-size: 0.9rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Adventure-JSON Generator</h1>
+  <p class="note">Erstelle hier dein Abenteuer mit Stationen, Items, Rätseln und Bedingungen. Kopiere danach das erzeugte JSON in deine <code>play.html</code>.</p>
+
+  <!-- -------------------------------------- -->
+  <!-- Abschnitt: Globale Abenteuer-Einstellungen -->
+  <!-- -------------------------------------- -->
+  <fieldset>
+    <legend><strong>Allgemeine Einstellungen</strong></legend>
+    <label for="advTitle">Titel des Abenteuers:</label>
+    <input type="text" id="advTitle" placeholder="z.B. 'Die Gurkenverschwörung'" />
+
+    <label for="advDescription">Beschreibung (optional):</label>
+    <textarea id="advDescription" placeholder="Kurzbeschreibung des Abenteuers"></textarea>
+  </fieldset>
+
+  <!-- -------------------------------------- -->
+  <!-- Abschnitt: Formular zum Hinzufügen neuer Station -->
+  <!-- -------------------------------------- -->
+  <fieldset id="newStationFieldset">
+    <legend><strong>Neue Station hinzufügen</strong></legend>
+
+    <label for="stationId">Station-ID (eindeutig):</label>
+    <input type="text" id="stationId" placeholder="z.B. 'start', 'rätsel1'" />
+
+    <label for="stationType">Stationstyp:</label>
+    <select id="stationType">
+      <option value="info">Info</option>
+      <option value="riddle">Rätsel</option>
+      <option value="item">Item</option>
+    </select>
+
+    <!-- Diese Felder ändern sich dynamisch je nach Stationstyp -->
+    <div id="fieldsInfo" class="sub-fields">
+      <label for="stationTextInfo">Text (Info):</label>
+      <textarea id="stationTextInfo" placeholder="Text anzeigen"></textarea>
+    </div>
+
+    <div id="fieldsRiddle" class="sub-fields" style="display:none;">
+      <label for="stationTextRiddle">Text (Rätsel):</label>
+      <textarea id="stationTextRiddle" placeholder="Rätsel-Text anzeigen"></textarea>
+      <label for="stationAnswerRiddle">Antwort (Genau so eingeben):</label>
+      <input type="text" id="stationAnswerRiddle" placeholder="z.B. 'Linus Torvalds'" />
+    </div>
+
+    <div id="fieldsItem" class="sub-fields" style="display:none;">
+      <label for="stationItemName">Item-Name (wird dem Inventar hinzugefügt):</label>
+      <input type="text" id="stationItemName" placeholder="z.B. 'Goldener Schlüssel'" />
+      <label for="stationItemDesc">Item-Beschreibung (optional):</label>
+      <textarea id="stationItemDesc" placeholder="Beschreibung des Items"></textarea>
+    </div>
+
+    <!-- Gemeinsame Felder für alle Stationen -->
+    <div class="flex-row">
+      <div class="flex-col">
+        <label for="stationOptional">Optionale Station?</label>
+        <select id="stationOptional">
+          <option value="false">Nein (-> Pflichtstation)</option>
+          <option value="true">Ja (-> nur Bonuspunkte)</option>
+        </select>
+      </div>
+      <div class="flex-col">
+        <label for="stationItemsGiven">Items, die nach Abschluss verliehen werden (Komma-getrennt):</label>
+        <input type="text" id="stationItemsGiven" placeholder="z.B. 'key1,item2'" />
+      </div>
+      <div class="flex-col">
+        <label for="stationRequiresItems">Benötigte Items, um Station freizuschalten (Komma-getrennt):</label>
+        <input type="text" id="stationRequiresItems" placeholder="z.B. 'key1'" />
+      </div>
+    </div>
+
+    <!-- Optional: GPS-Koordinaten (für Karte) -->
+    <div class="flex-row">
+      <div class="flex-col">
+        <label for="stationLat">Latitude (optional):</label>
+        <input type="number" id="stationLat" placeholder="z.B. 47.3769" step="any" />
+      </div>
+      <div class="flex-col">
+        <label for="stationLng">Longitude (optional):</label>
+        <input type="number" id="stationLng" placeholder="z.B. 8.5417" step="any" />
+      </div>
+    </div>
+
+    <button type="button" id="addStationBtn">➕ Station hinzufügen</button>
+  </fieldset>
+
+  <!-- -------------------------------------- -->
+  <!-- Abschnitt: Liste der bisher erstellten Stationen -->
+  <!-- -------------------------------------- -->
+  <div class="station-list" id="stationList">
+    <h2>Bisherige Stationen</h2>
+    <!-- Jede Station wird hier als .station-item angezeigt -->
+  </div>
+
+  <!-- -------------------------------------- -->
+  <!-- Abschnitt: JSON-Ausgabe -->
+  <!-- -------------------------------------- -->
+  <fieldset>
+    <legend><strong>Generiertes JSON</strong></legend>
+    <textarea id="outputJson" readonly placeholder="Das JSON erscheint hier, sobald du Stationen angelegt hast"></textarea>
+    <p class="note">Kopiere das JSON und füge es in deine <code>play.html</code> ein.</p>
+  </fieldset>
+
+
+  <script>
+    /*****************************************************************************
+     * Adventure-JSON Generator
+     * 
+     * Diese Datei erzeugt ein JSON-Objekt mit folgenden Struktur:
+     * {
+     *   "title": "...",
+     *   "description": "...",
+     *   "stations": [
+     *     {
+     *       "id": "string",
+     *       "type": "info" | "riddle" | "item",
+     *       "text": "string",             // bei info und riddle
+     *       "answer": "string",           // nur bei riddle
+     *       "itemName": "string",         // nur bei item (ist identisch mit itemsGiven im Abschluss, hier zur Übersicht)
+     *       "itemDesc": "string",         // nur bei item
+     *       "optional": boolean,
+     *       "itemsGiven": ["string", ...],
+     *       "requiresItems": ["string", ...],
+     *       "lat": number | null,
+     *       "lng": number | null
+     *     },
+     *     ...
+     *   ]
+     * }
+     *****************************************************************************/
+
+    // 1. Globale Variable: Array aller Stationen
+    let stations = [];
+
+    // 2. Verweise auf DOM-Elemente
+    const advTitle         = document.getElementById("advTitle");
+    const advDescription   = document.getElementById("advDescription");
+    const stationIdInput   = document.getElementById("stationId");
+    const stationTypeSelect= document.getElementById("stationType");
+    const addStationBtn    = document.getElementById("addStationBtn");
+    const stationListDiv   = document.getElementById("stationList");
+    const outputJsonArea   = document.getElementById("outputJson");
+
+    // Sub-Felder für verschiedene Stationstypen
+    const fieldsInfo       = document.getElementById("fieldsInfo");
+    const fieldsRiddle     = document.getElementById("fieldsRiddle");
+    const fieldsItem       = document.getElementById("fieldsItem");
+
+    // Gemeinsame Felder
+    const stationTextInfo      = document.getElementById("stationTextInfo");
+    const stationTextRiddle    = document.getElementById("stationTextRiddle");
+    const stationAnswerRiddle  = document.getElementById("stationAnswerRiddle");
+    const stationItemName      = document.getElementById("stationItemName");
+    const stationItemDesc      = document.getElementById("stationItemDesc");
+    const stationOptional      = document.getElementById("stationOptional");
+    const stationItemsGiven    = document.getElementById("stationItemsGiven");
+    const stationRequiresItems = document.getElementById("stationRequiresItems");
+    const stationLat           = document.getElementById("stationLat");
+    const stationLng           = document.getElementById("stationLng");
+
+
+    /*****************************************************************************
+     * Funktion: showRelevantFields
+     * Zeigt im Formular nur die Felder, die zum gewählten Stationstyp passen.
+     *****************************************************************************/
+    function showRelevantFields() {
+      const type = stationTypeSelect.value;
+      fieldsInfo.style.display   = (type === "info")   ? "block" : "none";
+      fieldsRiddle.style.display = (type === "riddle") ? "block" : "none";
+      fieldsItem.style.display   = (type === "item")   ? "block" : "none";
+    }
+    stationTypeSelect.addEventListener("change", showRelevantFields);
+
+    /*****************************************************************************
+     * Funktion: renderStationList
+     * Aktualisiert die Anzeige aller Stationen unter dem Formular.
+     *****************************************************************************/
+    function renderStationList() {
+      // Stationen-Liste leeren
+      stationListDiv.innerHTML = "<h2>Bisherige Stationen</h2>";
+      stations.forEach((st, idx) => {
+        const div = document.createElement("div");
+        div.classList.add("station-item");
+        div.innerHTML = `
+          <strong>${st.id} (${st.type})</strong><br>
+          ${st.type === "info" ? `Text: ${st.text}` : ""}
+          ${st.type === "riddle" ? `Rätsel: ${st.text}<br>Antwort: ${st.answer}` : ""}
+          ${st.type === "item" ? `Item: ${st.itemName} – ${st.itemDesc}` : ""}
+          <br>
+          Optional: ${st.optional} | Gibt Items: ${st.itemsGiven.join(", ")} | Benötigt: ${st.requiresItems.join(", ")}
+          ${st.lat !== null && st.lng !== null ? `<br>Koordinaten: ${st.lat}, ${st.lng}` : ""}
+        `;
+        // Löschen-Button
+        const btnDel = document.createElement("button");
+        btnDel.textContent = "✖";
+        btnDel.classList.add("delete");
+        btnDel.title = "Station löschen";
+        btnDel.addEventListener("click", () => {
+          stations.splice(idx, 1);
+          renderStationList();
+          updateOutputJson();
+        });
+        div.appendChild(btnDel);
+        stationListDiv.appendChild(div);
+      });
+    }
+
+    /*****************************************************************************
+     * Funktion: updateOutputJson
+     * Baut aus allen Daten das finale JSON und zeigt es im Textarea.
+     *****************************************************************************/
+    function updateOutputJson() {
+      const obj = {
+        title: advTitle.value.trim(),
+        description: advDescription.value.trim(),
+        stations: stations
+      };
+      outputJsonArea.value = JSON.stringify(obj, null, 2);
+    }
+
+    /*****************************************************************************
+     * Funktion: addNewStation
+     * Liest alle Formular-Felder aus, erzeugt ein Station-Objekt und fügt es zum Array hinzu.
+     *****************************************************************************/
+    function addNewStation() {
+      const id = stationIdInput.value.trim();
+      if (!id) {
+        alert("Bitte gib einer Station eine eindeutige ID!");
+        return;
+      }
+      // Prüfen, ob ID bereits existiert
+      if (stations.some(s => s.id === id)) {
+        alert("Eine Station mit dieser ID existiert bereits!");
+        return;
+      }
+      const type = stationTypeSelect.value;
+      const optional = stationOptional.value === "true";
+      const itemsGiven = stationItemsGiven.value
+        .split(",").map(s => s.trim()).filter(s => s);
+      const requiresItems = stationRequiresItems.value
+        .split(",").map(s => s.trim()).filter(s => s);
+      // Latitude/Lng
+      const lat = stationLat.value ? parseFloat(stationLat.value) : null;
+      const lng = stationLng.value ? parseFloat(stationLng.value) : null;
+
+      // Basis-Objekt
+      const stationObj = {
+        id, type,
+        optional,
+        itemsGiven,
+        requiresItems,
+        lat,
+        lng
+      };
+
+      // Typ-spezifische Felder erweitern
+      if (type === "info") {
+        const txt = stationTextInfo.value.trim();
+        if (!txt) {
+          alert("Bitte hinterlege den Info-Text!");
+          return;
+        }
+        stationObj.text = txt;
+      }
+      else if (type === "riddle") {
+        const txt = stationTextRiddle.value.trim();
+        const ans = stationAnswerRiddle.value.trim();
+        if (!txt || !ans) {
+          alert("Bitte Rätsel-Text und Antwort eingeben!");
+          return;
+        }
+        stationObj.text = txt;
+        stationObj.answer = ans;
+      }
+      else if (type === "item") {
+        const name = stationItemName.value.trim();
+        const desc = stationItemDesc.value.trim();
+        if (!name) {
+          alert("Bitte Item-Name eingeben!");
+          return;
+        }
+        stationObj.itemName = name;
+        stationObj.itemDesc = desc;
+        // In der Spiel-Logik fügen wir das Item später ins Inventar ein
+      }
+
+      // Station hinzufügen
+      stations.push(stationObj);
+      // Formular zurücksetzen
+      stationIdInput.value = "";
+      stationTextInfo.value = "";
+      stationTextRiddle.value = "";
+      stationAnswerRiddle.value = "";
+      stationItemName.value = "";
+      stationItemDesc.value = "";
+      stationOptional.value = "false";
+      stationItemsGiven.value = "";
+      stationRequiresItems.value = "";
+      stationLat.value = "";
+      stationLng.value = "";
+
+      // Update UI
+      renderStationList();
+      updateOutputJson();
+    }
+    addStationBtn.addEventListener("click", addNewStation);
+
+    // Bei Seiten-Load einmal das passende Unterformular anzeigen
+    showRelevantFields();
+  </script>
+</body>
+</html>
