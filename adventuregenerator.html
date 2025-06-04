@@ -103,14 +103,12 @@
 
   <h1>Adventure-JSON Generator</h1>
   <p class="note">
-    Erstelle dein Abenteuer, indem du mehrere Stationen anlegst.  
-    Jede Station behält ihre eingegebenen Werte, bis du sie manuell löschst.  
-    Durch Klick auf „JSON aktualisieren“ wird das gesamte Abenteuer unten neu generiert.
+    Erstelle dein Abenteuer, indem du mehrere Stationen anlegst.<br>
+    Jede Station behält ihre Werte, bis du sie manuell löschst.<br>
+    Durch Klick auf „JSON aktualisieren“ wird das Abenteuer unten neu generiert.
   </p>
 
-  <!-- ------------------------------------------------------------------ -->
   <!-- Globale Einstellungen: Titel & Beschreibung -->
-  <!-- ------------------------------------------------------------------ -->
   <fieldset>
     <legend><strong>Allgemeine Einstellungen</strong></legend>
     <label for="advTitle">Titel des Abenteuers:</label>
@@ -120,25 +118,17 @@
     <textarea id="advDescription" placeholder="Kurzbeschreibung des Abenteuers"></textarea>
   </fieldset>
 
-  <!-- ------------------------------------------------------------------ -->
-  <!-- Buttons: Neue Station hinzufügen & Komplett löschen -->
-  <!-- ------------------------------------------------------------------ -->
+  <!-- Buttons: Neue Station hinzufügen & Komplett löschen & JSON aktualisieren -->
   <div id="controls">
     <button id="addStationBtn">➕ Neue Station hinzufügen</button>
     <button id="clearAllBtn" style="background: #e74c3c; color: white;">🗑️ Alle Stationen löschen</button>
     <button id="updateJsonBtn">🔄 JSON aktualisieren</button>
   </div>
 
-  <!-- ------------------------------------------------------------------ -->
   <!-- Container für alle Station-Formulare -->
-  <!-- ------------------------------------------------------------------ -->
-  <div id="stationFormsContainer">
-    <!-- Hier werden die einzelnen Station-Fieldsets eingefügt -->
-  </div>
+  <div id="stationFormsContainer"></div>
 
-  <!-- ------------------------------------------------------------------ -->
   <!-- Ausgabebereich: Generiertes JSON -->
-  <!-- ------------------------------------------------------------------ -->
   <fieldset>
     <legend><strong>Generiertes JSON</strong></legend>
     <textarea id="outputJson" readonly placeholder="JSON erscheint nach Klick auf '🔄 JSON aktualisieren'"></textarea>
@@ -155,37 +145,30 @@
 
   <script>
     /***************************************************************************
-     * Adventure-JSON Generator – mehrere Stationen bearbeiten/behalten
+     * Adventure-JSON Generator – komplett ohne jegliche Popups oder Alerts
      *
-     * - Jeder Klick auf „Neue Station hinzufügen“ erzeugt ein eigenes Formular-Fieldset,
-     *   das mit einer kleinen Leaflet-Karte verbunden ist.
-     * - Du kannst jede Station individuell bearbeiten, löschen oder deren Karte neu setzen.
-     * - „Alle Stationen löschen“ leert alles, inklusive JSON-Ausgabe.
-     * - „JSON aktualisieren“ baut aus allen aktuellen Formularen das finale Abenteuer-JSON.
+     * - “Neue Station hinzufügen” erzeugt ein neues Fieldset mit eigener Leaflet-Karte.
+     * - Fehlende Felder oder Koordinaten werden stillschweigend als "" oder null übernommen.
+     * - “Alle Stationen löschen” entfernt alle Fieldsets und leert das JSON-Feld.
+     * - “JSON aktualisieren” baut das finale JSON, ganz ohne Popup-Meldungen.
      ****************************************************************************/
 
-    let stationCount = 0;            // Zähler, um eindeutige IDs zu vergeben
-    const mapInstances = {};         // Speichert Leaflet-Map-Instanzen (key: stationIndex)
-    const markerInstances = {};      // Speichert Marker pro Station (key: stationIndex)
+    let stationCount = 0;
+    const mapInstances = {};
+    const markerInstances = {};
 
-    // DOM-Referenzen
-    const addStationBtn      = document.getElementById("addStationBtn");
-    const clearAllBtn        = document.getElementById("clearAllBtn");
-    const updateJsonBtn      = document.getElementById("updateJsonBtn");
-    const stationFormsDiv    = document.getElementById("stationFormsContainer");
-    const outputJsonArea     = document.getElementById("outputJson");
-    const advTitleInput      = document.getElementById("advTitle");
-    const advDescriptionInput= document.getElementById("advDescription");
+    const addStationBtn       = document.getElementById("addStationBtn");
+    const clearAllBtn         = document.getElementById("clearAllBtn");
+    const updateJsonBtn       = document.getElementById("updateJsonBtn");
+    const stationFormsDiv     = document.getElementById("stationFormsContainer");
+    const outputJsonArea      = document.getElementById("outputJson");
+    const advTitleInput       = document.getElementById("advTitle");
+    const advDescriptionInput = document.getElementById("advDescription");
 
-    /*****************************************************************************
-     * Funktion: addStationForm
-     * Fügt ein neues Fieldset für eine Station hinzu, inklusive Leaflet-Karte.
-     *****************************************************************************/
     function addStationForm() {
       stationCount++;
       const idx = stationCount;
 
-      // Erzeuge ein Fieldset-Div mit eindeutiger ID
       const fieldset = document.createElement("fieldset");
       fieldset.classList.add("station-form");
       fieldset.id = `station-form-${idx}`;
@@ -193,7 +176,7 @@
         <button type="button" class="delete-station" title="Station löschen">✖</button>
         <h2>Station ${idx}</h2>
 
-        <label for="stationId-${idx}">Station-ID (eindeutig):</label>
+        <label for="stationId-${idx}">Station-ID:</label>
         <input type="text" id="stationId-${idx}" placeholder="z.B. 'start', 'rätsel1'" />
 
         <label for="stationType-${idx}">Stationstyp:</label>
@@ -203,115 +186,100 @@
           <option value="item">Item</option>
         </select>
 
-        <!-- Dynamische Sub-Felder je nach Stationstyp -->
         <div id="fieldsInfo-${idx}" class="sub-fields">
           <label for="stationTextInfo-${idx}">Text (Info):</label>
-          <textarea id="stationTextInfo-${idx}" placeholder="Text anzeigen"></textarea>
+          <textarea id="stationTextInfo-${idx}" placeholder="Info-Text"></textarea>
         </div>
         <div id="fieldsRiddle-${idx}" class="sub-fields" style="display:none;">
           <label for="stationTextRiddle-${idx}">Text (Rätsel):</label>
-          <textarea id="stationTextRiddle-${idx}" placeholder="Rätsel-Text anzeigen"></textarea>
-          <label for="stationAnswerRiddle-${idx}">Antwort (Genau so eingeben):</label>
-          <input type="text" id="stationAnswerRiddle-${idx}" placeholder="z.B. 'Linus Torvalds'" />
+          <textarea id="stationTextRiddle-${idx}" placeholder="Rätsel-Text"></textarea>
+          <label for="stationAnswerRiddle-${idx}">Antwort:</label>
+          <input type="text" id="stationAnswerRiddle-${idx}" placeholder="Antwort eingeben" />
         </div>
         <div id="fieldsItem-${idx}" class="sub-fields" style="display:none;">
-          <label for="stationItemName-${idx}">Item-Name (wird ins Inventar gelegt):</label>
+          <label for="stationItemName-${idx}">Item-Name:</label>
           <input type="text" id="stationItemName-${idx}" placeholder="z.B. 'Goldener Schlüssel'" />
-          <label for="stationItemDesc-${idx}">Item-Beschreibung (optional):</label>
+          <label for="stationItemDesc-${idx}">Item-Beschreibung:</label>
           <textarea id="stationItemDesc-${idx}" placeholder="Beschreibung des Items"></textarea>
         </div>
 
-        <!-- Gemeinsame Felder -->
         <div class="flex-row">
           <div class="flex-col">
             <label for="stationOptional-${idx}">Optionale Station?</label>
             <select id="stationOptional-${idx}">
-              <option value="false">Nein (→ Pflichtstation)</option>
-              <option value="true">Ja (→ nur Bonuspunkte)</option>
+              <option value="false">Nein</option>
+              <option value="true">Ja</option>
             </select>
           </div>
           <div class="flex-col">
             <label for="stationItemsGiven-${idx}">
-              Items nach Abschluss (Komma-getrennt):
-            </label>
+              Items nach Abschluss (Komma):</label>
             <input type="text" id="stationItemsGiven-${idx}" placeholder="z.B. 'key1,item2'" />
           </div>
           <div class="flex-col">
             <label for="stationRequiresItems-${idx}">
-              Benötigte Items (Komma-getrennt):
-            </label>
+              Benötigte Items (Komma):</label>
             <input type="text" id="stationRequiresItems-${idx}" placeholder="z.B. 'key1'" />
           </div>
         </div>
 
-        <!-- Karte für Koordinatenauswahl -->
         <label class="map-label">
-          Klicke auf die Karte, um die Position der Station festzulegen 
-          (Latitude / Longitude sind Pflichtangaben).
+          Klicke auf die Karte, um Position festzulegen 
+          (Latitude/Longitude bleibt null, wenn du nicht klickst).
         </label>
         <div id="map-${idx}" class="map-container"></div>
         <p class="note">
-          Aktuell gewählt: <span id="selectedCoords-${idx}">keine Koordinaten</span>
+          Aktuell: <span id="selectedCoords-${idx}">keine Koordinaten</span>
         </p>
       `;
 
-      // Füge das Fieldset in den Container ein
       stationFormsDiv.appendChild(fieldset);
 
-      // 1) Delete-Button-Funktionalität
+      // 1) Delete-Button
       fieldset.querySelector(".delete-station").addEventListener("click", () => {
-        // Map & Marker entfernen
         if (mapInstances[idx]) {
           mapInstances[idx].remove();
           delete mapInstances[idx];
           delete markerInstances[idx];
         }
-        // Fieldset aus DOM entfernen
         fieldset.remove();
         updateOutputJson();
       });
 
-      // 2) Dynamische Anzeige der Sub-Felder je Stationstyp
+      // 2) Show/Hide Sub-Felder nach Typ
       const typeSelect = document.getElementById(`stationType-${idx}`);
       typeSelect.addEventListener("change", () => showRelevantFields(idx));
-      showRelevantFields(idx); // initial
+      showRelevantFields(idx);
 
       // 3) Leaflet-Karte initialisieren
       const mapDiv = document.getElementById(`map-${idx}`);
       const map = L.map(mapDiv).setView([47.3769, 8.5417], 13);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
+        attribution: "&copy; OpenStreetMap contributors"
       }).addTo(map);
       mapInstances[idx] = map;
 
-      // 4) Klick-Event: Marker setzen, Koordinaten anzeigen
+      // 4) Klick auf Karte: Marker setzen und Koordinaten anzeigen
       map.on("click", function(e) {
         const lat = e.latlng.lat;
         const lng = e.latlng.lng;
-        // Wenn es schon einen Marker gibt, verschieben wir ihn, sonst erstellen wir einen neuen
         if (markerInstances[idx]) {
           markerInstances[idx].setLatLng(e.latlng);
         } else {
           markerInstances[idx] = L.marker(e.latlng).addTo(map);
         }
-        // Koordinaten-Display updaten
         document.getElementById(`selectedCoords-${idx}`).textContent =
           lat.toFixed(5) + ", " + lng.toFixed(5);
         updateOutputJson();
       });
 
-      // 5) Bei jeder Änderung der Inputs das JSON neu aufbauen
+      // 5) Bei jeder Eingabe JSON neu bauen
       const inputs = fieldset.querySelectorAll("input, textarea, select");
       inputs.forEach(inp => {
         inp.addEventListener("input", updateOutputJson);
       });
     }
 
-    /*****************************************************************************
-     * Funktion: showRelevantFields
-     * Zeigt innerhalb einer Station die passenden Unterfelder an.
-     * @param {number} idx – die Nummer der Station (1,2,3,...)
-     *****************************************************************************/
     function showRelevantFields(idx) {
       const type = document.getElementById(`stationType-${idx}`).value;
       document.getElementById(`fieldsInfo-${idx}`).style.display   = (type === "info")   ? "block" : "none";
@@ -319,137 +287,82 @@
       document.getElementById(`fieldsItem-${idx}`).style.display   = (type === "item")   ? "block" : "none";
     }
 
-    /*****************************************************************************
-     * Funktion: clearAllStations
-     * Entfernt alle Station-Formulare und leert das JSON-Feld.
-     *****************************************************************************/
     function clearAllStations() {
-      // Alle Map-Instanzen entfernen
       Object.values(mapInstances).forEach(m => m.remove());
       Object.keys(mapInstances).forEach(k => delete mapInstances[k]);
       Object.keys(markerInstances).forEach(k => delete markerInstances[k]);
-
-      // Alle Station-Fieldsets aus dem DOM löschen
       stationFormsDiv.innerHTML = "";
-      // JSON-Ausgabe leeren
       outputJsonArea.value = "";
-      // Reset Zähler
       stationCount = 0;
     }
 
-    /*****************************************************************************
-     * Funktion: updateOutputJson
-     * Liest alle aktuellen Station-Formulare aus und baut das finale JSON.
-     *****************************************************************************/
     function updateOutputJson() {
-      const title = advTitleInput.value.trim();
+      const title       = advTitleInput.value.trim();
       const description = advDescriptionInput.value.trim();
-      const stations = [];
+      const stationsArr = [];
 
-      // Für jede existierende Station-Form ID
       for (let i = 1; i <= stationCount; i++) {
         const form = document.getElementById(`station-form-${i}`);
-        if (!form) continue; // überspringen, wenn gelöscht
+        if (!form) continue;
 
-        // Lies alle Werte aus
-        const idEl        = document.getElementById(`stationId-${i}`);
-        const typeEl      = document.getElementById(`stationType-${i}`);
-        const optionalEl  = document.getElementById(`stationOptional-${i}`);
-        const itemsGivenEl= document.getElementById(`stationItemsGiven-${i}`);
-        const requiresEl  = document.getElementById(`stationRequiresItems-${i}`);
-        const coordsText  = document.getElementById(`selectedCoords-${i}`).textContent;
+        const idVal        = document.getElementById(`stationId-${i}`).value.trim();
+        const typeVal      = document.getElementById(`stationType-${i}`).value;
+        const optionalVal  = document.getElementById(`stationOptional-${i}`).value === "true";
+        const itemsGivenArr = document.getElementById(`stationItemsGiven-${i}`).value
+                                 .split(",").map(s => s.trim()).filter(s => s);
+        const requiresArr  = document.getElementById(`stationRequiresItems-${i}`).value
+                                 .split(",").map(s => s.trim()).filter(s => s);
+        const coordsText   = document.getElementById(`selectedCoords-${i}`).textContent;
 
-        const idVal   = idEl.value.trim();
-        const typeVal = typeEl.value;
-        const optionalVal = optionalEl.value === "true";
-        const itemsGivenArr = itemsGivenEl.value
-          .split(",").map(s => s.trim()).filter(s => s);
-        const requiresArr = requiresEl.value
-          .split(",").map(s => s.trim()).filter(s => s);
-
-        // Koordinaten parsen
-        if (!coordsText || coordsText === "keine Koordinaten") {
-          alert(`Station ${i} („${idVal || "keine ID"}“) hat keine Koordinaten!\nBitte klicke auf die Karte, um Lat/Lng festzulegen.`);
-          return;
-        }
-        const [latStr, lngStr] = coordsText.split(",").map(s => s.trim());
-        const lat = parseFloat(latStr);
-        const lng = parseFloat(lngStr);
-        if (isNaN(lat) || isNaN(lng)) {
-          alert(`Station ${i} („${idVal || "keine ID"}“) hat ungültige Koordinaten!`);
-          return;
+        let lat = null;
+        let lng = null;
+        if (coordsText && coordsText !== "keine Koordinaten") {
+          const [latStr, lngStr] = coordsText.split(",").map(s => s.trim());
+          const parsedLat = parseFloat(latStr);
+          const parsedLng = parseFloat(lngStr);
+          if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
+            lat = parsedLat;
+            lng = parsedLng;
+          }
         }
 
-        // Basis-Objekt
         const stationObj = {
           id: idVal,
           type: typeVal,
           optional: optionalVal,
           itemsGiven: itemsGivenArr,
           requiresItems: requiresArr,
-          lat,
-          lng
+          lat: lat,
+          lng: lng
         };
 
-        // Typ-spezifische Felder ergänzen
         if (typeVal === "info") {
-          const txt = document.getElementById(`stationTextInfo-${i}`).value.trim();
-          if (!txt) {
-            alert(`Station ${i} (ID="${idVal}") – Info-Text fehlt!`);
-            return;
-          }
-          stationObj.text = txt;
-        }
-        else if (typeVal === "riddle") {
-          const txt = document.getElementById(`stationTextRiddle-${i}`).value.trim();
-          const ans = document.getElementById(`stationAnswerRiddle-${i}`).value.trim();
-          if (!txt || !ans) {
-            alert(`Station ${i} (ID="${idVal}") – Rätsel-Text oder Antwort fehlt!`);
-            return;
-          }
-          stationObj.text   = txt;
-          stationObj.answer = ans;
-        }
-        else if (typeVal === "item") {
-          const name = document.getElementById(`stationItemName-${i}`).value.trim();
-          const desc = document.getElementById(`stationItemDesc-${i}`).value.trim();
-          if (!name) {
-            alert(`Station ${i} (ID="${idVal}") – Item-Name fehlt!`);
-            return;
-          }
-          stationObj.itemName = name;
-          stationObj.itemDesc = desc;
+          stationObj.text = document.getElementById(`stationTextInfo-${i}`).value.trim();
+        } else if (typeVal === "riddle") {
+          stationObj.text   = document.getElementById(`stationTextRiddle-${i}`).value.trim();
+          stationObj.answer = document.getElementById(`stationAnswerRiddle-${i}`).value.trim();
+        } else if (typeVal === "item") {
+          stationObj.itemName = document.getElementById(`stationItemName-${i}`).value.trim();
+          stationObj.itemDesc = document.getElementById(`stationItemDesc-${i}`).value.trim();
         }
 
-        // ID validieren
-        if (!idVal) {
-          alert(`Station ${i} hat keine ID! Bitte gib eine eindeutige ID ein.`);
-          return;
-        }
-
-        // Hinzufügen zur Liste
-        stations.push(stationObj);
+        stationsArr.push(stationObj);
       }
 
-      // Gesamt-JSON erzeugen
       const result = {
-        title,
-        description,
-        stations
+        title: title,
+        description: description,
+        stations: stationsArr
       };
       outputJsonArea.value = JSON.stringify(result, null, 2);
     }
 
-    // Event-Listener
     addStationBtn.addEventListener("click", () => {
       addStationForm();
-      // Direkt JSON updaten, damit leere Felder ggf. als Warnung erscheinen
       updateOutputJson();
     });
     clearAllBtn.addEventListener("click", () => {
-      if (confirm("Alle Stationen wirklich löschen?")) {
-        clearAllStations();
-      }
+      clearAllStations();
     });
     updateJsonBtn.addEventListener("click", updateOutputJson);
   </script>
