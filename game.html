@@ -198,6 +198,12 @@
 
         getLocation();
 
+        const Inventory = [];
+
+        function addItemToInventory(item) {
+          Inventory.push(item);
+        } 
+
         
 
 
@@ -259,7 +265,17 @@
         ${station.text}
         `);
 
-        
+        marker.on("click"), () => {
+          const dist = distanceInMeters(latitude, longitude, station.lat, station.lng);
+
+          if (dist < 50) {
+            
+          } else {
+            alert(`⛔ Du bist ${Math.round(dist)} Meter entfernt. Geh näher ran!`);
+          }
+
+
+        }
 
       })
       
