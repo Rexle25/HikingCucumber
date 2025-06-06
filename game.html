@@ -206,6 +206,10 @@
 
 
     <script>
+
+      let map;
+
+
       document.addEventListener("DOMContentLoaded", function () {
 
        const map = L.map('map').setView([46.948611, 7.456496], 10);
@@ -237,7 +241,11 @@
       console.log("Titel:", parsedData.title);
       console.log("Stationen:", parsedData.stations);
       
-      // Jetzt kannst du z.B. durch alle Stationen gehen:
+      const stations = parsedData.stations;
+
+      stations.forEach((station) => {
+        const marker = L.marker([station.lat, station.lng]).addTo(map);
+      })
       
     });
 
