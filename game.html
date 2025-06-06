@@ -212,7 +212,7 @@
 
       document.addEventListener("DOMContentLoaded", function () {
 
-       const map = L.map('map').setView([46.948611, 7.456496], 10);
+       map = L.map('map').setView([46.948611, 7.456496], 10);
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
@@ -245,6 +245,11 @@
 
       stations.forEach((station) => {
         const marker = L.marker([station.lat, station.lng]).addTo(map);
+
+      marker.bindPopup(`
+        <strong>${station.id}</strong><br/>
+        ${station.text}
+        `);
       })
       
     });
