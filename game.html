@@ -206,6 +206,21 @@
 
 
     <script>
+      document.addEventListener("DOMContentLoaded", function () {
+
+       const map = L.map('map').setView([46.948611, 7.456496], 10);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        }).addTo(map);
+
+    });
+
+      
+    </script>
+
+    <script>
 
           document.getElementById("btnLaden").addEventListener("click", () => {
       const input = document.getElementById("jsonInput").value;
@@ -223,22 +238,11 @@
       console.log("Stationen:", parsedData.stations);
       
       // Jetzt kannst du z.B. durch alle Stationen gehen:
-      parsedData.stations.forEach(station => {
-        const map = L.map('map').setView([46.948611, 7.456496], 10);
-
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 19,
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-        }).addTo(map);
-        // Hier Marker erzeugen, Logik einbauen etc.
-      });
+      
     });
 
-       
 
-    
 
-      
     </script>
 
 
