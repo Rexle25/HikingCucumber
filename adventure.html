@@ -1,31 +1,538 @@
-// ===== Versuch, eine Station zu öffnen – erst Entfernung und dann Item-Voraussetzungen prüfen =====
-function attemptOpenStation(st) {
-  // 1. Prüfen, ob alle benötigten Items vorhanden sind
-  const missing = (st.requiresItems || []).filter(req => !inventory.includes(req));
-  if (missing.length > 0) {
-    contentDiv.innerHTML = `<p>🔒 Du benötigst zuerst folgendes Item, um "${st.id}" freizuschalten: <b>${missing.join(", ")}</b></p>`;
-    return;
-  }
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Adventure Play</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  // 2. Wenn Items ok, dann Geolocation abfragen
-  if (!navigator.geolocation) {
-    contentDiv.innerHTML = `<p>⚠️ Geolocation nicht unterstützt.</p>`;
-    return;
-  }
+  <!-- -------- Leaflet CSS & JS -------- -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+  ></script>
 
-  navigator.geolocation.getCurrentPosition(pos => {
-    const d = distanceInMeters(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
-    if (d <= NEARBY_THRESHOLD) {
-      openStation(st.id);
-    } else {
-      contentDiv.innerHTML = `<p>Du bist ${Math.round(d)} m entfernt. Geh näher an Station "${st.id}" heran!</p>`;
+  <style>
+    /* ----- Grund-Layout ----- */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
     }
-  }, _err => {
-    contentDiv.innerHTML = `<p>⚠️ Position konnte nicht ermittelt werden.</p>`;
-  });
-}
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
 
-// ===== Marker-Klick: Entfernung & Item-Check =====
-function onMarkerClick(st) {
-  attemptOpenStation(st);
-}
+    /* ----- HEADER (JSON-Eingabe) ----- */
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 0.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    #jsonContainer {
+      display: flex;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+    #jsonInput {
+      flex: 1;
+      font-family: monospace;
+      font-size: 0.9rem;
+      padding: 0.4rem;
+      box-sizing: border-box;
+      resize: vertical;
+      min-height: 3rem;
+      border: none;
+      border-radius: 3px;
+    }
+    #btnLoadJson,
+    #btnReset {
+      background: #e67e22;
+      border: none;
+      padding: 0 0.8rem;
+      color: white;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-radius: 3px;
+    }
+    #btnReset {
+      background: #c0392b;
+    }
+
+    /* ----- MAIN (Karte + Content) ----- */
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    /* Sidebar (Karte + Stations-Liste) */
+    #sidebar {
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #ddd;
+      height: 100%;
+    }
+    /* Karte nimmt verbleibenden Platz innerhalb von #sidebar */
+    #map {
+      flex: 1;
+    }
+    /* Stations-Liste unter der Karte */
+    #stationListContainer {
+      max-height: 200px;
+      overflow-y: auto;
+      background: #ecf0f1;
+      padding: 0.5rem;
+    }
+    #stationListContainer h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1rem;
+    }
+    .station-entry {
+      padding: 0.3rem 0.5rem;
+      margin-bottom: 0.2rem;
+      border: 1px solid #bdc3c7;
+      border-radius: 3px;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .station-entry.locked {
+      background: #f5b7b1;
+      cursor: not-allowed;
+    }
+    .station-entry.completed {
+      background: #a3e4d7;
+      text-decoration: line-through;
+    }
+
+    /* Content-Bereich für Stationen */
+    #content {
+      flex: 2;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    /* ----- FOOTER (Inventar + Punkte) ----- */
+    footer {
+      background: #f4f6f7;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    #inventory {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    #inventory span {
+      background: #d5dbdb;
+      padding: 0.3rem 0.6rem;
+      border-radius: 3px;
+      font-size: 0.9rem;
+    }
+    #points {
+      font-weight: bold;
+    }
+
+    /* Allgemeine Buttons & Inputs */
+    button {
+      padding: 0.5rem 1rem;
+      background: #2980b9;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      border-radius: 3px;
+    }
+    button:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+    }
+    input[type="text"], textarea {
+      font-size: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ========================= HEADER ========================= -->
+  <header>
+    <h1 id="gameTitle">Adventure Play</h1>
+    <div id="jsonContainer">
+      <textarea id="jsonInput" placeholder="Hier dein Adventure-JSON einfügen…"></textarea>
+      <button id="btnLoadJson">🎲 Laden</button>
+      <button id="btnReset">♻️ Reset</button>
+    </div>
+  </header>
+
+  <!-- ========================= MAIN-LAYOUT ========================= -->
+  <main>
+    <!-- --- SIDEBAR: Karte + Stations-Liste --- -->
+    <div id="sidebar">
+      <div id="map"></div>
+      <div id="stationListContainer">
+        <h2>Stationen</h2>
+        <!-- Wird dynamisch befüllt -->
+      </div>
+    </div>
+
+    <!-- --- CONTENT: Hier erscheinen Info, Rätsel, Item --- -->
+    <div id="content">
+      <p>Bitte JSON eingeben und auf „🎲 Laden“ klicken, um zu starten.</p>
+    </div>
+  </main>
+
+  <!-- ========================= FOOTER: Inventar + Punkte ========================= -->
+  <footer>
+    <div id="inventory">
+      <strong>Inventar:</strong>
+    </div>
+    <div id="points">
+      Punkte: <span id="pointsValue">0</span>
+    </div>
+  </footer>
+
+  <!-- ========================= JAVASCRIPT ========================= -->
+  <script>
+  /*************************************************************************
+   * Adventure Play – komplett ohne Popups/Alerts
+   *
+   * - JSON wird in festem <textarea> eingegeben.
+   * - Klick auf „🎲 Laden“ parst und startet das Abenteuer.
+   * - Jede Station wird nur freigegeben, wenn du nahe genug (≤50 m) bist
+   *   UND alle erforderlichen Items vorhanden sind.
+   * - Reset löscht localStorage und lädt neu.
+   *************************************************************************/
+
+    // ===== Globales State & DOM-Referenzen =====
+    let gameData = null;             // Eingespeichertes JSON-Objekt
+    let stationStates = {};          // Status jeder Station: "locked"|"unlocked"|"completed"
+    let inventory = [];              // Gesammelte Item-IDs
+    let points = 0;                  // Aktuelle Punkte
+
+    const gameTitleEl     = document.getElementById("gameTitle");
+    const btnLoadJson     = document.getElementById("btnLoadJson");
+    const btnReset        = document.getElementById("btnReset");
+    const jsonInput       = document.getElementById("jsonInput");
+    const contentDiv      = document.getElementById("content");
+    const stationListDiv  = document.getElementById("stationListContainer");
+    const inventoryDiv    = document.getElementById("inventory");
+    const pointsValueEl   = document.getElementById("pointsValue");
+    let leafletMap        = null;    // Leaflet-Map-Instanz
+    let markersById       = {};      // stationId -> Leaflet Marker
+
+    const NEARBY_THRESHOLD = 50; // Meter
+
+    // ===== Hilfs-Funktion: Distanz (in m) zwischen zwei (lat, lng) Punkten =====
+    function deg2rad(x) { return x * Math.PI / 180; }
+    function distanceInMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const dLat = deg2rad(lat2 - lat1);
+      const dLon = deg2rad(lon2 - lon1);
+      const a = Math.sin(dLat/2)**2 +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon/2)**2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    // ===== localStorage-Funktionen =====
+    function saveProgress() {
+      localStorage.setItem("adv_gameData", JSON.stringify(gameData));
+      localStorage.setItem("adv_stationStates", JSON.stringify(stationStates));
+      localStorage.setItem("adv_inventory", JSON.stringify(inventory));
+      localStorage.setItem("adv_points", points.toString());
+    }
+    function loadProgress() {
+      const saved = localStorage.getItem("adv_gameData");
+      if (!saved) return false;
+      gameData       = JSON.parse(saved);
+      stationStates  = JSON.parse(localStorage.getItem("adv_stationStates")  || "{}");
+      inventory      = JSON.parse(localStorage.getItem("adv_inventory")      || "[]");
+      points         = parseInt(localStorage.getItem("adv_points") || "0", 10);
+      return true;
+    }
+    function clearProgress() {
+      localStorage.removeItem("adv_gameData");
+      localStorage.removeItem("adv_stationStates");
+      localStorage.removeItem("adv_inventory");
+      localStorage.removeItem("adv_points");
+      window.location.reload();
+    }
+
+    // ===== Prüfen, ob eine Station freigeschaltet (unlocked) ist =====
+    function isStationUnlocked(st) {
+      if (stationStates[st.id] === "completed") return true;
+      for (const req of (st.requiresItems || [])) {
+        if (!inventory.includes(req)) return false;
+      }
+      return true;
+    }
+
+    // ===== Leaflet-Map initialisieren =====
+    function initMap() {
+      if (leafletMap) return;
+      leafletMap = L.map("map").setView([47.3769, 8.5417], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(leafletMap);
+    }
+
+    // ===== Marker für alle Stationen auf der Karte platzieren =====
+    function placeMarkers() {
+      markersById = {};
+      gameData.stations.forEach(st => {
+        if (st.lat != null && st.lng != null) {
+          const marker = L.marker([st.lat, st.lng]).addTo(leafletMap);
+          marker.on("click", () => onMarkerClick(st));
+          markersById[st.id] = marker;
+        }
+      });
+    }
+
+    // ===== Stations-Liste (Sidebar) rendern =====
+    function renderStationList() {
+      stationListDiv.innerHTML = "<h2>Stationen</h2>";
+      gameData.stations.forEach(st => {
+        const unlocked = isStationUnlocked(st);
+        const completed = stationStates[st.id] === "completed";
+        const entry = document.createElement("div");
+        entry.classList.add("station-entry");
+        if (!unlocked)      entry.classList.add("locked");
+        else if (completed) entry.classList.add("completed");
+        entry.innerHTML = `
+          <span>${st.id}</span>
+          <span>${completed ? "✅" : unlocked ? "➤" : "🔒"}</span>
+        `;
+        if (unlocked && !completed) {
+          entry.addEventListener("click", () => attemptOpenStation(st));
+        }
+        stationListDiv.appendChild(entry);
+      });
+    }
+
+    // ===== Versuch, eine Station zu öffnen – erst Items prüfen, dann Entfernung prüfen =====
+    function attemptOpenStation(st) {
+      // 1. Items-Prüfung
+      const missing = (st.requiresItems || []).filter(req => !inventory.includes(req));
+      if (missing.length > 0) {
+        contentDiv.innerHTML = `
+          <p>🔒 Du benötigst zuerst folgendes Item, um "${st.id}" freizuschalten:</p>
+          <p><b>${missing.join(", ")}</b></p>
+        `;
+        return;
+      }
+
+      // 2. Entfernung prüfen
+      if (!navigator.geolocation) {
+        contentDiv.innerHTML = `<p>⚠️ Geolocation nicht unterstützt.</p>`;
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(pos => {
+        const d = distanceInMeters(pos.coords.latitude, pos.coords.longitude, st.lat, st.lng);
+        if (d <= NEARBY_THRESHOLD) {
+          openStation(st.id);
+        } else {
+          contentDiv.innerHTML = `<p>Du bist ${Math.round(d)} Meter entfernt. Geh näher an Station "${st.id}" heran!</p>`;
+        }
+      }, _err => {
+        contentDiv.innerHTML = `<p>⚠️ Position konnte nicht ermittelt werden.</p>`;
+      });
+    }
+
+    // ===== Marker-Klick: ebenfalls Versuch, Station zu öffnen =====
+    function onMarkerClick(st) {
+      attemptOpenStation(st);
+    }
+
+    // ===== Station tatsächlich anzeigen =====
+    function openStation(stationId) {
+      const st = gameData.stations.find(s => s.id === stationId);
+      if (!st) return;
+      contentDiv.innerHTML = "";
+      const title = document.createElement("h2");
+      title.textContent = `Station: ${st.id}`;
+      contentDiv.appendChild(title);
+
+      if (st.type === "info") {
+        renderInfoStation(st);
+      } else if (st.type === "riddle") {
+        renderRiddleStation(st);
+      } else if (st.type === "item") {
+        renderItemStation(st);
+      }
+    }
+
+    // ===== Info-Station rendern =====
+    function renderInfoStation(st) {
+      const p = document.createElement("p");
+      p.textContent = st.text;
+      contentDiv.appendChild(p);
+
+      const btn = document.createElement("button");
+      btn.textContent = "✔️ Weiter";
+      btn.addEventListener("click", () => finishStation(st));
+      contentDiv.appendChild(btn);
+    }
+
+    // ===== Rätsel-Station rendern =====
+    function renderRiddleStation(st) {
+      const p = document.createElement("p");
+      p.textContent = st.text;
+      contentDiv.appendChild(p);
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Deine Antwort…";
+      contentDiv.appendChild(input);
+
+      const feedback = document.createElement("p");
+      feedback.style.color = "red";
+      contentDiv.appendChild(feedback);
+
+      const btn = document.createElement("button");
+      btn.textContent = "Antwort prüfen";
+      btn.addEventListener("click", () => {
+        if (input.value.trim().toLowerCase() === st.answer.trim().toLowerCase()) {
+          finishStation(st);
+        } else {
+          feedback.textContent = "❌ Falsch, versuche es nochmal!";
+        }
+      });
+      contentDiv.appendChild(btn);
+    }
+
+    // ===== Item-Station rendern =====
+    function renderItemStation(st) {
+      const p = document.createElement("p");
+      p.textContent = `Item gefunden: ${st.itemName}`;
+      contentDiv.appendChild(p);
+
+      if (st.itemDesc) {
+        const desc = document.createElement("p");
+        desc.style.fontStyle = "italic";
+        desc.textContent = st.itemDesc;
+        contentDiv.appendChild(desc);
+      }
+
+      const btn = document.createElement("button");
+      btn.textContent = "✔️ Item einsammeln";
+      btn.addEventListener("click", () => finishStation(st));
+      contentDiv.appendChild(btn);
+    }
+
+    // ===== Station beenden/abschließen =====
+    function finishStation(st) {
+      const gained = st.optional ? 5 : 10;
+      points += gained;
+
+      for (const itm of (st.itemsGiven || [])) {
+        if (!inventory.includes(itm)) {
+          inventory.push(itm);
+        }
+      }
+
+      stationStates[st.id] = "completed";
+
+      updateInventoryUI();
+      updatePointsUI();
+      renderStationList();
+      saveProgress();
+
+      contentDiv.innerHTML = `
+        <h2>Station ${st.id} abgeschlossen!</h2>
+        <p>Du hast ${gained} Punkte erhalten.</p>
+        <button id="nextBtn">➤ Zurück zur Übersicht</button>
+      `;
+      document.getElementById("nextBtn").addEventListener("click", () => {
+        contentDiv.innerHTML = `<p>Wähle nun eine weitere Station.</p>`;
+      });
+    }
+
+    // ===== UI-Update: Inventar & Punkte =====
+    function updateInventoryUI() {
+      inventoryDiv.innerHTML = "<strong>Inventar:</strong>";
+      inventory.forEach(itmId => {
+        const span = document.createElement("span");
+        span.textContent = itmId;
+        inventoryDiv.appendChild(span);
+      });
+    }
+    function updatePointsUI() {
+      pointsValueEl.textContent = points.toString();
+    }
+
+    // ===== JSON laden (Button “🎲 Laden”) =====
+    btnLoadJson.addEventListener("click", () => {
+      let parsed;
+      try {
+        parsed = JSON.parse(jsonInput.value);
+      } catch (e) {
+        contentDiv.innerHTML = `<p style="color:red;">Ungültiges JSON-Format.</p>`;
+        return;
+      }
+      gameData = parsed;
+
+      gameTitleEl.textContent = gameData.title || "Adventure Play";
+
+      if (!loadProgress()) {
+        gameData.stations.forEach(st => {
+          stationStates[st.id] = (st.requiresItems && st.requiresItems.length > 0)
+            ? "locked"
+            : "unlocked";
+        });
+        inventory = [];
+        points = 0;
+      }
+
+      initMap();
+      placeMarkers();
+
+      updateInventoryUI();
+      updatePointsUI();
+      renderStationList();
+      contentDiv.innerHTML = `<p>Wähle eine Station aus der Liste oder auf der Karte.</p>`;
+
+      saveProgress();
+    });
+
+    // ===== Reset (Button “♻️ Reset”) =====
+    btnReset.addEventListener("click", () => {
+      clearProgress();
+    });
+
+    // ===== Prüfen beim Laden, ob Fortschritt gespeichert ist =====
+    window.addEventListener("load", () => {
+      if (loadProgress() && gameData) {
+        gameTitleEl.textContent = gameData.title || "Adventure Play";
+        initMap();
+        placeMarkers();
+        updateInventoryUI();
+        updatePointsUI();
+        renderStationList();
+        contentDiv.innerHTML = `<p>Fortsetzung deines Abenteuers!</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
