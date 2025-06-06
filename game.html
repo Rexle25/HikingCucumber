@@ -265,7 +265,7 @@
         ${station.text}
         `);
 
-        marker.on("click"), () => {
+        marker.on("click", () => {
           const dist = distanceInMeters(latitude, longitude, station.lat, station.lng);
 
           if (dist < 50) {
@@ -275,7 +275,7 @@
           }
 
 
-        }
+        })
 
       })
       
