@@ -229,6 +229,14 @@
           document.getElementById("btnLaden").addEventListener("click", () => {
       const input = document.getElementById("jsonInput").value;
 
+     const jsonInput = document.getElementById("jsonInput");
+    const loadButton = document.getElementById("btnLaden");
+
+    jsonInput.remove();
+    loadButton.remove();
+
+
+
       let parsedData;
       try {
         parsedData = JSON.parse(input);  // 📥 JSON einlesen
