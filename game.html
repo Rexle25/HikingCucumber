@@ -5,7 +5,7 @@
   <title>Adventure Play</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Leaflet CSS & JS -->
+  <!-- -------- Leaflet CSS & JS -------- -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -17,6 +17,7 @@
   ></script>
 
   <style>
+    /* ----- Grund-Layout ----- */
     html, body {
       height: 100%;
       margin: 0;
@@ -29,48 +30,221 @@
       height: 100vh;
     }
 
+    /* ----- HEADER (JSON-Eingabe) ----- */
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 0.5rem 1rem;
+      /* Flex, damit JSON-Textarea und Buttons nebeneinander sitzen */
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    #jsonContainer {
+      display: flex;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+    #jsonInput {
+      flex: 1;
+      font-family: monospace;
+      font-size: 0.9rem;
+      padding: 0.4rem;
+      box-sizing: border-box;
+      resize: vertical;
+      min-height: 3rem;
+      border: none;
+      border-radius: 3px;
+    }
+    #btnLoadJson,
+    #btnReset {
+      background: #e67e22;
+      border: none;
+      padding: 0 0.8rem;
+      color: white;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-radius: 3px;
+    }
+    #btnReset {
+      background: #c0392b;
+    }
+
+    /* ----- MAIN (Karte + Content) ----- */
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    /* Sidebar (Karte + Stations-Liste) */
+    #sidebar {
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #ddd;
+      /* Damit #map mit flex:1 Höhe bekommt */
+      height: 100%;
+    }
+    /* Karte nimmt den verbleibenden Platz innerhalb von #sidebar */
     #map {
-      height: 500px;
+      flex: 1;
+    }
+    /* Stations-Liste unter der Karte */
+    #stationListContainer {
+      max-height: 200px;
+      overflow-y: auto;
+      background: #ecf0f1;
+      padding: 0.5rem;
+    }
+    #stationListContainer h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1rem;
+    }
+    .station-entry {
+      padding: 0.3rem 0.5rem;
+      margin-bottom: 0.2rem;
+      border: 1px solid #bdc3c7;
+      border-radius: 3px;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .station-entry.locked {
+      background: #f5b7b1;
+      cursor: not-allowed;
+    }
+    .station-entry.completed {
+      background: #a3e4d7;
+      text-decoration: line-through;
+    }
+
+    /* Content-Bereich für Stationen */
+    #content {
+      flex: 2;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    /* ----- FOOTER (Inventar + Punkte) ----- */
+    footer {
+      background: #f4f6f7;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    #inventory {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    #inventory span {
+      background: #d5dbdb;
+      padding: 0.3rem 0.6rem;
+      border-radius: 3px;
+      font-size: 0.9rem;
+    }
+    #points {
+      font-weight: bold;
+    }
+
+    /* Allgemeine Buttons & Inputs */
+    button {
+      padding: 0.5rem 1rem;
+      background: #2980b9;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      border-radius: 3px;
+    }
+    button:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+    }
+    input[type="text"], textarea {
+      font-size: 1rem;
     }
   </style>
 </head>
 <body>
 
-  <h1 id="titel">Adventure play</h1>
-  <div id="map"></div>
+    <h1 id="titel">Adventure play</h1>
 
-  <script>
-    // Position wird global gespeichert
-    let latitude = 0.0;
-    let longitude = 0.0;
+    <div id="map" style="height: 500px;"></div>
+    
+     
 
-    // Hole aktuelle Position
-    function getLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
-      }
-    }
 
-    function showPosition(position) {
-      latitude = position.coords.latitude;
-      longitude = position.coords.longitude;
-      console.log("Position:", latitude, longitude);
-    }
 
-    // Sobald die Seite geladen ist
+
+
+    <script>
+        let longitude = 0.0;
+
+        let latitude = 0.0;
+
+        getLocation();
+
+        
+
+
+    </script>
     document.addEventListener("DOMContentLoaded", function () {
-      // Hole Geoposition
-      getLocation();
 
-      // Initialisiere Karte mit Standardposition
-      const map = L.map('map').setView([46.948611, 7.456496], 10);
+       const map = L.map('map').setView([46.948611, 7.456496], 10);
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-      }).addTo(map);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        }).addTo(map);
+
     });
-  </script>
 
-</body>
-</html>
+    
+   
+
+
+
+
+
+
+
+
+    <script>
+
+      
+    </script>
+
+
+    <script>
+                function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        }
+        }
+
+        function showPosition(position) {
+        latitude = position.coords.latitude;
+        longitude= position.coords.longitude;
+        }
+    </script>
+
+    <script>
+
+
+    </script>
+
+
+
+
+
+</body> ist so korrekt?
