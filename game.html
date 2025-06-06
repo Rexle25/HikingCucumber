@@ -179,6 +179,10 @@
 
     <h1 id="titel">Adventure play</h1>
 
+    <textarea id="jsonInput" placeholder="Füge hier das JSON ein..."></textarea>
+    <button id="btnLaden">Lade JSON</button>
+
+
     <div id="map" style="height: 500px;"></div>
     
      
@@ -200,27 +204,39 @@
     </script>
     
 
-    
-   
-
-
-
-
-
-
-
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
 
-       const map = L.map('map').setView([46.948611, 7.456496], 10);
+          document.getElementById("btnLaden").addEventListener("click", () => {
+      const input = document.getElementById("jsonInput").value;
+
+      let parsedData;
+      try {
+        parsedData = JSON.parse(input);  // 📥 JSON einlesen
+      } catch (error) {
+        alert("❌ JSON ist ungültig: " + error.message);
+        return;
+      }
+
+      // ✅ JSON erfolgreich geladen
+      console.log("Titel:", parsedData.title);
+      console.log("Stationen:", parsedData.stations);
+      
+      // Jetzt kannst du z.B. durch alle Stationen gehen:
+      parsedData.stations.forEach(station => {
+        const map = L.map('map').setView([46.948611, 7.456496], 10);
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
         }).addTo(map);
-
+        // Hier Marker erzeugen, Logik einbauen etc.
+      });
     });
+
+       
+
+    
 
       
     </script>
