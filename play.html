@@ -41,6 +41,9 @@
     <script>
         var inventar = [];
 
+        let lat = 0.0
+        let lon = 0.0
+
         function getLocation() {
              navigator.geolocation.getCurrentPosition(showPosition);
              
@@ -49,8 +52,8 @@
                        
                     
         function showPosition(position) {
-            let lat = position.coords.latitude;
-            let lon = position.coords.longitude;
+            lat = position.coords.latitude;
+            lon = position.coords.longitude;
 
             
 
