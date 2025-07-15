@@ -48,7 +48,7 @@
              JSONinput = document.getElementById('JSONinput').value;
              const data = JSON.parse(JSONinput);
 
-             data.stations.forEach(station => {
+             data.stations.forEach((station) => {
                 if  (!station.location) {
                     alert("Keine location gefunden")
                 }
