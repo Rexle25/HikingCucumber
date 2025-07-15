@@ -1,0 +1,24 @@
+{
+  "name": "gnubound",
+  "version": "1.0.0",
+  "description": "This project is currently in development and not playable. Check again in August.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rexle25/wandercode.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rexle25/wandercode/issues"
+  },
+  "homepage": "https://github.com/Rexle25/wandercode#readme",
+  "dependencies": {
+    "headbreaker": "^3.0.0",
+    "konva": "^9.3.22"
+  }
+}
