@@ -97,12 +97,22 @@
                 
                 var marker = L.marker([station.lat, station.lon]).addTo(map).on('click', function(e) {
 
-                    
 
-                    getLocation();
-                    let latDelta = station.lat - lat;
-                    let lonDelta = station.lon - lon;
-                    alert("Test " + lat);
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            const lat = pos.coords.latitude;
+                            const lon = pos.coords.longitude;
+                            const dist = Math.hypot(
+                                station.lat -lat,
+                                station.lon - lon
+                            ) * 111000;
+
+                            alert(dist);
+                        }
+                        
+
+
+                    )
                     
 
                     
