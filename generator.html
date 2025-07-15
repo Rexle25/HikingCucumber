@@ -5,6 +5,8 @@
 
 <body>
 
+     <button onclick="CreateStation()">Erstelle eine Station</button> 
+
     <script>
 
         let station = 1
@@ -14,6 +16,25 @@
             const titel = document.createElement("h2");
             titel.innerHTML = "Station " + station;
             document.body.appendChild(titel);
+
+            const name = document.createElement("input");
+            name.attributes = type="text"
+            document.body.appendChild(name);
+
+            const benötigtesItem = document.createElement("input");
+            benötigtesItem.attributes = type="text"
+            document.body.appendChild(benötigtesItem);
+
+            const erhaltenesItem = document.createElement("input");
+            erhaltenesItem.attributes = type="text"
+            document.body.appendChild(erhaltenesItem);
+
+            const typ = document.createElement("input");
+            typ.attributes = type="radio"
+            document.body.appendChild(name);
+
+
+
 
 
         }
