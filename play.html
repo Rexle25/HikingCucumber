@@ -26,4 +26,17 @@
         JSONinput = document.getElementById('JSONinput').value
         const spiel = JSON.parse(JSONinput)
     </script>
+
+    <script>
+        
+        var map = L.map('map').setView([46.9480900, 7.4474400], 12);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+
+
+    </script>
 </body>
