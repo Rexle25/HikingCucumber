@@ -16,10 +16,16 @@
 
 </head>
 
+
+
 <body>
+
+
     <p>JSON von Schnitzeljagd hier einfügen</p>
     <input type="textarea"; id="JSONinput">
      <button onclick="jsonParse()">Drücke hier wenn du das JSON eingefügt hast</button> 
+
+     <p id="inventarAnzeige">Inventar: []</p>
 
      <div id="map"></div>
 
@@ -48,7 +54,10 @@
         let gesucht = "null"
 
         
-        
+        function zeigeInventar() {
+            document.getElementById("inventarAnzeige").innerText = "Inventar: " + inventar.join(", ");
+
+        }
             
          
 
@@ -130,6 +139,18 @@
                                             frage.remove();
                                             input.remove();
                                             btn.remove();
+                                            verbleibendeStationen = verbleibendeStationen - 1;
+                                            
+                                            inventar.push(station.getItem);
+                                            zeigeInventar();
+
+                                            if (verbleibendeStationen = 0) {
+                                                alert("Du hast alles Abgeschlossen!");
+                                            }
+
+
+                                        } else {
+                                            alert("Falsche Antwort");
                                         }
                                     }
 
@@ -171,5 +192,6 @@
     </script>
 
     
+
 
 </body>
