@@ -46,10 +46,20 @@
              JSONinput = document.getElementById('JSONinput').value
              const data = JSON.parse(JSONinput)
 
+             data.stations.forEach(station => {
+
+                var marker = L.marker([station.location]).addTo(map);
+
+             });
+
         }
-        var inventar = [];
+        
        
 
+    </script>
+
+    <script>
+        var inventar = [];
     </script>
 
 </body>
