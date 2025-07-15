@@ -63,7 +63,11 @@
             
              data.stations.forEach((station) => {
                 
-                var marker = L.marker([station.lat, station.lon]).addTo(map);
+                var marker = L.marker([station.lat, station.lon]).addTo(map).on('click', function(e) {
+
+                    alert("Marker geklickt")
+
+                });
                 
 
              });
