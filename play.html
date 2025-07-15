@@ -19,13 +19,11 @@
 <body>
     <p>JSON von Schnitzeljagd hier einfügen</p>
     <input type="text"; id="JSONinput">
+     <button onclick="jsonParse()">Drücke hier wenn du das JSON eingefügt hast</button> 
 
      <div id="map"></div>
 
-    <script>
-        JSONinput = document.getElementById('JSONinput').value
-        const spiel = JSON.parse(JSONinput)
-    </script>
+    
 
     <script>
         
@@ -39,4 +37,19 @@
 
 
     </script>
+
+    <script>
+
+
+        function jsonParse(){
+
+             JSONinput = document.getElementById('JSONinput').value
+             const data = JSON.parse(JSONinput)
+
+        }
+        var inventar = [];
+       
+
+    </script>
+
 </body>
