@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<head>
+    <title>Test</title>
+</head>
+
+<link rel="stylesheet" href="https://unpkg.com/jigsaw-puzzle-js/dist/jigsaw-puzzle.min.css">
+<script src="https://unpkg.com/jigsaw-puzzle-js/dist/jigsaw-puzzle.min.js"></script>
+
+<body>
+
+<div id="jigsaw" style="width:400px; height:300px;"></div>
+
+<script>
+  // 3) Init, Shuffle & Callback
+  const jp = new JigsawPuzzle({
+    element: '#jigsaw',
+    image: 'https://yourdomain.com/bild.jpg',
+    rows: 3,
+    columns: 3,
+    shuffle: true
+  });
+  jp.init();
+  jp.on('complete', () => {
+    alert('🧩 Puzzle gelöst!');
+    jp.element.remove(); // Container wegräumen
+  });
+</script>
+
+</body>

@@ -5,7 +5,9 @@
             "lat": 46.9480900,
             "lon": 7.4474400,
             "giveItem": "Gurke",
-            "getItem": "Gnu"
+            "getItem": "Gnu",
+            "type": "slide"
+        
     
         }
 
