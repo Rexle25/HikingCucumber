@@ -55,8 +55,12 @@
                 alert("Fehler beim Parsen des JSON:\n" + e.message);
             }
 
-             
+            if (!data.stations || !Array.isArray(data.stations)) {
+                alert("❌ Keine gültigen Stationen im JSON gefunden."); 
+            }
 
+
+            
              data.stations.forEach((station) => {
                 
                 var marker = L.marker([station.location]).addTo(map);
