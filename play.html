@@ -40,6 +40,22 @@
 
     <script>
         var inventar = [];
+
+        function getLocation() {
+                        navigator.geolocation.getCurrentPosition(showPosition);
+                    }
+                    function showPosition(position) {
+
+                        let lat = position.coords.latitude;
+                        let lon = position.coords.longitude;
+                        
+                        let latDelta = station.lat - lat;
+                        let lonDelta = station.lon - lon;
+                        alert(latDelta + lonDelta)
+
+
+                    }
+
     </script>
 
     <script>
@@ -69,22 +85,9 @@
                 
                 var marker = L.marker([station.lat, station.lon]).addTo(map).on('click', function(e) {
 
-                    function getLocation() {
-                        navigator.geolocation.getCurrentPosition(showPosition);
-                    }
-                    function showPosition(position) {
+                    
 
-                        let lat = position.coords.latitude;
-                        let lon = position.coords.longitude;
-                        
-                        let latDelta = station.lat - lat;
-                        let lonDelta = station.lon - lon;
-                        alert(latDelta + lonDelta)
-
-
-                    }
-
-
+                    getLocation();
 
                     
 
