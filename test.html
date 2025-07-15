@@ -3,41 +3,60 @@
 <head>
   <meta charset="utf-8">
   <title>Jigsaw Puzzle Test</title>
-  <!-- 1) CSS muss im <head> stehen, inkl. Versions‑Angabe -->
+
+  <!-- 1️⃣ Richtiges CSS laden (Version 1.1.0) -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/jigsaw-puzzle-js@1.1.0/dist/jigsaw-puzzle.min.css"
   >
+  <style>
+    /* zur Autogröße: Container immer quadratisch */
+    #jigsaw {
+      width: 400px;
+      height: 300px;
+      margin: 40px auto;
+      border: 1px solid #ddd;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- 2) Dein Container, breiten-/höhenfest machen -->
-  <div
-    id="jigsaw"
-    style="width:400px; height:300px; margin:20px auto; border:1px solid #ccc"
-  ></div>
+  <!-- 2️⃣ Platzhalter für dein Puzzle -->
+  <div id="jigsaw"></div>
 
-  <!-- 3) Skript ans Ende des <body>, direkt vor dein Init -->
+  <!-- 3️⃣ Richtiges Script laden, und zwar VOR deinem Init-Code -->
   <script src="https://unpkg.com/jigsaw-puzzle-js@1.1.0/dist/jigsaw-puzzle.min.js"></script>
   <script>
-    // 4) Warte, bis das DOM & das Puzzle‑Script geladen sind
     document.addEventListener('DOMContentLoaded', () => {
-      // 5) Erstelle das Puzzle
-      const jp = new JigsawPuzzle({
-        element: '#jigsaw',
-        image: 'https://cdn.pixabay.com/photo/2020/04/25/09/04/cucumber-5089995_960_720.jpg',
-        rows: 3,
-        columns: 3,
-        shuffle: true
-      });
-      jp.init();
+      // 4️⃣ Bild erst laden, bevor wir init() aufrufen
+      const imgUrl = 'https://cdn.pixabay.com/photo/2020/04/25/09/04/cucumber-5089995_960_720.jpg';
+      const tmpImg = new Image();
 
-      // 6) Höre aufs "complete"-Event
-      jp.on('complete', () => {
-        alert('🧩 Puzzle gelöst!');
-        // Container wegräumen
-        document.querySelector('#jigsaw').remove();
-      });
+      tmpImg.onload = () => {
+        // ���� Jetzt ist das Bild im Cache, wir können das Puzzle starten
+        const jp = new JigsawPuzzle({
+          element: '#jigsaw',
+          image: imgUrl,
+          rows: 3,
+          columns: 3,
+          shuffle: true
+        });
+        jp.init();
+
+        // 5️⃣ Callback, wenn’s fertig gepuzzlet ist
+        jp.on('complete', () => {
+          alert('🧩 Puzzle gelöst!');
+          // Aufräumen
+          document.querySelector('#jigsaw').remove();
+        });
+      };
+
+      // Fehler, falls das Bild nicht lädt
+      tmpImg.onerror = () => {
+        console.error('Bild konnte nicht geladen werden:', imgUrl);
+      };
+
+      tmpImg.src = imgUrl;
     });
   </script>
 </body>
