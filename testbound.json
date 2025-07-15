@@ -6,7 +6,9 @@
             "lon": 7.4474400,
             "giveItem": "Gurke",
             "getItem": "Gnu",
-            "type": "quiz"
+            "type": "quiz",
+            "question": "Test",
+            "answer": "sus"
         
     
         }
