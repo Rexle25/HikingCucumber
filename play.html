@@ -50,7 +50,7 @@
 
             try {
                 data = JSON.parse(JSONinput);
-                alert("Erfolgreicher JSON parse")
+                
             } catch (e) {
                 alert("Fehler beim Parsen des JSON:\n" + e.message);
             }
@@ -62,8 +62,8 @@
 
             
              data.stations.forEach((station) => {
-                alert("Test")
-                var marker = L.marker([station.lat, station.lon], title = station.name).addTo(map);
+                
+                var marker = L.marker([station.lat, station.lon]).addTo(map);
                 
 
              });
