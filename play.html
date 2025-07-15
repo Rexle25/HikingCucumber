@@ -58,11 +58,9 @@
              
 
              data.stations.forEach((station) => {
-                if  (!station.location) {
-                    alert("Keine location gefunden")
-                }
+                
                 var marker = L.marker([station.location]).addTo(map);
-                alert("Marker erstellt");
+                
 
              });
 

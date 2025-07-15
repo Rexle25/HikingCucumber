@@ -2,7 +2,7 @@
     "stations": [
         {   
             "name": "Gurke",
-            "location": [46.94809, 7.44744]
+            "location": ["46.94809, 7.44744"]
     
         }
 
