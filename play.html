@@ -54,6 +54,7 @@
         function showPosition(position) {
             lat = position.coords.latitude;
             lon = position.coords.longitude;
+            alert(lat);
 
             
 
@@ -101,8 +102,6 @@
                     getLocation();
                     let latDelta = station.lat - lat;
                     let lonDelta = station.lon - lon;
-                    alert(latDelta);
-                    alert(lonDelta);
                     alert(lat);
                     
 
