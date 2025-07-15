@@ -43,7 +43,7 @@
 
         function getLocation() {
              navigator.geolocation.getCurrentPosition(showPosition);
-             alert("Geolocation abgerufen");
+             
 
         }
                        
@@ -52,11 +52,11 @@
             let lat = position.coords.latitude;
             let lon = position.coords.longitude;
 
-            alert(position.coords.latitude);
+            
 
             let latDelta = station.lat - lat;
             let lonDelta = station.lon - lon;
-            alert(latDelta + lonDelta);
+            alert("Test");
 
         }
 
@@ -97,7 +97,7 @@
                     
 
                     getLocation();
-                    alert("Marker geklickt");
+                    
 
                     
 
