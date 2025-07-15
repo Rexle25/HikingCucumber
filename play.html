@@ -39,6 +39,10 @@
     </script>
 
     <script>
+        var inventar = [];
+    </script>
+
+    <script>
 
 
         function jsonParse(){
@@ -56,7 +60,7 @@
             }
 
             if (!data.stations || !Array.isArray(data.stations)) {
-                alert("❌ Keine gültigen Stationen im JSON gefunden."); 
+                alert("Keine gültigen Stationen im JSON gefunden."); 
             }
 
 
@@ -65,7 +69,24 @@
                 
                 var marker = L.marker([station.lat, station.lon]).addTo(map).on('click', function(e) {
 
-                    alert("Marker geklickt")
+                    function getLocation() {
+                        navigator.geolocation.getCurrentPosition(showPosition);
+                    }
+                    function showPosition(position) {
+
+                        let lat = position.coords.latitude;
+                        let lon = position.coords.longitude;
+                        
+                        let latDelta = station.lat - lat;
+                        let lonDelta = station.lon - lon;
+                        alert(latDelta + lonDelta)
+
+
+                    }
+
+
+
+                    
 
                 });
                 
@@ -78,8 +99,6 @@
 
     </script>
 
-    <script>
-        var inventar = [];
-    </script>
+    
 
 </body>
