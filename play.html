@@ -47,11 +47,7 @@
         let verbleibendeStationen = 0;
         let gesucht = "null"
 
-        function StationsCheck() {
-            if (station.type = "quiz") {
-                alert("Gurke");
-            }
-        }
+        
 
             
          
@@ -109,7 +105,11 @@
                             ) * 111000;
 
                             alert(dist);
-                            StationsCheck();
+                            
+                            if (station.type == "quiz") {
+                                alert("Gurke");
+                            }
+
                         }
 
                         
