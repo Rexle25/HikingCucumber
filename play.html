@@ -46,7 +46,15 @@
 
             
              JSONinput = document.getElementById('JSONinput').value;
-             const data = JSON.parse(JSONinput);
+             let data
+
+            try {
+                data = JSON.parse(JSONinput);
+            } catch (e) {
+                alert("Fehler beim Parsen des JSON:\n" + e.message);
+            }
+
+             
 
              data.stations.forEach((station) => {
                 if  (!station.location) {
