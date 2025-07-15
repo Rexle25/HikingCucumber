@@ -40,13 +40,14 @@
 
     <script>
         var inventar = [];
+        inventar.push("Gurke");
 
         let lat = 0.0
         let lon = 0.0
         let verbleibendeStationen = 0;
         let gesucht = "null"
 
-        function getLocation() {
+        
 
             
          
@@ -93,8 +94,8 @@
                     gesucht = station.giveItem;
 
                     if (inventar.includes(gesucht)) {
-                        
-                        navigator.geolocation.getCurrentPosition(
+
+                    navigator.geolocation.getCurrentPosition(
                         pos => {
                             const lat = pos.coords.latitude;
                             const lon = pos.coords.longitude;
@@ -109,14 +110,12 @@
 
 
                     )
-
                     } else {
                         alert("Du brauchst erst " + gesucht + " bevor du auf diese Station zugreifen kannst")
                     }
 
 
 
-                    
                     
 
                     
