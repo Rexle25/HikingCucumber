@@ -48,7 +48,7 @@
         let gesucht = "null"
 
         
-
+        
             
          
 
@@ -106,10 +106,36 @@
 
                             alert(dist);
                             
-                            if (dist < 60) {
+                            if (dist < 500000) {
                                 if (station.type == "quiz") {
-                                    alert(station.question);
+                                    const frage = document.createElement("p");
+                                    frage.innerText = station.question;
+                                    document.body.appendChild(frage);
+
+                                    const input = document.createElement("input");
+                                    input.type = "text";
+                                    input.id = "antwort";
+                                    document.body.appendChild(input);
+
+                                    const btn = document.createElement("button");
+                                    btn.innerHTML = "Hello Button";
+                                    document.body.appendChild(btn);
+
+                                    btn.onclick = function() {
+                                        const userAntwort = input.value.trim().toLocaleLowerCase();
+                                        const richtigeAntwort = station.answer.trim().toLowerCase();
+
+                                        if (userAntwort == richtigeAntwort) {
+                                            map.removeLayer(marker); // <-- Marker entfernen
+                                            frage.remove();
+                                            input.remove();
+                                            btn.remove();
+                                        }
+                                    }
+
+                                    
                                 } 
+
 
                             } else {
                                 alert("Du bist noch " + dist + " Meter von der Station entfernt");
