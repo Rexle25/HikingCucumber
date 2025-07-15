@@ -43,25 +43,13 @@
 
         let lat = 0.0
         let lon = 0.0
+        let verbleibendeStationen = 0;
+        let gesucht = "null"
 
         function getLocation() {
-             navigator.geolocation.getCurrentPosition(showPosition);
-             
-
-        }
-                       
-                    
-        function showPosition(position) {
-            lat = position.coords.latitude;
-            lon = position.coords.longitude;
-            alert(lat);
 
             
-
-            
-            
-
-        }
+         
 
                         
 
@@ -95,15 +83,23 @@
             
              data.stations.forEach((station) => {
                 
+                verbleibendeStationen++;
+
+
+                
+
                 var marker = L.marker([station.lat, station.lon]).addTo(map).on('click', function(e) {
 
+                    gesucht = station.giveItem;
 
-                    navigator.geolocation.getCurrentPosition(
+                    if (inventar.includes(gesucht)) {
+                        
+                        navigator.geolocation.getCurrentPosition(
                         pos => {
                             const lat = pos.coords.latitude;
                             const lon = pos.coords.longitude;
                             const dist = Math.hypot(
-                                station.lat -lat,
+                                station.lat - lat,
                                 station.lon - lon
                             ) * 111000;
 
@@ -113,6 +109,14 @@
 
 
                     )
+
+                    } else {
+                        alert("Du brauchst erst " + gesucht + " bevor du auf diese Station zugreifen kannst")
+                    }
+
+
+
+                    
                     
 
                     
