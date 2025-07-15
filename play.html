@@ -63,7 +63,7 @@
             
              data.stations.forEach((station) => {
                 alert("Test")
-                var marker = L.marker([station.location]).addTo(map);
+                var marker = L.marker([station.lat, station.lon]).addTo(map);
                 
 
              });
