@@ -21,11 +21,11 @@ p {
 }
 
 input {
-     color: aquamarine;
+     background-color: aquamarine;
      margin: auto
 }
 
 textarea {
-     color: aquamarine;
-     margin:auto
+     background-color: aquamarine;
+     margin: auto
 }
