@@ -27,6 +27,6 @@ input {
 
 textarea {
      background-color: aquamarine;
-     margin-top: 50px;
-     margin-left: 5opx;
+     margin-top: auto;
+     margin-left: auto;
 }
