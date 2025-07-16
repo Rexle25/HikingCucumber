@@ -20,6 +20,9 @@
 
 <body>
 
+    <button onclick="help()" style="margin-top: auto; margin-right: auto; border-radius: 50px;">?</button> 
+
+
     <h1>Schnitzeljagd spielen</h1>
     <p>JSON von Schnitzeljagd hier einfügen</p>
     <textarea id="JSONinput" rows = "10" cols = "30"></textarea>
@@ -61,6 +64,12 @@
         }
             
         zeigeInventar();
+
+        function help() {
+            var snd = new Audio("audio/sound1.mp3");
+            snd.play();
+            snd.currentTime=0;
+        }
          
 
                         
