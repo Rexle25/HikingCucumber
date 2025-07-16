@@ -70,6 +70,12 @@
             snd.play();
             snd.currentTime=0;
         }
+
+        function stationFertig() {
+            var snd = new Audio("audio/sound4.mp3");
+            snd.play();
+            snd.currentTime=0;
+        }
          
 
                         
@@ -158,9 +164,11 @@
                                             input.remove();
                                             btn.remove();
                                             verbleibendeStationen = verbleibendeStationen - 1;
+
+                                            stationFertig();
                                             
 
-
+                                            
                                             inventar.push(station.getItem);
                                             zeigeInventar();
 
@@ -168,6 +176,9 @@
 
                                             if (verbleibendeStationen == 0) {
                                                 alert("Du hast alles Abgeschlossen!");
+                                                inventar = []
+                                                zeigeInventar();
+                                                stationFertig();
                                             }
 
 
