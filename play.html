@@ -57,8 +57,10 @@
         function zeigeInventar() {
             document.getElementById("inventarAnzeige").innerText = "Inventar: " + inventar.join(", ");
 
+
         }
             
+        zeigeInventar();
          
 
                         
@@ -115,7 +117,10 @@
 
                             alert(dist);
                             
-                            if (dist < 500000) {
+                            if (dist < 50) {
+
+                                //Generiere das Quiz Station Interface
+
                                 if (station.type == "quiz") {
                                     const frage = document.createElement("p");
                                     frage.innerText = station.question;
@@ -130,21 +135,29 @@
                                     btn.innerHTML = "Überprüfen";
                                     document.body.appendChild(btn);
 
+
+                                    //Überprüfe Antwort
                                     btn.onclick = function() {
                                         const userAntwort = input.value.trim().toLocaleLowerCase();
                                         const richtigeAntwort = station.answer.trim().toLowerCase();
 
+
+                                        //Entferne Quiz Interface
                                         if (userAntwort == richtigeAntwort) {
-                                            map.removeLayer(marker); // <-- Marker entfernen
+                                            map.removeLayer(marker); 
                                             frage.remove();
                                             input.remove();
                                             btn.remove();
                                             verbleibendeStationen = verbleibendeStationen - 1;
                                             
+
+
                                             inventar.push(station.getItem);
                                             zeigeInventar();
 
-                                            if (verbleibendeStationen = 0) {
+                                            
+
+                                            if (verbleibendeStationen == 0) {
                                                 alert("Du hast alles Abgeschlossen!");
                                             }
 
