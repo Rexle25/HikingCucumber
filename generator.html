@@ -4,22 +4,45 @@
   <meta charset="UTF-8">
   <title>Schnitzeljagd Generator</title>
   <style>
-    .station { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
-    .station input, .station select { display: block; margin-bottom: 5px; }
-    button { margin-top: 5px; }
+    .station { 
+      border: 2px solid #ccc; 
+      padding: 10px; 
+      margin: 10px 0; 
+      cursor: pointer;
+    }
+    .station input, .station select { 
+      display: block; 
+      margin-bottom: 5px; 
+    }
+    button { 
+      margin-top: 5px; 
+    }
+    .selected {
+      border-color: green;
+      background-color: #f0fff0;
+    }
   </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 <body>
 
   <h1>Schnitzeljagd Generator</h1>
   <div id="stationsContainer"></div>
   
-  <button onclick="addStation()">Neue Station hinzufügen</button>
-  <button onclick="generateJSON()">JSON generieren</button>
+  <button onclick="addStation()"> Neue Station hinzufügen</button>
+  <button onclick="generateJSON()"> JSON generieren</button>
 
   <pre id="output" style="background:#eee; padding:10px; margin-top:20px;"></pre>
 
+  <h2> Karte</h2>
+  <div id="map" style="height: 400px;"></div>
+  <p> Klicke auf eine Station, dann auf die Karte, um Koordinaten zu setzen.</p>
+
   <script>
+    let selectedStationDiv = null;
+    let activeMarker = null;
+
     function addStation() {
       const container = document.getElementById("stationsContainer");
       const div = document.createElement("div");
@@ -42,6 +65,14 @@
         </div>
         <button onclick="this.parentElement.remove()">❌ Löschen</button>
       `;
+
+     
+      div.onclick = () => {
+        document.querySelectorAll(".station").forEach(d => d.classList.remove("selected"));
+        div.classList.add("selected");
+        selectedStationDiv = div;
+      };
+
       container.appendChild(div);
     }
 
@@ -79,10 +110,33 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "gnubound.json";
+      a.download = "schnitzeljagd.json";
       a.click();
       URL.revokeObjectURL(url);
     }
+
+
+    const map = L.map('map').setView([46.94809, 7.44744], 13); // Start: Bern
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    map.on('click', function (e) {
+      if (!selectedStationDiv) {
+        alert("Bitte zuerst eine Station auswählen!");
+        return;
+      }
+
+      const { lat, lng } = e.latlng;
+      selectedStationDiv.querySelector(".lat").value = lat.toFixed(6);
+      selectedStationDiv.querySelector(".lon").value = lng.toFixed(6);
+
+      if (activeMarker) {
+        activeMarker.setLatLng(e.latlng);
+      } else {
+        activeMarker = L.marker(e.latlng).addTo(map);
+      }
+    });
   </script>
 
 </body>
