@@ -1,67 +1,90 @@
 <!DOCTYPE html>
+<html lang="de">
 <head>
-    <title>Generator</title>
+  <meta charset="UTF-8">
+  <title>Schnitzeljagd Generator</title>
+  <style>
+    .station { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    .station input, .station select { display: block; margin-bottom: 5px; }
+    button { margin-top: 5px; }
+  </style>
 </head>
-
 <body>
 
-    <button onclick="create()">Klicke hier um eine Station hinzuzufügen</button>
-    <div id="container"></div>
+  <h1>Schnitzeljagd Generator</h1>
+  <div id="stationsContainer"></div>
+  
+  <button onclick="addStation()">➕ Neue Station hinzufügen</button>
+  <button onclick="generateJSON()">📦 JSON generieren</button>
 
-    <script>
+  <pre id="output" style="background:#eee; padding:10px; margin-top:20px;"></pre>
 
-        function create() {
-            const container = document.getElementById("container");
-            const div = document.createElement("div");
-            div.className = "station";
-            div.innerHTML = `
-                <label>Name: <input type="text" class="name"></label>
-                <label>Latitude: <input type="number" step="any" class="lat"></label>
-                <label>Longitude: <input type="number" step="any" class="lon"></label>
-                <label>Gib Item: <input type="text" class="giveItem"></label>
-                <label>Bekomme Item: <input type="text" class="getItem"></label>
-                <label>Typ: 
-                <select class="type" onchange="toggleQuizFields(this)">
-                    <option value="normal">normal</option>
-                    <option value="quiz">quiz</option>
-                </select>
-                </label>
-                <div class="quizFields" style="display:none;">
-                <label>Frage: <input type="text" class="question"></label>
-                <label>Antwort: <input type="text" class="answer"></label>
-                </div>
-                <button onclick="this.parentElement.remove()">Löschen</button>
-            `;
+  <script>
+    function addStation() {
+      const container = document.getElementById("stationsContainer");
+      const div = document.createElement("div");
+      div.className = "station";
+      div.innerHTML = `
+        <label>Name: <input type="text" class="name"></label>
+        <label>Latitude: <input type="number" step="any" class="lat"></label>
+        <label>Longitude: <input type="number" step="any" class="lon"></label>
+        <label>Gib Item: <input type="text" class="giveItem"></label>
+        <label>Bekomme Item: <input type="text" class="getItem"></label>
+        <label>Typ: 
+          <select class="type" onchange="toggleQuizFields(this)">
+            <option value="normal">normal</option>
+            <option value="quiz">quiz</option>
+          </select>
+        </label>
+        <div class="quizFields" style="display:none;">
+          <label>Frage: <input type="text" class="question"></label>
+          <label>Antwort: <input type="text" class="answer"></label>
+        </div>
+        <button onclick="this.parentElement.remove()">❌ Löschen</button>
+      `;
+      container.appendChild(div);
+    }
 
+    function toggleQuizFields(selectElement) {
+      const quizFields = selectElement.parentElement.parentElement.querySelector(".quizFields");
+      quizFields.style.display = selectElement.value === "quiz" ? "block" : "none";
+    }
 
+    function generateJSON() {
+      const stationDivs = document.querySelectorAll(".station");
+      const stations = [];
 
+      stationDivs.forEach(div => {
+        const station = {
+          name: div.querySelector(".name").value,
+          lat: parseFloat(div.querySelector(".lat").value),
+          lon: parseFloat(div.querySelector(".lon").value),
+          giveItem: div.querySelector(".giveItem").value,
+          getItem: div.querySelector(".getItem").value,
+          type: div.querySelector(".type").value
+        };
 
-
-            
-            
-            
-            
-            
+        if (station.type === "quiz") {
+          station.question = div.querySelector(".question").value;
+          station.answer = div.querySelector(".answer").value;
         }
 
-        
-            
+        stations.push(station);
+      });
 
+      const finalJSON = JSON.stringify({ stations }, null, 4);
+      document.getElementById("output").textContent = finalJSON;
 
-        
+      // Optional: JSON-Datei herunterladen
+      const blob = new Blob([finalJSON], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "schnitzeljagd.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
 
-
-
-        
-
-
-
-
-
-        
-
-
-
-    </script>
-    
 </body>
+</html>
