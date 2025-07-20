@@ -4,23 +4,10 @@
   <meta charset="UTF-8">
   <title>Schnitzeljagd Generator</title>
   <style>
-    .station { 
-      border: 2px solid #ccc; 
-      padding: 10px; 
-      margin: 10px 0; 
-      cursor: pointer;
-    }
-    .station input, .station select { 
-      display: block; 
-      margin-bottom: 5px; 
-    }
-    button { 
-      margin-top: 5px; 
-    }
-    .selected {
-      border-color: green;
-      background-color: #f0fff0;
-    }
+    .station { border: 2px solid #ccc; padding: 10px; margin: 10px 0; cursor: pointer; }
+    .station input, .station select { display: block; margin-bottom: 5px; }
+    button { margin-top: 5px; }
+    .selected { border-color: green; background-color: #f0fff0; }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -54,19 +41,27 @@
         <label>Gib Item: <input type="text" class="giveItem"></label>
         <label>Bekomme Item: <input type="text" class="getItem"></label>
         <label>Typ: 
-          <select class="type" onchange="toggleQuizFields(this)">
-            <option value="normal">normal</option>
+          <select class="type" onchange="toggleTypeFields(this)">
             <option value="quiz">quiz</option>
+            <option value="find">find</option>
           </select>
         </label>
+
         <div class="quizFields" style="display:none;">
           <label>Frage: <input type="text" class="question"></label>
           <label>Antwort: <input type="text" class="answer"></label>
         </div>
+
+        <div class="findFields" style="display:none;">
+          <label>Bild-URL: <input type="text" class="image"></label>
+          <label>Objekt-URL: <input type="text" class="target"></label>
+          <label>Breite (px): <input type="number" class="targetWidth" value="50"></label>
+          <label>Höhe (px): <input type="number" class="targetHeight" value="50"></label>
+        </div>
+
         <button onclick="this.parentElement.remove()">❌ Löschen</button>
       `;
 
-     
       div.onclick = () => {
         document.querySelectorAll(".station").forEach(d => d.classList.remove("selected"));
         div.classList.add("selected");
@@ -76,9 +71,19 @@
       container.appendChild(div);
     }
 
-    function toggleQuizFields(selectElement) {
-      const quizFields = selectElement.parentElement.parentElement.querySelector(".quizFields");
-      quizFields.style.display = selectElement.value === "quiz" ? "block" : "none";
+    function toggleTypeFields(selectElement) {
+      const station = selectElement.closest(".station");
+      const quizFields = station.querySelector(".quizFields");
+      const findFields = station.querySelector(".findFields");
+
+      quizFields.style.display = "none";
+      findFields.style.display = "none";
+
+      if (selectElement.value === "quiz") {
+        quizFields.style.display = "block";
+      } else if (selectElement.value === "find") {
+        findFields.style.display = "block";
+      }
     }
 
     function generateJSON() {
@@ -86,18 +91,29 @@
       const stations = [];
 
       stationDivs.forEach(div => {
+        const type = div.querySelector(".type").value;
+
         const station = {
           name: div.querySelector(".name").value,
           lat: parseFloat(div.querySelector(".lat").value),
           lon: parseFloat(div.querySelector(".lon").value),
           giveItem: div.querySelector(".giveItem").value,
           getItem: div.querySelector(".getItem").value,
-          type: div.querySelector(".type").value
+          type: type
         };
 
-        if (station.type === "quiz") {
+        if (type === "quiz") {
           station.question = div.querySelector(".question").value;
           station.answer = div.querySelector(".answer").value;
+        }
+
+        if (type === "find") {
+          station.image = div.querySelector(".image").value;
+          station.target = div.querySelector(".target").value;
+          station.targetSize = {
+            width: parseInt(div.querySelector(".targetWidth").value),
+            height: parseInt(div.querySelector(".targetHeight").value)
+          };
         }
 
         stations.push(station);
@@ -115,8 +131,7 @@
       URL.revokeObjectURL(url);
     }
 
-
-    const map = L.map('map').setView([46.94809, 7.44744], 13); // Start: Bern
+    const map = L.map('map').setView([46.94809, 7.44744], 13); // Bern
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap'
     }).addTo(map);
