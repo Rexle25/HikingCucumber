@@ -56,6 +56,8 @@
 
         const iframe = document.createElement("iframe");
         document.body.appendChild(iframe);
+        iframe.width = "0";
+        iframe.height = "0";
 
         var inventar = [];
         inventar.push("Gurke");
@@ -88,8 +90,7 @@
 
         function overworldMusic(data) {
             
-            iframe.width = "0";
-            iframe.height = "0";
+            
             iframe.src = data.music;
             iframe.frameBorder = "0";
             iframe.allow = "autoplay";
