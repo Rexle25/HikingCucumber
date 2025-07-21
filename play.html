@@ -31,7 +31,7 @@
     <h1>Schnitzeljagd spielen</h1>
     <p>JSON von Schnitzeljagd hier einfügen</p>
     <textarea id="JSONinput" rows = "10" cols = "30"></textarea>
-     <button onclick="jsonParse()">Drücke hier wenn du das JSON eingefügt hast</button> 
+     <button onclick="jsonParse()" id="button">Drücke hier wenn du das JSON eingefügt hast</button> 
 
      <p id="inventarAnzeige">Inventar: []</p>
 
@@ -111,6 +111,12 @@
                 alert("Keine gültigen Stationen im JSON gefunden."); 
             }
 
+
+            const textarea = document.getElementById("JSONinput");
+            const button = document.getElementById("button");
+
+            textarea.remove;
+            button.remove;
 
             
              data.stations.forEach((station) => {
