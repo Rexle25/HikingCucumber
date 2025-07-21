@@ -82,21 +82,7 @@
             snd.currentTime=0;
         }
 
-        function overworldMusic(data) {
-
-            const textarea = document.getElementById("JSONinput");
-            const button = document.getElementById("button");
-
-            const iframe = document.createElement("iframe");
-            iframe.width = "0";
-            iframe.height = "0";
-            iframe.src = data.music;
-            iframe.frameBorder = "0";
-            iframe.allow = "autoplay";
-
-            document.body.appendChild(iframe);
-            
-        }
+        
          
 
                         
@@ -134,7 +120,17 @@
             button.remove();
 
             
+            const textarea = document.getElementById("JSONinput");
+            const button = document.getElementById("button");
 
+            const iframe = document.createElement("iframe");
+            iframe.width = "0";
+            iframe.height = "0";
+            iframe.src = data.music;
+            iframe.frameBorder = "0";
+            iframe.allow = "autoplay";
+
+            document.body.appendChild(iframe);
             
              data.stations.forEach((station) => {
                 
