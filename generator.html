@@ -15,6 +15,10 @@
 <body>
 
   <h1>Schnitzeljagd Generator</h1>
+  <!-- Global music URL -->
+  <div>
+    <label>Overworld Music (YouTube URL): <input type="text" id="globalMusic" placeholder="https://www.youtube.com/watch?v=..." style="width: 100%;"></label>
+  </div>
   <div id="stationsContainer"></div>
   
   <button onclick="addStation()"> Neue Station hinzufügen</button>
@@ -29,6 +33,14 @@
   <script>
     let selectedStationDiv = null;
     let activeMarker = null;
+
+    // Hilfsfunktion: normale YouTube-URL zu embed+loop URL
+    function convertYouTubeURLtoEmbedLoop(url) {
+      const match = url.match(/(?:v=|\/embed\/|\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (!match) return null;
+      const id = match[1];
+      return `https://www.youtube.com/embed/${id}?autoplay=1&loop=1&playlist=${id}`;
+    }
 
     function addStation() {
       const container = document.getElementById("stationsContainer");
@@ -46,6 +58,8 @@
             <option value="find">find</option>
           </select>
         </label>
+        <!-- Stationspezifische Musik URL Eingabe -->
+        <label>Station Music (YouTube URL): <input type="text" class="stationMusic" placeholder="https://www.youtube.com/watch?v=..." style="width:100%;"></label>
 
         <div class="quizFields" style="display:none;">
           <label>Frage: <input type="text" class="question"></label>
@@ -92,7 +106,6 @@
 
       stationDivs.forEach(div => {
         const type = div.querySelector(".type").value;
-
         const station = {
           name: div.querySelector(".name").value,
           lat: parseFloat(div.querySelector(".lat").value),
@@ -101,6 +114,13 @@
           getItem: div.querySelector(".getItem").value,
           type: type
         };
+
+        // Stationspezifische Musik verarbeitet
+        const smUrl = div.querySelector(".stationMusic").value.trim();
+        if (smUrl) {
+          const embedUrl = convertYouTubeURLtoEmbedLoop(smUrl);
+          if (embedUrl) station.music = embedUrl;
+        }
 
         if (type === "quiz") {
           station.question = div.querySelector(".question").value;
@@ -119,7 +139,12 @@
         stations.push(station);
       });
 
-      const finalJSON = JSON.stringify({ stations }, null, 4);
+      // Global Music
+      const globalUrl = document.getElementById("globalMusic").value.trim();
+      const globalEmbed = convertYouTubeURLtoEmbedLoop(globalUrl);
+      const outputObj = globalEmbed ? { music: globalEmbed, stations } : { stations };
+
+      const finalJSON = JSON.stringify(outputObj, null, 4);
       document.getElementById("output").textContent = finalJSON;
 
       const blob = new Blob([finalJSON], { type: "application/json" });
@@ -139,7 +164,7 @@
     map.on('click', function (e) {
       if (!selectedStationDiv) {
         alert("Bitte zuerst eine Station auswählen!");
-        return;
+        return; 
       }
 
       const { lat, lng } = e.latlng;
