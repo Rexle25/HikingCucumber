@@ -125,10 +125,11 @@
             iframe.src = data.music;
             iframe.frameBorder = "0";
             iframe.allow = "autoplay";
+            document.body.appendChild(iframe);
 
             overworldMusic(data);
 
-            document.body.appendChild(iframe);
+            
 
             textarea.remove();
             button.remove();
