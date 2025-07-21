@@ -115,6 +115,10 @@
             const textarea = document.getElementById("JSONinput");
             const button = document.getElementById("button");
 
+            const music = new Audio(data.music);
+            music.loop = true;
+            music.play();
+
             textarea.remove();
             button.remove();
 
