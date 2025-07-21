@@ -167,6 +167,8 @@
                             
                             if (dist < 50) {
 
+                                iframe.src = station.music;
+
                                 //Generiere das Quiz Station Interface
 
                                 if (station.type == "quiz") {
@@ -204,6 +206,8 @@
                                             
                                             inventar.push(station.getItem);
                                             zeigeInventar();
+
+                                            overworldMusic(data);
 
                                             
 
