@@ -15,26 +15,35 @@
 <body>
 
   <h1>Schnitzeljagd Generator</h1>
-  <!-- Global music URL -->
-  <div>
-    <label>Overworld Music (YouTube URL): <input type="text" id="globalMusic" placeholder="https://www.youtube.com/watch?v=..." style="width: 100%;"></label>
-  </div>
+
+  <!-- Option für konstante Overworld-Musik -->
+  <label>
+    <input type="checkbox" id="constantMusicCheckbox" /> Constant Music
+  </label>
+  <br />
+
+  <!-- Global music URL Eingang -->
+  <label>
+    Overworld Music (YouTube URL):
+    <input type="text" id="globalMusic" placeholder="https://www.youtube.com/watch?v=..." style="width: 100%;" />
+  </label>
+
   <div id="stationsContainer"></div>
   
-  <button onclick="addStation()"> Neue Station hinzufügen</button>
-  <button onclick="generateJSON()"> JSON generieren</button>
+  <button onclick="addStation()">Neue Station hinzufügen</button>
+  <button onclick="generateJSON()">JSON generieren</button>
 
   <pre id="output" style="background:#eee; padding:10px; margin-top:20px;"></pre>
 
-  <h2> Karte</h2>
+  <h2>Karte</h2>
   <div id="map" style="height: 400px;"></div>
-  <p> Klicke auf eine Station, dann auf die Karte, um Koordinaten zu setzen.</p>
+  <p>Klicke auf eine Station, dann auf die Karte, um Koordinaten zu setzen.</p>
 
   <script>
     let selectedStationDiv = null;
     let activeMarker = null;
 
-    // Hilfsfunktion: normale YouTube-URL zu embed+loop URL
+    // Hilfsfunktion: YouTube URL -> embed-loop URL
     function convertYouTubeURLtoEmbedLoop(url) {
       const match = url.match(/(?:v=|\/embed\/|\.be\/)([a-zA-Z0-9_-]{11})/);
       if (!match) return null;
@@ -52,13 +61,14 @@
         <label>Longitude: <input type="number" step="any" class="lon"></label>
         <label>Gib Item: <input type="text" class="giveItem"></label>
         <label>Bekomme Item: <input type="text" class="getItem"></label>
-        <label>Typ: 
+        <label>Typ:
           <select class="type" onchange="toggleTypeFields(this)">
             <option value="quiz">quiz</option>
             <option value="find">find</option>
           </select>
         </label>
-        <!-- Stationspezifische Musik URL Eingabe -->
+
+        <!-- Stationspezifische Musik URL -->
         <label>Station Music (YouTube URL): <input type="text" class="stationMusic" placeholder="https://www.youtube.com/watch?v=..." style="width:100%;"></label>
 
         <div class="quizFields" style="display:none;">
@@ -87,20 +97,15 @@
 
     function toggleTypeFields(selectElement) {
       const station = selectElement.closest(".station");
-      const quizFields = station.querySelector(".quizFields");
-      const findFields = station.querySelector(".findFields");
-
-      quizFields.style.display = "none";
-      findFields.style.display = "none";
-
-      if (selectElement.value === "quiz") {
-        quizFields.style.display = "block";
-      } else if (selectElement.value === "find") {
-        findFields.style.display = "block";
-      }
+      station.querySelector(".quizFields").style.display = selectElement.value === "quiz" ? "block" : "none";
+      station.querySelector(".findFields").style.display = selectElement.value === "find" ? "block" : "none";
     }
 
     function generateJSON() {
+      const constantMusic = document.getElementById("constantMusicCheckbox").checked;
+      const globalInput = document.getElementById("globalMusic").value.trim();
+      const globalEmbed = convertYouTubeURLtoEmbedLoop(globalInput) || "";
+
       const stationDivs = document.querySelectorAll(".station");
       const stations = [];
 
@@ -115,12 +120,10 @@
           type: type
         };
 
-        // Stationspezifische Musik verarbeitet
-        const smUrl = div.querySelector(".stationMusic").value.trim();
-        if (smUrl) {
-          const embedUrl = convertYouTubeURLtoEmbedLoop(smUrl);
-          if (embedUrl) station.music = embedUrl;
-        }
+        // Stationspezifische Musik
+        const smInput = div.querySelector(".stationMusic").value.trim();
+        const smEmbed = convertYouTubeURLtoEmbedLoop(smInput);
+        if (smEmbed) station.music = smEmbed;
 
         if (type === "quiz") {
           station.question = div.querySelector(".question").value;
@@ -139,11 +142,7 @@
         stations.push(station);
       });
 
-      // Global Music
-      const globalUrl = document.getElementById("globalMusic").value.trim();
-      const globalEmbed = convertYouTubeURLtoEmbedLoop(globalUrl);
-      const outputObj = globalEmbed ? { music: globalEmbed, stations } : { stations };
-
+      const outputObj = { constantMusic, music: globalEmbed, stations };
       const finalJSON = JSON.stringify(outputObj, null, 4);
       document.getElementById("output").textContent = finalJSON;
 
@@ -156,26 +155,20 @@
       URL.revokeObjectURL(url);
     }
 
-    const map = L.map('map').setView([46.94809, 7.44744], 13); // Bern
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
+    const map = L.map('map').setView([46.94809, 7.44744], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
 
-    map.on('click', function (e) {
+    map.on('click', e => {
       if (!selectedStationDiv) {
         alert("Bitte zuerst eine Station auswählen!");
-        return; 
+        return;
       }
-
       const { lat, lng } = e.latlng;
       selectedStationDiv.querySelector(".lat").value = lat.toFixed(6);
       selectedStationDiv.querySelector(".lon").value = lng.toFixed(6);
 
-      if (activeMarker) {
-        activeMarker.setLatLng(e.latlng);
-      } else {
-        activeMarker = L.marker(e.latlng).addTo(map);
-      }
+      if (activeMarker) activeMarker.setLatLng(e.latlng);
+      else activeMarker = L.marker(e.latlng).addTo(map);
     });
   </script>
 
