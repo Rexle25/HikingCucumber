@@ -81,8 +81,6 @@
             snd.play();
             snd.currentTime=0;
         }
-
-        
          
 
                         
@@ -114,12 +112,6 @@
             }
 
 
-            
-
-            textarea.remove();
-            button.remove();
-
-            
             const textarea = document.getElementById("JSONinput");
             const button = document.getElementById("button");
 
@@ -131,6 +123,10 @@
             iframe.allow = "autoplay";
 
             document.body.appendChild(iframe);
+
+            textarea.remove();
+            button.remove();
+
             
              data.stations.forEach((station) => {
                 
