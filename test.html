@@ -148,11 +148,14 @@
         function save() {
 
           localStorage.setItem("inventar", JSON.stringify(inventar));
+          localStorage.setItem("markers", JSON.stringify(gemachteStationen));
 
         }
         
         function load() {
-          
+
+          inventar = jsonParse(localStorage.inventar);
+
         }
 
                         
