@@ -22,11 +22,15 @@ p {
 
 input {
      background-color: aquamarine;
-     margin: auto
+     margin-bottom: 60px;
 }
 
 textarea {
      background-color: aquamarine;
      margin-top: auto;
      margin-left: auto;
+}
+
+iframe {
+     z-index: 2000;
 }
