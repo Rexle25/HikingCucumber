@@ -58,10 +58,12 @@
         
         const iframe = document.createElement("iframe");
         document.body.appendChild(iframe);
-        iframe.width = "0";
-        iframe.height = "0";
+        iframe.width = "200";
+        iframe.height = "200";
         iframe.frameBorder = "0";
-        iframe.allow = "autoplay";
+        iframe.zIndex = "2000";
+        
+        
 
         var inventar = [];
         inventar.push("Gurke");
@@ -98,6 +100,42 @@
             iframe.src = data.music;
             
             
+        }
+
+        function createQuestionOverlay(frageText) {
+          const overlay = document.createElement("div");
+          overlay.style.position = "fixed";
+          overlay.style.top = "0";
+          overlay.style.left = "0";
+          overlay.style.width = "100vw";
+          overlay.style.height = "100vh";
+          overlay.style.zIndex = "1000";
+          overlay.style.backgroundImage = "url(textures/paper.png)";
+          overlay.style.display = "flex";
+          overlay.style.flexDirection = "column";
+          overlay.style.alignItems = "center";
+
+          const frage = document.createElement("p");
+          frage.innerText = frageText;
+          frage.style.color = "black";
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.style.marginBottom = "60px";
+
+          const btn = document.createElement("button");
+          btn.innerText = "Überprüfen";
+          btn.style.marginBottom = "40px";
+
+          overlay.appendChild(frage);
+          overlay.appendChild(input);
+          overlay.appendChild(btn);
+
+          document.body.appendChild(overlay);
+
+          return {overlay, input, btn};
+
+          
         }
          
 
@@ -174,18 +212,7 @@
                                 //Generiere das Quiz Station Interface
 
                                 if (station.type == "quiz") {
-                                    const frage = document.createElement("p");
-                                    frage.innerText = station.question;
-                                    document.body.appendChild(frage);
-
-                                    const input = document.createElement("input");
-                                    input.type = "text";
-                                    input.id = "antwort";
-                                    document.body.appendChild(input);
-
-                                    const btn = document.createElement("button");
-                                    btn.innerHTML = "Überprüfen";
-                                    document.body.appendChild(btn);
+                                    const {overlay, input, btn} = createQuestionOverlay(station.question);
 
 
                                     //Überprüfe Antwort
@@ -197,9 +224,7 @@
                                         //Entferne Quiz Interface
                                         if (userAntwort == richtigeAntwort) {
                                             map.removeLayer(marker); 
-                                            frage.remove();
-                                            input.remove();
-                                            btn.remove();
+                                            overlay.remove();
                                             verbleibendeStationen = verbleibendeStationen - 1;
 
                                             stationFertig();
