@@ -33,4 +33,7 @@ textarea {
 
 iframe {
      z-index: 2000;
+     position: fixed;
+     bottom: 10%;
+     left: 10%;
 }
