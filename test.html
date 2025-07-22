@@ -54,9 +54,14 @@
 
     <script>
 
-        let iframe;
+
         
-        
+        const iframe = document.createElement("iframe");
+        document.body.appendChild(iframe);
+        iframe.width = "0";
+        iframe.height = "0";
+        iframe.frameBorder = "0";
+        iframe.allow = "autoplay";
 
         var inventar = [];
         inventar.push("Gurke");
@@ -87,7 +92,13 @@
             snd.currentTime=0;
         }
 
-        
+        function overworldMusic(data) {
+            
+            
+            iframe.src = data.music;
+            
+            
+        }
          
 
                         
@@ -101,14 +112,6 @@
 
 
         function jsonParse(){
-
-             iframe = document.createElement("iframe");
-             document.body.appendChild(iframe);
-             iframe.width = "0";
-             iframe.height = "0";
-             iframe.frameBorder = "0";
-             iframe.allow = "autoplay";
-             iframe.src = data.music;
 
 
             
@@ -132,7 +135,7 @@
 
             
 
-            
+            overworldMusic(data);
 
             
 
@@ -206,7 +209,7 @@
                                             inventar.push(station.getItem);
                                             zeigeInventar();
 
-                                            
+                                            overworldMusic(data);
 
                                             
 
