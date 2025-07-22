@@ -1,22 +1,274 @@
-<script src="https://flbulgarelli.github.io/headbreaker/js/headbreaker.js"></script>
+<!DOCTYPE html>
+
+<head>
+    <title>Play</title>
+    <meta name="description" content="Create your own interactive scavenger hunts with puzzles.
+     Everything is free, open source and without ads.">
+     <meta name="keywords" content="scavenger hunt, free, open source, outdoor, game, no ads, no account, json, map, outside, website, browser game, riddle, 
+     location based game, web app, map based game">
+     <meta name="author" content="Rexle25">
+
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+     
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+      <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+
 <body>
-  <div id="puzzle"></div>
-  <script>
-    const autogen = new headbreaker.Canvas('puzzle', {
-      width: 800, height: 650,
-      pieceSize: 100, proximity: 20,
-      borderFill: 10, strokeWidth: 2, lineSoftness: 0.18,
-    });
-    autogen.autogenerate({
-      horizontalPiecesCount: 2,
-      verticalPiecesCount: 2,
-      metadata: [
-        {color: '#B83361'},
-        {color: '#B87D32'},
-        {color: '#A4C234'},
-        {color: '#37AB8C'}
-      ]
-    });
-    autogen.draw();
-  </script>
+
+    <button onclick="help()" style="margin-right: auto; border-radius: 200px;">?</button> 
+
+
+    <h1>Schnitzeljagd spielen</h1>
+    <p>JSON von Schnitzeljagd hier einfügen</p>
+    <textarea id="JSONinput" rows = "10" cols = "30"></textarea>
+     <button onclick="jsonParse()" id="button">Drücke hier wenn du das JSON eingefügt hast</button> 
+
+     <p id="inventarAnzeige">Inventar: []</p>
+
+     <div id="map"></div>
+
+    
+
+    <script>
+        
+        var map = L.map('map').setView([46.9480900, 7.4474400], 12);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+
+
+    </script>
+
+    <script>
+
+
+        
+        const iframe = document.createElement("iframe");
+        document.body.appendChild(iframe);
+        iframe.width = "0";
+        iframe.height = "0";
+        iframe.frameBorder = "0";
+        iframe.allow = "autoplay";
+
+        var inventar = [];
+        inventar.push("Gurke");
+
+        let lat = 0.0
+        let lon = 0.0
+        let verbleibendeStationen = 0;
+        let gesucht = "null"
+
+        
+        function zeigeInventar() {
+            document.getElementById("inventarAnzeige").innerText = "Inventar: " + inventar.join(", ");
+
+
+        }
+            
+        zeigeInventar();
+
+        function help() {
+            var snd = new Audio("audio/sound1.mp3");
+            snd.play();
+            snd.currentTime=0;
+        }
+
+        function stationFertig() {
+            var snd = new Audio("audio/sound4.mp3");
+            snd.play();
+            snd.currentTime=0;
+        }
+
+        function overworldMusic(data) {
+            
+            
+            iframe.src = data.music;
+            
+            
+        }
+         
+
+                        
+
+
+                    
+
+    </script>
+
+    <script>
+
+
+        function jsonParse(){
+
+
+            
+             JSONinput = document.getElementById("JSONinput").value;
+             let data;
+
+            try {
+                data = JSON.parse(JSONinput);
+                
+            } catch (e) {
+                alert("Fehler beim Parsen des JSON:\n" + e.message);
+            }
+
+            if (!data.stations || !Array.isArray(data.stations)) {
+                alert("Keine gültigen Stationen im JSON gefunden."); 
+            }
+
+
+            const textarea = document.getElementById("JSONinput");
+            const button = document.getElementById("button");
+
+            
+
+            overworldMusic(data);
+
+            
+
+            textarea.remove();
+            button.remove();
+
+            
+             data.stations.forEach((station) => {
+                
+                verbleibendeStationen++;
+
+
+                
+
+                var marker = L.marker([station.lat, station.lon]).addTo(map).on('click', function(e) {
+
+                    gesucht = station.giveItem;
+
+                    if (inventar.includes(gesucht)) {
+
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            const lat = pos.coords.latitude;
+                            const lon = pos.coords.longitude;
+                            const dist = Math.hypot(
+                                station.lat - lat,
+                                station.lon - lon
+                            ) * 111000;
+
+                            
+                            
+                            if (dist < 50) {
+
+                                iframe.src = station.music;
+
+                                //Generiere das Quiz Station Interface
+
+                                if (station.type == "quiz") {
+                                    const frage = document.createElement("p");
+                                    frage.innerText = station.question;
+                                    document.body.appendChild(frage);
+
+                                    const input = document.createElement("input");
+                                    input.type = "text";
+                                    input.id = "antwort";
+                                    document.body.appendChild(input);
+
+                                    const btn = document.createElement("button");
+                                    btn.innerHTML = "Überprüfen";
+                                    document.body.appendChild(btn);
+
+
+                                    //Überprüfe Antwort
+                                    btn.onclick = function() {
+                                        const userAntwort = input.value.trim().toLocaleLowerCase();
+                                        const richtigeAntwort = station.answer.trim().toLowerCase();
+
+
+                                        //Entferne Quiz Interface
+                                        if (userAntwort == richtigeAntwort) {
+                                            map.removeLayer(marker); 
+                                            frage.remove();
+                                            input.remove();
+                                            btn.remove();
+                                            verbleibendeStationen = verbleibendeStationen - 1;
+
+                                            stationFertig();
+                                            
+
+                                            
+                                            inventar.push(station.getItem);
+                                            zeigeInventar();
+
+                                            overworldMusic(data);
+
+                                            
+
+                                            if (verbleibendeStationen == 0) {
+                                                alert("Du hast alles Abgeschlossen!");
+                                                inventar = []
+                                                zeigeInventar();
+                                                stationFertig();
+                                            }
+
+
+                                        } else {
+                                            alert("Falsche Antwort");
+                                        }
+                                    }
+
+                                    
+                                } else if(station.type = find) {
+
+                                    const myImg = document.createElement('img');
+
+
+                                }
+
+
+                            } else {
+                                alert("Du bist noch " + dist + " Meter von der Station entfernt");
+                            } 
+
+                            
+
+                        }
+
+                        
+
+
+                    )
+                    } else {
+                        alert("Du brauchst erst " + gesucht + " bevor du auf diese Station zugreifen kannst")
+                    }
+
+
+
+                    
+
+                    
+
+                });
+                
+
+             });
+
+        }
+        
+       
+
+    </script>
+
+    
+
+
 </body>
