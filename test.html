@@ -108,7 +108,7 @@
           overlay.style.width = "100vw";
           overlay.style.height = "100vh";
           overlay.style.zIndex = "1000";
-          overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+          overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
 
           const frage = document.createElement("p");
           frage.innerText = frageText;
@@ -217,9 +217,7 @@
                                         //Entferne Quiz Interface
                                         if (userAntwort == richtigeAntwort) {
                                             map.removeLayer(marker); 
-                                            frage.remove();
-                                            input.remove();
-                                            btn.remove();
+                                            overlay.remove();
                                             verbleibendeStationen = verbleibendeStationen - 1;
 
                                             stationFertig();
