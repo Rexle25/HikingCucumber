@@ -112,13 +112,15 @@
 
           const frage = document.createElement("p");
           frage.innerText = frageText;
+          frage.style.color = "black";
 
           const input = document.createElement("input");
           input.type = "text";
+          input.style.margin = "auto";
 
           const btn = document.createElement("button");
-
           btn.innerText = "Überprüfen";
+          btn.style.margin = "auto";
 
           overlay.appendChild(frage);
           overlay.appendChild(input);
