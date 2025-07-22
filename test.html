@@ -27,6 +27,10 @@
 
     <button onclick="help()" style="margin-right: auto; border-radius: 200px;">?</button> 
 
+    <button onclick="save()">Speichere das Spiel</button>
+
+    <button onclick="load()">Lade das Spiel vom letzten Speicherstand</button>
+
 
     <h1>Schnitzeljagd spielen</h1>
     <p>JSON von Schnitzeljagd hier einfügen</p>
@@ -62,6 +66,9 @@
         iframe.height = "200";
         iframe.frameBorder = "0";
         iframe.zIndex = "2000";
+
+        var gemachteStationen = [];
+        let verbleibendeStationenSave;
         
         
 
@@ -137,7 +144,16 @@
 
           
         }
-         
+
+        function save() {
+
+          localStorage.setItem("inventar", JSON.stringify(inventar));
+
+        }
+        
+        function load() {
+          
+        }
 
                         
 
@@ -223,6 +239,7 @@
 
                                         //Entferne Quiz Interface
                                         if (userAntwort == richtigeAntwort) {
+                                            gemachteStationen.push(marker);
                                             map.removeLayer(marker); 
                                             overlay.remove();
                                             verbleibendeStationen = verbleibendeStationen - 1;
