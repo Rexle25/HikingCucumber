@@ -110,6 +110,9 @@
           overlay.style.height = "100vh";
           overlay.style.zIndex = "1000";
           overlay.style.backgroundImage = "url(textures/paper.png)";
+          overlay.style.display = "flex";
+          overlay.style.flexDirection = "column";
+          overlay.style.alignItems = "center";
 
           const frage = document.createElement("p");
           frage.innerText = frageText;
