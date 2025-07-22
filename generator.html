@@ -1,176 +1,107 @@
 <!DOCTYPE html>
-<html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Schnitzeljagd Generator</title>
-  <style>
-    .station { border: 2px solid #ccc; padding: 10px; margin: 10px 0; cursor: pointer; }
-    .station input, .station select { display: block; margin-bottom: 5px; }
-    button { margin-top: 5px; }
-    .selected { border-color: green; background-color: #f0fff0; }
-  </style>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <title>Generator</title>
 </head>
+
 <body>
 
-  <h1>Schnitzeljagd Generator</h1>
+<button onclick="addBox()">Klicke für neue Station</button>
 
-  <!-- Option für konstante Overworld-Musik -->
-  <label>
-    <input type="checkbox" id="constantMusicCheckbox" /> Constant Music
-  </label>
-  <br />
 
-  <!-- Global music URL Eingang -->
-  <label>
-    Overworld Music (YouTube URL):
-    <input type="text" id="globalMusic" placeholder="https://www.youtube.com/watch?v=..." style="width: 100%;" />
-  </label>
 
-  <div id="stationsContainer"></div>
-  
-  <button onclick="addStation()">Neue Station hinzufügen</button>
-  <button onclick="generateJSON()">JSON generieren</button>
+<script>
 
-  <pre id="output" style="background:#eee; padding:10px; margin-top:20px;"></pre>
+function addBox() {
 
-  <h2>Karte</h2>
-  <div id="map" style="height: 400px;"></div>
-  <p>Klicke auf eine Station, dann auf die Karte, um Koordinaten zu setzen.</p>
+  const box = document.createElement("div");
+  box.classList.add("station");
+  box.innerHTML = `
+    <hr>
+    <label>Name: <input type="text" class="nameInput"></label><br>
+    <label>Frage: <input type="text" class="questionInput"></label><br>
+    <label>Antwort: <input type="text" class="answerInput"></label><br>
+    <label>Musik-URL: <input type="text" class="musicInput"></label><br>
+    <label>Give Item: <input type="text" class="giveItemInput"></label><br>
+    <label>Get Item: <input type="text" class="getItemInput"></label><br>
+    <label>Lat: <input type="text" class="latInput" readonly></label>
+    <label>Lon: <input type="text" class="lonInput" readonly></label>
+    <div class="map" style="height: 200px;"></div>
+  `;
+  document.getElementById("stationContainer").appendChild(box);
 
-  <script>
-    let selectedStationDiv = null;
-    let activeMarker = null;
+  setupMapInBox(box);
 
-    // Hilfsfunktion: YouTube URL -> embed-loop URL
-    function convertYouTubeURLtoEmbedLoop(url) {
-      const match = url.match(/(?:v=|\/embed\/|\.be\/)([a-zA-Z0-9_-]{11})/);
-      if (!match) return null;
-      const id = match[1];
-      return `https://www.youtube.com/embed/${id}?autoplay=1&loop=1&playlist=${id}`;
+
+}
+
+function setupMapInBox(box) {
+  const mapDiv = box.querySelector(".map");
+  const map = L.map(mapDiv).setView([46.9, 7.4], 8);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+  let marker;
+  map.on("click", function(e) {
+    if (marker) marker.remove();
+    marker = L.marker(e.latlng).addTo(map);
+    box.querySelector(".latInput").value = e.latlng.lat;
+    box.querySelector(".lonInput").value = e.latlng.lng;
+  });
+}
+
+
+
+
+
+function youtubeToEmbed(url) {
+  const match = url.match(/v=([^&]+)/);
+  if (!match) return url;
+  const id = match[1];
+  return `https://www.youtube.com/embed/${id}?autoplay=1&loop=1&playlist=${id}`;
+}
+
+function generateJSON() {
+  const stationElements = document.querySelectorAll(".station");
+  const stations = [];
+
+  stationElements.forEach(box => {
+    const name = box.querySelector(".nameInput").value;
+    const question = box.querySelector(".questionInput").value;
+    const answer = box.querySelector(".answerInput").value;
+    const giveItem = box.querySelector(".giveItemInput").value;
+    const getItem = box.querySelector(".getItemInput").value;
+    const musicRaw = box.querySelector(".musicInput").value;
+    const music = youtubeToEmbed(musicRaw);
+    const lat = parseFloat(box.querySelector(".latInput").value);
+    const lon = parseFloat(box.querySelector(".lonInput").value);
+
+    if (!name || isNaN(lat) || isNaN(lon)) {
+      alert("Fehlende Angaben bei Station. Bitte alles ausfüllen.");
+      return;
     }
 
-    function addStation() {
-      const container = document.getElementById("stationsContainer");
-      const div = document.createElement("div");
-      div.className = "station";
-      div.innerHTML = `
-        <label>Name: <input type="text" class="name"></label>
-        <label>Latitude: <input type="number" step="any" class="lat"></label>
-        <label>Longitude: <input type="number" step="any" class="lon"></label>
-        <label>Gib Item: <input type="text" class="giveItem"></label>
-        <label>Bekomme Item: <input type="text" class="getItem"></label>
-        <label>Typ:
-          <select class="type" onchange="toggleTypeFields(this)">
-            <option value="quiz">quiz</option>
-            <option value="find">find</option>
-          </select>
-        </label>
+    stations.push({ name, question, answer, giveItem, getItem, music, lat, lon, type: "quiz" });
+  });
 
-        <!-- Stationspezifische Musik URL -->
-        <label>Station Music (YouTube URL): <input type="text" class="stationMusic" placeholder="https://www.youtube.com/watch?v=..." style="width:100%;"></label>
+  const fullData = {
+    constantMusic: false,
+    music: "",
+    stations: stations
+  };
 
-        <div class="quizFields" style="display:none;">
-          <label>Frage: <input type="text" class="question"></label>
-          <label>Antwort: <input type="text" class="answer"></label>
-        </div>
+  document.getElementById("outputArea").value = JSON.stringify(fullData, null, 2);
+}
 
-        <div class="findFields" style="display:none;">
-          <label>Bild-URL: <input type="text" class="image"></label>
-          <label>Objekt-URL: <input type="text" class="target"></label>
-          <label>Breite (px): <input type="number" class="targetWidth" value="50"></label>
-          <label>Höhe (px): <input type="number" class="targetHeight" value="50"></label>
-        </div>
 
-        <button onclick="this.parentElement.remove()">❌ Löschen</button>
-      `;
 
-      div.onclick = () => {
-        document.querySelectorAll(".station").forEach(d => d.classList.remove("selected"));
-        div.classList.add("selected");
-        selectedStationDiv = div;
-      };
 
-      container.appendChild(div);
-    }
 
-    function toggleTypeFields(selectElement) {
-      const station = selectElement.closest(".station");
-      station.querySelector(".quizFields").style.display = selectElement.value === "quiz" ? "block" : "none";
-      station.querySelector(".findFields").style.display = selectElement.value === "find" ? "block" : "none";
-    }
 
-    function generateJSON() {
-      const constantMusic = document.getElementById("constantMusicCheckbox").checked;
-      const globalInput = document.getElementById("globalMusic").value.trim();
-      const globalEmbed = convertYouTubeURLtoEmbedLoop(globalInput) || "";
 
-      const stationDivs = document.querySelectorAll(".station");
-      const stations = [];
 
-      stationDivs.forEach(div => {
-        const type = div.querySelector(".type").value;
-        const station = {
-          name: div.querySelector(".name").value,
-          lat: parseFloat(div.querySelector(".lat").value),
-          lon: parseFloat(div.querySelector(".lon").value),
-          giveItem: div.querySelector(".giveItem").value,
-          getItem: div.querySelector(".getItem").value,
-          type: type
-        };
+</script>
 
-        // Stationspezifische Musik
-        const smInput = div.querySelector(".stationMusic").value.trim();
-        const smEmbed = convertYouTubeURLtoEmbedLoop(smInput);
-        if (smEmbed) station.music = smEmbed;
+<button onclick="generateJSON()">🚀 JSON erstellen</button>
+<textarea id="outputArea" style="width: 100%; height: 300px;"></textarea>
 
-        if (type === "quiz") {
-          station.question = div.querySelector(".question").value;
-          station.answer = div.querySelector(".answer").value;
-        }
-
-        if (type === "find") {
-          station.image = div.querySelector(".image").value;
-          station.target = div.querySelector(".target").value;
-          station.targetSize = {
-            width: parseInt(div.querySelector(".targetWidth").value),
-            height: parseInt(div.querySelector(".targetHeight").value)
-          };
-        }
-
-        stations.push(station);
-      });
-
-      const outputObj = { constantMusic, music: globalEmbed, stations };
-      const finalJSON = JSON.stringify(outputObj, null, 4);
-      document.getElementById("output").textContent = finalJSON;
-
-      const blob = new Blob([finalJSON], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "schnitzeljagd.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    const map = L.map('map').setView([46.94809, 7.44744], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-
-    map.on('click', e => {
-      if (!selectedStationDiv) {
-        alert("Bitte zuerst eine Station auswählen!");
-        return;
-      }
-      const { lat, lng } = e.latlng;
-      selectedStationDiv.querySelector(".lat").value = lat.toFixed(6);
-      selectedStationDiv.querySelector(".lon").value = lng.toFixed(6);
-
-      if (activeMarker) activeMarker.setLatLng(e.latlng);
-      else activeMarker = L.marker(e.latlng).addTo(map);
-    });
-  </script>
 
 </body>
-</html>
