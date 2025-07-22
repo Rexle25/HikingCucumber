@@ -126,6 +126,8 @@
           document.body.appendChild(overlay);
 
           return {overlay, input, btn};
+
+          
         }
          
 
@@ -202,18 +204,7 @@
                                 //Generiere das Quiz Station Interface
 
                                 if (station.type == "quiz") {
-                                    const frage = document.createElement("p");
-                                    frage.innerText = station.question;
-                                    document.body.appendChild(frage);
-
-                                    const input = document.createElement("input");
-                                    input.type = "text";
-                                    input.id = "antwort";
-                                    document.body.appendChild(input);
-
-                                    const btn = document.createElement("button");
-                                    btn.innerHTML = "Überprüfen";
-                                    document.body.appendChild(btn);
+                                    const {overlay, input, btn} = createQuestionOverlay(station.question);
 
 
                                     //Überprüfe Antwort
