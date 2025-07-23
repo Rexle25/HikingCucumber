@@ -28,6 +28,9 @@
 
 <body>
 
+
+     <script src="achievments.js"></script> 
+
     <button onclick="help()" style="margin-right: auto; border-radius: 200px;">?</button> 
 
     <button onclick="save()">Speichere das Spiel</button>
@@ -62,18 +65,7 @@
     <script>
 
         setInterval(() => {
-            navigator.geolocation.getCurrentPosition( pos => {
-
-
-                alert(pos.coords.altitude);
-                alert(pos.coords.altitudeAccuracy);
-                alert("sus");
-                alert(pos.coords.speed);
-
-            }
-
-
-            )
+            achievments();
             
 
 
