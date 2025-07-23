@@ -160,10 +160,21 @@
 
 
 
-            temporäresInventar = jsonParse(localStorage.inventar);
+            temporäresInventar = json.Parse(localStorage.inventar);
+            gemachteStationen = json.Parse(localStorage.markers)
             inventar = temporäresInventar;
             zeigeInventar();
             alert(temporäresInventar);
+            
+            gemachteStationen((marker) => {
+
+                map.removeLayer(marker);
+                verbleibendeStationen++;
+
+            }
+        
+        
+        )
 
         }
 
