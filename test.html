@@ -62,7 +62,15 @@
     <script>
 
         setInterval(() => {
-            alert("sus");
+            navigator.gelocation.getCurrentPosition( pos => {
+
+
+                alert(pos.coords.altitude);
+
+            }
+
+
+            )
             
 
 
