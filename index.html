@@ -17,5 +17,14 @@
     <a href="https://hikingcucumber.netlify.app/play">Starte jetzt die Schnitzeljagd</a> <br>
     <a href="https://hikingcucumber.netlify.app/generatortest">Erstelle eine Schnitzeljagd</a>
 
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log('Service Worker registriert'))
+        .catch((err) => console.error('Service Worker Registrierung fehlgeschlagen:', err));
+    }
+    </script>
+
+
 
 </body>
