@@ -157,7 +157,13 @@
         
         function load() {
 
-          alert(jsonParse(localStorage.inventar));
+
+
+
+            temporäresInventar = jsonParse(localStorage.inventar);
+            inventar = temporäresInventar;
+            zeigeInventar();
+            alert(temporäresInventar);
 
         }
 
