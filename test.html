@@ -152,6 +152,7 @@
 
           localStorage.setItem("inventar", JSON.stringify(inventar));
           localStorage.setItem("markers", JSON.stringify(gemachteStationen));
+          alert("save");
 
         }
         
@@ -159,7 +160,7 @@
 
 
 
-
+            alert("load");
             temporäresInventar = json.Parse(localStorage.inventar);
             gemachteStationen = json.Parse(localStorage.markers)
             inventar = temporäresInventar;
