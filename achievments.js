@@ -4,10 +4,14 @@ function achievments() {
 
 
                 alert(pos.coords.altitude);
-                alert(pos.coords.altitudeAccuracy);
-                alert("sus");
-                alert(pos.coords.speed);
-                alert("Gurke");
+
+                localStorage.setItem(sus, "sus");
+                alert(localStorage.getItem(sus));
+
+
+                
+
+
 
                 
 
