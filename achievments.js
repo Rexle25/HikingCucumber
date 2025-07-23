@@ -7,6 +7,7 @@ function achievments() {
                 alert(pos.coords.altitudeAccuracy);
                 alert("sus");
                 alert(pos.coords.speed);
+                alert("Gurke");
 
                 
 
