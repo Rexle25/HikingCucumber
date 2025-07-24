@@ -5,8 +5,8 @@ function achievments() {
 
                 alert(pos.coords.altitude);
 
-                localStorage.setItem(sus, "sus");
-                alert(localStorage.getItem(sus));
+                localStorage.setItem("sus", "sus");
+                alert(localStorage.getItem("sus"));
 
 
                 
