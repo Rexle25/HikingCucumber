@@ -190,8 +190,10 @@
             
             gemachteStationen.forEach((marker) => {
 
+
+                alert("sus");
                 map.removeLayer(marker);
-                verbleibendeStationen++;
+                verbleibendeStationen = verbleibendeStationen -1;
 
             }
         
