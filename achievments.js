@@ -3,10 +3,12 @@ function achievments() {
     navigator.geolocation.getCurrentPosition( pos => {
 
 
-                alert(pos.coords.altitude);
+                if (pos.coords.altitude > 500) {
 
-                localStorage.setItem("sus", "sus");
-                alert(localStorage.getItem("sus"));
+                    alert("Hügelgurke");
+
+                }
+                
 
 
                 
