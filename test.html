@@ -180,8 +180,8 @@
 
 
             alert("load");
-            temporäresInventar = json.parse(localStorage.inventar);
-            gemachteStationen = json.parse(localStorage.markers)
+            temporäresInventar = JSON.parse(localStorage.getItem("inventar"));
+            gemachteStationen = JSON.parse(localStorage.getItem("markers"));
             inventar = temporäresInventar;
             zeigeInventar();
             alert(temporäresInventar);
