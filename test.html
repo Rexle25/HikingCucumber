@@ -172,7 +172,8 @@
         function save() {
 
           localStorage.setItem("inventar", JSON.stringify(inventar));
-          localStorage.setItem("markers", JSON.stringify(gemachteStationen));
+          const markerCoords = gemachteStationen.map(marker => [marker.getLatLng().lat, marker.getLatLng().lng]);
+          localStorage.setItem("markers", JSON.stringify(markerCoords));
           alert("save");
 
         }
@@ -188,17 +189,25 @@
             zeigeInventar();
             
             
-            gemachteStationen.forEach((marker) => {
-
-
-                alert("sus");
-                map.removeLayer(marker);
-                verbleibendeStationen = verbleibendeStationen -1;
-
+           if (markerCoords) {
+                markerCoords.forEach(coords => {
+                
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Marker) {
+                    const layerLatLng = layer.getLatLng();
+                    if (layerLatLng.lat === coords[0] && layerLatLng.lng === coords[1]) {
+                        map.removeLayer(layer);
+                        gemachteStationen.push(layer);
+                        verbleibendeStationen--;
+                    }
+                    }
+                });
+                });
             }
+
         
         
-        )
+        
 
         }
 
