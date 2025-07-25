@@ -41,5 +41,5 @@ function showAchievments() {
         
     }
 
-    createAchievment("gurkensus", "eine suse gurke", localStorage.getItem("gurkensus"));
+    createAchievment("Hügelgurke", "Sei mindestens 500 meter über dem Meer", localStorage.getItem("hügelgurke"));
 }
