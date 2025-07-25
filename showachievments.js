@@ -3,6 +3,10 @@ function showAchievments() {
 
     function createAchievment(titeltext, descriptiontext, bool) {
 
+        const oben = document.createElement("p");
+        oben.innerHTML = "______________________________";
+        document.body.appendChild(oben);
+
         const title = document.createElement("h2");
         title.innerHTML = titeltext;
         document.body.appendChild(title);
