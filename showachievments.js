@@ -33,6 +33,10 @@ function showAchievments() {
         
         document.body.appendChild(finished);
 
+        const unten = document.createElement("p");
+        unten.innerHTML = "______________________________";
+        document.body.appendChild(unten);
+
         
         
     }
