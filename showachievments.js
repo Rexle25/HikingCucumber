@@ -26,7 +26,7 @@ function showAchievments() {
 
         }
 
-        finished.innerHTML = bool;
+        
         document.body.appendChild(finished);
 
         
