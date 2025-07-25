@@ -8,10 +8,18 @@ function showAchievments() {
         document.body.appendChild(title);
 
         const description = document.createElement("p");
-        title.innerHTML = descriptiontext;
+        description.innerHTML = descriptiontext;
         document.body.appendChild(description);
 
         const finished = document.createElement("p");
+
+        if (bool = null) {
+            finished.innerHTML = "false";
+        } else {
+            finished.innerHTML = "true";
+
+        }
+
         finished.innerHTML = bool;
         document.body.appendChild(finished);
 
