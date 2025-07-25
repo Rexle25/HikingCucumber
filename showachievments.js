@@ -13,7 +13,7 @@ function showAchievments() {
 
         const finished = document.createElement("p");
 
-        if (bool = null) {
+        if (bool === null) {
             finished.innerHTML = "false";
         } else {
             finished.innerHTML = "true";
