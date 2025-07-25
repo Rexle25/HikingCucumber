@@ -8,7 +8,7 @@ function achievments() {
                     var hügelgurke = localStorage.getItem("hügelgurke");
                     alert(hügelgurke);
 
-                    if (hügelgurke = null) {
+                    if (hügelgurke === null) {
                         alert("nullgurke");
                         localStorage.setItem("hügelgurke", "true")
                     } else {
