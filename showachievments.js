@@ -11,12 +11,18 @@ function showAchievments() {
         description.innerHTML = descriptiontext;
         document.body.appendChild(description);
 
+
+        const bestanden = document.createElement("h3");
+        bestanden.innerHTML = "Bereits gemacht:";
+        document.body.appendChild(bestanden);
+
+
         const finished = document.createElement("p");
 
         if (bool === null) {
-            finished.innerHTML = "false";
+            finished.innerHTML = "Nein";
         } else {
-            finished.innerHTML = "true";
+            finished.innerHTML = "Ja";
 
         }
 
