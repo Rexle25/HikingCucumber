@@ -37,3 +37,13 @@ iframe {
      bottom: 3%;
      left: 3%;
 }
+h3 {
+     color: bisque;
+     text-align: center;
+     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+h2 {
+     color: bisque;
+     text-align: center;
+     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
