@@ -5,7 +5,9 @@ function achievments() {
 
                 if (pos.coords.altitude > 500) {
 
-                    alert("Hügelgurke");
+                    var hügelgurke = localStorage.getItem("hügelgurke");
+                    alert(hügelgurke);
+                    
 
                 }
                 
