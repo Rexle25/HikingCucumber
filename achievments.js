@@ -36,5 +36,14 @@ function achievments() {
 
 }
 
+function addPoints(pointsToAdd) {
+
+    let temporärePunkte = parseInt(localStorage.getItem("punkte")) || 0;
+    let neuePunkte = temporärePunkte + pointsToAdd;
+    localStorage.setItem("punkte", neuePunkte);
+
+
+}
+
 
 
