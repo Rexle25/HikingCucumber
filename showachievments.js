@@ -74,6 +74,8 @@ function showAchievments() {
         
     }
 
+    showLevel();
+
     createAchievment("Hügelgurke", "Sei mindestens 500 Meter über dem Meer", localStorage.getItem("hügelgurke"));
     createAchievment("Berggurke", "Sei mindestens 1000 Meter über dem Meer", localStorage.getItem("berggurke"));
 }
