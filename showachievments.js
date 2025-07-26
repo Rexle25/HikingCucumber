@@ -1,6 +1,37 @@
 function showAchievments() {
 
 
+    function showLevel() {
+
+
+        var punkte = localStorage.getItem("punkte");
+
+        switch (punkte) {
+
+
+            case punkte === null 
+
+        }
+
+    }
+
+    function renderLevel(name, playerpoints, maxPoints) {
+
+        const levelRender = document.createElement("h3");
+        levelRender.innerHTML = name;
+        document.body.appendChild(levelRender);
+
+        const pointsRender = document.createElement("h3");
+        pointsRender.innerHTML = playerpoints + "/" + maxPoints;
+        document.body.appendChild(pointsRender);
+
+
+
+
+
+
+    }
+
     function createAchievment(titeltext, descriptiontext, bool) {
 
         const oben = document.createElement("p");
