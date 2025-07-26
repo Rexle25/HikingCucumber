@@ -57,7 +57,14 @@
             let markerLat = lat + random;
             let markerLon = lon + random2;
 
-            let marker = L.marker([markerLat, markerLon ]).addTo(map)
+            var marker = L.marker([markerLat, markerLon ]).addTo(map)
+
+            var circle = L.circle([lat, lon], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.5,
+                radius: 10
+            }).addTo(map);  
 
 
         }
