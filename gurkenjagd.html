@@ -54,7 +54,7 @@
 
             lat = pos.coords.latitude;
             lon = pos.coords.longitude;
-            var markerGroup = L.layerGroup().addTo(map);
+            
 
         
 
@@ -62,8 +62,37 @@
 
                 random = (Math.random() * 0.002) -0.001;
                 random2 = (Math.random() * 0.002) -0.001;
+                markerLat = lat + random;
+                markerLon = lon + random;
 
-                L.marker([lat + random, lon + random2]).addTo(markerGroup);
+
+                var marker = L.marker([markerLon, markerLat ]).addTo(map).on('click', function(e) {
+
+
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            const lat = pos.coords.latitude;
+                            const lon = pos.coords.longitude;
+                            const dist = Math.hypot(
+                                station.lat - lat,
+                                station.lon - lon
+                            ) * 111000;
+
+                            
+                            
+                            if (dist < 50) {
+
+                                
+
+                            }
+
+                        }
+
+                    )
+                        
+
+                        
+                })
 
             }
 
