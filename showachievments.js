@@ -13,7 +13,23 @@ function showAchievments() {
 
         } else if (punkte >= 10 && punkte < 20) {
 
-            renderLevel("Anfängergurke", punkte, 20 )
+            renderLevel("Anfängergurke", punkte, 20)
+
+        } else if (punkte >= 20 && punkte < 30) {
+
+            renderLevel("Fortgeschrittene Gurke", punkte, 30)
+
+        } else if (punkte >= 30 && punkte < 50) {
+
+            renderLevel("Wandergurke", punkte, 50)
+
+        } else if (punkte >= 50 && punkte < 100) {
+
+            renderLevel("Elite Gurke", punkte, 100)
+
+        } else if (punkte >= 100 && punkte < 1000) {
+
+            renderLevel("Legendäre Wandergurke", punkte, 1000)
 
         }
 
