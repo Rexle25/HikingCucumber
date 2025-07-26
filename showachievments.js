@@ -9,7 +9,9 @@ function showAchievments() {
         switch (punkte) {
 
 
-            case punkte === null 
+            case punkte === null:
+            renderLevel(Losergurke, 0, 10);
+            break;
 
         }
 
