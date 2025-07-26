@@ -11,6 +11,10 @@ function showAchievments() {
 
             renderLevel("Losergurke", 0, 10 )
 
+        } else if (punkte >= 10 && punkte < 20) {
+
+            renderLevel("Anfängergurke", punkte, 20 )
+
         }
 
 
