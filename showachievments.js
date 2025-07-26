@@ -4,9 +4,10 @@ function showAchievments() {
     function showLevel() {
 
 
-        var punkte = localStorage.getItem("punkte");
+        let punkte = parseInt(localStorage.getItem("punkte")) || 0;
 
-        if (punkte === null) {
+
+        if (punkte === 0) {
 
             renderLevel("Losergurke", 0, 10 )
 
