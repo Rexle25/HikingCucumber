@@ -74,8 +74,8 @@
                             const lat = pos.coords.latitude;
                             const lon = pos.coords.longitude;
                             const dist = Math.hypot(
-                                station.lat - lat,
-                                station.lon - lon
+                                markerLat - lat,
+                                markerLon - lon
                             ) * 111000;
 
                             
