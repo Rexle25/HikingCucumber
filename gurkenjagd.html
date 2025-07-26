@@ -54,6 +54,18 @@
 
             lat = pos.coords.latitude;
             lon = pos.coords.longitude;
+            var markerGroup = L.layerGroup().addTo(map);
+
+        
+
+            for (let i = 0; i < 10; i++) {
+
+                random = (Math.random() * 0.02) -1;
+                random2 = (Math.random() * 0.02) -1;
+
+                L.marker([lat + random, lon + random2]).addTo(markerGroup);
+
+            }
 
 
 
@@ -62,20 +74,11 @@
 
         )
 
-        var markerGroup = L.layerGroup().addTo(map);
-
         
 
-        for (let i = 0; i < 10; i++) {
-
-            random = (Math.random() * 0.02) -1;
-            random2 = (Math.random() * 0.02) -1;
-
-            L.marker([lat + random, lon + random2]).addTo(markerGroup);
 
 
-
-        }
+        
 
         
 
