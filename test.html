@@ -68,7 +68,7 @@
 
         setInterval(() => {
             achievments();
-            addPoints(10);
+            
             
 
 
@@ -286,6 +286,7 @@
                                             map.removeLayer(marker); 
                                             overlay.remove();
                                             verbleibendeStationen = verbleibendeStationen - 1;
+                                            addPoints(10);
 
                                             stationFertig();
                                             
