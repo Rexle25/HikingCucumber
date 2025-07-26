@@ -82,8 +82,11 @@
                             
                             if (dist < 50) {
 
-                                
+                                addPoints(1);
+                                map.removeLayer(marker); 
 
+                            } else {
+                                alert("Du bist noch " + dist + " Meter von diesem Ort entfernt")
                             }
 
                         }
