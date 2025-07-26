@@ -84,7 +84,23 @@
             navigator.geolocation.getCurrentPosition( pos => {
 
 
+            playerLat = pos.coords.latitude;
+            playerLon = pos.coords.longitude;
 
+            const step = 0.00005;
+
+            const dLat = playerLat - markerLat;
+            const dLon = playerLon - markerLon;
+
+            const dist = Math.sqrt(dLat * dLat + dLon * dLon);
+
+            const dirLat = dLat / dist;
+            const dirLon = dLon / dist;
+
+            gurkeLat += dirLat * step;
+            gurkeLon += dirLon * step;
+
+            gurke.setLatLng([gurkeLat, gurkeLon]);
 
 
             })
