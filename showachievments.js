@@ -6,14 +6,18 @@ function showAchievments() {
 
         var punkte = localStorage.getItem("punkte");
 
-        switch (punkte) {
+        if (punkte === null) {
 
-
-            case punkte === null:
-            renderLevel(Losergurke, 0, 10);
-            break;
+            renderLevel("Losergurke", "0", "10" )
 
         }
+
+
+            
+            
+            
+
+        
 
     }
 
