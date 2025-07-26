@@ -4,7 +4,7 @@ function showAchievments() {
     function showLevel() {
 
 
-        let punkte = parseInt(localStorage.getItem("punkte")) || 11;
+        let punkte = parseInt(localStorage.getItem("punkte")) || 0;
 
 
         if (punkte === 0) {
