@@ -31,6 +31,7 @@
         let lon;
         let random;
         let random2;
+        let randInt = Math.floor(Math.random < 0.5)
         navigator.geolocation.getCurrentPosition(
 
         pos => {
@@ -38,7 +39,9 @@
             lat = pos.coords.latitude;
             lon = pos.coords.longitude;
 
-            if (Math.random < 0.5) {
+            
+
+            if (randInt < 0.5) {
 
                 random = (Math.random() * 0.004);
                 random2 = (Math.random() * 0.004);
