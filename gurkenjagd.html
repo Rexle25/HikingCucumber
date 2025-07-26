@@ -13,6 +13,9 @@
 </head>
 
 <body>
+
+    <script src="achievments.js"></script> 
+
      <div id="map"></div>
 
      <script>
@@ -26,4 +29,54 @@
 
 
      </script>
+
+     <script>
+        var markerGroup = L.layerGroup().addTo(map);
+
+        setInterval(() => {
+            achievments();
+
+
+        }, 10000);
+
+
+     </script>
     
+    <script>
+
+        let lat;
+        let lon;
+        let random;
+        let random2;
+        navigator.geolocation.getCurrentPosition(
+
+        pos => {
+
+            lat = pos.coords.latitude;
+            lon = pos.coords.longitude;
+
+
+
+        }
+
+
+        )
+
+        var markerGroup = L.layerGroup().addTo(map);
+
+        
+
+        for (let i = 0; i < 10; i++) {
+
+            random = (Math.random() * 0.02) -1;
+            random2 = (Math.random() * 0.02) -1;
+
+            L.marker([lat + random, lon + random2]).addTo(markerGroup);
+
+
+
+        }
+
+        
+
+    </script>
