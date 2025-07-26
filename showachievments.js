@@ -8,7 +8,7 @@ function showAchievments() {
 
         if (punkte === null) {
 
-            renderLevel("Losergurke", "0", "10" )
+            renderLevel("Losergurke", 0, 10 )
 
         }
 
