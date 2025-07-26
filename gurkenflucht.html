@@ -31,6 +31,8 @@
         let lon;
         let random;
         let random2;
+        let markerLat;
+        let markerLon;
         let randInt = Math.floor(Math.random < 0.5)
         navigator.geolocation.getCurrentPosition(
 
@@ -54,21 +56,16 @@
             }
 
             
-            let markerLat = lat + random;
-            let markerLon = lon + random2;
+            markerLat = lat + random;
+            markerLon = lon + random2;
 
-            var gurke = L.circle([lat, lon], {
-                color: 'green',
-                fillColor: '#f03',
-                fillOpacity: 0.5,
-                radius: 10
-            }).addTo(map);  
+            var gurke = L.marker([markerLat, markerLon ]).addTo(map)
 
-            var gurke = L.circle([lat, lon], {
+            var player = L.circle([lat, lon], {
                 color: 'red',
                 fillColor: '#f03',
                 fillOpacity: 0.5,
-                radius: 30
+                radius: 10
             }).addTo(map);  
 
 
@@ -78,6 +75,24 @@
 
 
         )
+
+        var playerLat;
+        var playerLon;
+
+        setInterval(() => {
+
+            navigator.geolocation.getCurrentPosition( pos => {
+
+
+
+
+
+            })
+
+        }, 5000)
+    
+    
+    
 
 
     </script>
