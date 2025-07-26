@@ -89,12 +89,14 @@
             playerLat = pos.coords.latitude;
             playerLon = pos.coords.longitude;
 
-            const step = 0.00015;
+            
 
             const dLat = playerLat - markerLat;
             const dLon = playerLon - markerLon;
 
             const dist = Math.sqrt(dLat * dLat + dLon * dLon);
+
+            const step = 0.00015 * dist
 
             const dirLat = dLat / dist;
             const dirLon = dLon / dist;
