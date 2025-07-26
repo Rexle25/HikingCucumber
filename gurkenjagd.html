@@ -62,8 +62,8 @@
 
                 random = (Math.random() * 0.006) -0.003;
                 random2 = (Math.random() * 0.006) -0.003;
-                markerLat = lat + random;
-                markerLon = lon + random2;
+                let markerLat = lat + random;
+                let markerLon = lon + random2;
 
 
                 var marker = L.marker([markerLat, markerLon ]).addTo(map).on('click', function(e) {
