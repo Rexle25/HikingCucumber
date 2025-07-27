@@ -104,6 +104,7 @@
         });
         
         var dist;
+        
 
         setInterval(() => {
 
@@ -151,6 +152,16 @@
 
 
         }, 600000)
+
+        setInterval(() => {
+
+            var snd = new Audio("audio/sound5.mp3");
+            snd.play();
+            snd.currentTime=0;
+
+        }, dist * 10000)
+
+
     
         const types = ["Ablenkung", "Stoppen", "Aufhalten"]
     
