@@ -113,7 +113,7 @@
 
             const dist = Math.sqrt(dLat * dLat + dLon * dLon);
 
-            const step = 0.00006 + ((dist * 111000) ** 1.02) / 111000;
+            const step = 0.00006 + ((dist * 111000) ** 1.02) / 1110000;
 
             const dirLat = dLat / dist;
             const dirLon = dLon / dist;
