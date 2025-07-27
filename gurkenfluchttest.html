@@ -121,10 +121,12 @@
 
             dist = Math.sqrt(dLat * dLat + dLon * dLon);
 
+            let step;
+
             if (abgelenkt) {
-                const step = -0.0000006 + ((dist * 111000) ** 1.03) / 1110000000;
+                step = -0.0000006 + ((dist * 111000) ** 1.03) / 1110000000;
             } else {
-                const step = 0.0000006 + ((dist * 111000) ** 1.03) / 1110000000;
+                step = 0.0000006 + ((dist * 111000) ** 1.03) / 1110000000;
             }
 
             
@@ -204,7 +206,7 @@
                     abgelenkt = true;
 
                     setTimeout(() => {
-                        abegelenkt = false;
+                        abgelenkt = false;
                     }, 3000);
 
                 }
