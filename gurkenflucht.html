@@ -92,7 +92,7 @@
 
         setInterval(() => {
 
-            navigator.geolocation.watchPosition( pos => {
+            navigator.geolocation.getCurrentPosition( pos => {
 
 
             playerLat = pos.coords.latitude;
