@@ -156,13 +156,39 @@
     <video id="camera" autoplay playsinline style="position: fixed; width: 100%; height: 100%; object-fit: cover;"></video>
 
     <script>
-        
+
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
     .then(stream => {
         document.getElementById("camera").srcObject = stream;
     });
+
+    window.addEventListener('deviceorientationabsolute', function(event) {
+        if (event.absolute && event.alpha !== null) {
+            const heading = 360 - event.alpha;
+            
+        }
+    }, true);
+
+    function bearingToTarget(lat1, lon1, lat2, lon2) {
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const y = Math.sin(Δλ) * Math.cos(φ2);
+    const x = Math.cos(φ1)*Math.sin(φ2) -
+              Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
+    const θ = Math.atan2(y, x);
+    return (θ * 180 / Math.PI + 360) % 360;
+
+    }
+
+
     
     </script>
+
+    <div id="gurken-arrow" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    🥒
+    </div>
 
 
 </body>
