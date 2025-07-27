@@ -153,6 +153,16 @@
 
     </script>
 
+    <video id="camera" autoplay playsinline style="position: fixed; width: 100%; height: 100%; object-fit: cover;"></video>
+
+    <script>
+        
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+    .then(stream => {
+        document.getElementById("camera").srcObject = stream;
+    });
+    
+    </script>
 
 
 </body>
