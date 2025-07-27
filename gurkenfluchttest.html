@@ -140,15 +140,17 @@
 
             }
 
-            if (dist < 0.005 && audioPlaying === false) {
-                audioPlaying = true;
-                snd.play();
-
-                
+            if (dist < 0.005) {
+                if (!audioPlaying) {
+                    snd.play();
+                    audioPlaying = true;
+                }
             } else {
-                snd.pause();
-                snd.currentTime=0;
-                audioPlaying = false;
+                if (audioPlaying) {
+                    snd.pause();
+                    snd.currentTime = 0;
+                    audioPlaying = false;
+                }
             }
 
 
