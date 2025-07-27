@@ -174,11 +174,12 @@
 
     
         const types = ["Ablenkung", "Stoppen", "Aufhalten"]
-        const randomType = types[Math.floor(Math.random() * types.length)];
+        
     
         
         setInterval(() => {
 
+            const randomType = types[Math.floor(Math.random() * types.length)];
             let randomItem = (Math.random() * 0.006) -0.003;
             let random2Item = (Math.random() * 0.006) -0.003;
 
@@ -189,7 +190,7 @@
 
                 
 
-                
+                alert(randomType);
 
 
                 
