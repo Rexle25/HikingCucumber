@@ -48,7 +48,7 @@
         let gurke;
         let eingelegt;
         const randInt = Math.floor(Math.random() * 2);
-        navigator.geolocation.getCurrentPosition(
+        navigator.geolocation.watchPosition(
 
         pos => {
 
@@ -92,7 +92,7 @@
 
         setInterval(() => {
 
-            navigator.geolocation.getCurrentPosition( pos => {
+            navigator.geolocation.watchPosition( pos => {
 
 
             playerLat = pos.coords.latitude;
