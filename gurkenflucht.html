@@ -57,17 +57,14 @@
 
             
 
-            if (randInt < 0.5) {
+            const radiusInDegrees = 0.004; // ca. 400-500 m je nach Breitengrad
 
-                random = (Math.random() * 0.004);
-                random2 = (Math.random() * 0.004);
+            const angle = Math.random() * 2 * Math.PI;
+            const distance = Math.random() * radiusInDegrees;
 
-            } else {
+            random = Math.cos(angle) * distance;
+            random2 = Math.sin(angle) * distance;
 
-                random = (Math.random() * -0.004);
-                random2 = (Math.random() * -0.004);
-
-            }
 
             
             markerLat = lat + random;
