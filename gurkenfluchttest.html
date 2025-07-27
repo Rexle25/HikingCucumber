@@ -90,6 +90,7 @@
 
         var playerLat;
         var playerLon;
+        var audioPlaying;
         
 
         navigator.geolocation.watchPosition( pos => {
@@ -139,13 +140,16 @@
 
             }
 
-            if (dist > 0.0004) {
+            if (dist > 0.0004 && audioPlaying === false) {
+                audioPlaying = true;
                 var snd = new Audio("audio/music.mp3");
                 snd.play();
+
                 
             } else {
                 snd.pause
                 snd.currentTime=0;
+                audioPlaying = false;
             }
 
 
