@@ -140,7 +140,7 @@
 
             }
 
-            if (dist > 0.0004 && audioPlaying === false) {
+            if (dist < 0.0004 && audioPlaying === false) {
                 audioPlaying = true;
                 var snd = new Audio("audio/music.mp3");
                 snd.play();
