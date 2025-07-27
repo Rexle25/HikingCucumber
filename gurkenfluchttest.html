@@ -48,6 +48,7 @@
         let gurke;
         let eingelegt;
         let beepInterval;
+        let abgelenkt;
         const randInt = Math.floor(Math.random() * 2);
         navigator.geolocation.getCurrentPosition(
 
@@ -120,7 +121,13 @@
 
             dist = Math.sqrt(dLat * dLat + dLon * dLon);
 
-            const step = 0.0000006 + ((dist * 111000) ** 1.03) / 1110000000;
+            if (abgelenkt) {
+                const step = -0.0000006 + ((dist * 111000) ** 1.03) / 1110000000;
+            } else {
+                const step = 0.0000006 + ((dist * 111000) ** 1.03) / 1110000000;
+            }
+
+            
 
             const dirLat = dLat / dist;
             const dirLon = dLon / dist;
@@ -191,6 +198,16 @@
                 
 
                 alert(randomType);
+
+                if (randomType === "Ablenkung") {
+
+                    abgelenkt = true;
+
+                    setTimeout(() => {
+                        abegelenkt = false;
+                    }, 3000);
+
+                }
 
 
                 
