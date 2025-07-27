@@ -205,11 +205,13 @@
 
                     abgelenkt = true;
 
+                    map.removeLayer(marker); 
+
                     setTimeout(() => {
                         abgelenkt = false;
                     }, 20000);
 
-                    map.removeLayer(marker); 
+                    
 
                 }
 
