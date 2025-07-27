@@ -90,6 +90,7 @@
 
         var playerLat;
         var playerLon;
+        const dist = Math.sqrt(dLat * dLat + dLon * dLon);
 
         navigator.geolocation.watchPosition( pos => {
 
@@ -112,7 +113,7 @@
             const dLat = playerLat - markerLat;
             const dLon = playerLon - markerLon;
 
-            const dist = Math.sqrt(dLat * dLat + dLon * dLon);
+            dist = Math.sqrt(dLat * dLat + dLon * dLon);
 
             const step = 0.0000006 + ((dist * 111000) ** 1.03) / 1110000000;
 
@@ -124,9 +125,7 @@
 
             gurke.setLatLng([markerLat, markerLon]);
 
-            var snd = new Audio("audio/sound5.mp3");
-            snd.play();
-            snd.currentTime=dist * 500;
+            
 
             
 
