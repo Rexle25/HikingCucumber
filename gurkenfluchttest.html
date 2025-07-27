@@ -47,6 +47,7 @@
         let player;
         let gurke;
         let eingelegt;
+        let beepInterval;
         const randInt = Math.floor(Math.random() * 2);
         navigator.geolocation.getCurrentPosition(
 
@@ -122,6 +123,10 @@
             markerLon += dirLon * step;
 
             gurke.setLatLng([markerLat, markerLon]);
+
+            var snd = new Audio("audio/sound5.mp3");
+            snd.play();
+            snd.currentTime=dist * 500;
 
             
 
