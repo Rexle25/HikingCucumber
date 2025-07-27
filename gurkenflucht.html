@@ -90,15 +90,21 @@
         var playerLat;
         var playerLon;
 
-        
-
-        setInterval(() => {
-
-            navigator.geolocation.watchPosition( pos => {
+        navigator.geolocation.watchPosition( pos => {
 
 
             playerLat = pos.coords.latitude;
             playerLon = pos.coords.longitude;
+
+            player.setLatLng([playerLat, playerLon]);
+
+        
+        })
+        
+
+        setInterval(() => {
+
+            
 
             
 
@@ -117,7 +123,7 @@
 
             gurke.setLatLng([markerLat, markerLon]);
 
-            player.setLatLng([playerLat, playerLon]);
+            
 
             if (dist < 0.00010) {
 
@@ -129,7 +135,7 @@
 
 
 
-            })
+            
 
         }, 5000)
 
