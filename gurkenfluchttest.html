@@ -103,6 +103,7 @@
         
         });
         
+        var dist;
 
         setInterval(() => {
 
@@ -113,7 +114,7 @@
             const dLat = playerLat - markerLat;
             const dLon = playerLon - markerLon;
 
-            var dist = Math.sqrt(dLat * dLat + dLon * dLon);
+            dist = Math.sqrt(dLat * dLat + dLon * dLon);
 
             const step = 0.0000006 + ((dist * 111000) ** 1.03) / 1110000000;
 
