@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<head>
+    <title>Gurkenflucht</title>
+
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+    <script>
+
+        var map = L.map('map').setView([46.9480900, 7.4474400], 12);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        var greenIcon = L.icon({
+            iconUrl: 'cucumber.png',
+            shadowUrl: '',
+
+            iconSize:     [70, 17], // size of the icon
+            shadowSize:   [50, 64], // size of the shadow
+            iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
+            shadowAnchor: [4, 62],  // the same for the shadow
+            popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+        });
+
+        let lat;
+        let lon;
+        let random;
+        let random2;
+        let markerLat;
+        let markerLon;
+        let player;
+        let gurke;
+        let eingelegt;
+        const randInt = Math.floor(Math.random() * 2);
+        navigator.geolocation.getCurrentPosition(
+
+        pos => {
+
+            lat = pos.coords.latitude;
+            lon = pos.coords.longitude;
+
+            
+
+            const radiusInDegrees = 0.004; // ca. 400-500 m je nach Breitengrad
+
+            const angle = Math.random() * 2 * Math.PI;
+            const distance = radiusInDegrees;
+
+            random = Math.cos(angle) * distance;
+            random2 = Math.sin(angle) * distance;
+
+
+            
+            markerLat = lat + random;
+            markerLon = lon + random2;
+
+            gurke = L.marker([markerLat, markerLon ], {icon: greenIcon}).addTo(map)
+
+            player = L.circle([lat, lon], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.5,
+                radius: 10
+            }).addTo(map);  
+
+
+        }
+
+            
+
+
+        )
+
+        var playerLat;
+        var playerLon;
+
+        navigator.geolocation.watchPosition( pos => {
+
+
+            playerLat = pos.coords.latitude;
+            playerLon = pos.coords.longitude;
+
+            player.setLatLng([playerLat, playerLon]);
+
+        
+        });
+        
+
+        setInterval(() => {
+
+            
+
+            
+
+            const dLat = playerLat - markerLat;
+            const dLon = playerLon - markerLon;
+
+            const dist = Math.sqrt(dLat * dLat + dLon * dLon);
+
+            const step = 0.00006 + dist * 0.001
+
+            const dirLat = dLat / dist;
+            const dirLon = dLon / dist;
+
+            markerLat += dirLat * step;
+            markerLon += dirLon * step;
+
+            gurke.setLatLng([markerLat, markerLon]);
+
+            
+
+            if (dist < 0.00010) {
+
+                alert ("Du wurdest eingelegt");
+                eingelegt = true;
+
+            }
+
+
+
+
+            
+
+        }, 5000)
+
+        setInterval(() => {
+
+            alert("Du hast gewonnen!")
+
+
+
+        }, 600000)
+    
+    
+    
+
+
+    </script>
+
+
+
+</body>
