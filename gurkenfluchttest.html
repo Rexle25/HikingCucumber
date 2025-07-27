@@ -179,6 +179,28 @@
         setInterval(() => {
 
             const gewählterTyp = types[Math.floor(Math.random() * types.length)];
+            let marker = L.marker([0, 0 ]).addTo(map).on('click', function(e) {
+
+                const radiusInDegreesItem = 0.004;
+
+                const angleItem = Math.random() * 2 * Math.PI;
+                const distanceItem = radiusInDegreesItem;
+
+                random = Math.cos(angle) * distanceItem;
+                random2 = Math.sin(angle) * distanceItem;
+
+
+                let itemLat = playerLat + random;
+                let itemLon = playerLon + random2;
+
+                marker.setLatLng(itemLat, itemLon);
+
+
+                
+
+            })
+
+
             
             
 
