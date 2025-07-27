@@ -147,8 +147,16 @@
 
         }, 600000)
     
+        const types = ["Ablenkung", "Stoppen", "Aufhalten"]
     
-    
+        
+        setInterval(() => {
+
+            const gewählterTyp = array[Math.floor(Math.random() * array.length)];
+            alert(gewählterTyp)
+            
+
+        }, 5000)
 
 
     </script>
