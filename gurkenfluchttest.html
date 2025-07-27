@@ -178,14 +178,8 @@
         
         setInterval(() => {
 
-            const gewählterTyp = types[Math.floor(Math.random() * types.length)];
-            const radiusInDegreesItem = 0.004;
-
-            const angleItem = Math.random() * 2 * Math.PI;
-            const distanceItem = radiusInDegreesItem;
-
-            random = Math.cos(angleItem) * distanceItem;
-            random2 = Math.sin(angleItem) * distanceItem;
+            let randomItem = (Math.random() * 0.006) -0.003;
+            let random2Item = (Math.random() * 0.006) -0.003;
 
 
             let itemLat = playerLat + random;
