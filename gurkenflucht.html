@@ -92,7 +92,7 @@
 
         setInterval(() => {
 
-            navigator.geolocation.getCurrentPosition( pos => {
+            navigator.geolocation.watchPosition( pos => {
 
 
             playerLat = pos.coords.latitude;
@@ -105,7 +105,7 @@
 
             const dist = Math.sqrt(dLat * dLat + dLon * dLon);
 
-            const step = 0.00010 + dist * 0.001
+            const step = 0.00005 + dist * 0.001
 
             const dirLat = dLat / dist;
             const dirLon = dLon / dist;
