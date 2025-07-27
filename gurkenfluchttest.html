@@ -184,8 +184,8 @@
             let random2Item = (Math.random() * 0.006) -0.003;
 
 
-            let itemLat = playerLat + random;
-            let itemLon = playerLon + random2;
+            let itemLat = playerLat + randomItem;
+            let itemLon = playerLon + random2Item;
             let marker = L.marker([itemLat, itemLon ]).addTo(map).on('click', function(e) {
 
                 
