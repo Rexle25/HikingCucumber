@@ -46,6 +46,7 @@
         let markerLon;
         let player;
         let gurke;
+        let eingelegt;
         const randInt = Math.floor(Math.random() * 2);
         navigator.geolocation.getCurrentPosition(
 
@@ -122,6 +123,8 @@
             if (dist < 0.00010) {
 
                 alert ("Du wurdest eingelegt");
+                eingelegt = true;
+
             }
 
 
@@ -130,6 +133,14 @@
             })
 
         }, 5000)
+
+        setInterval(() => {
+
+            alert("Du hast gewonnen!")
+
+
+
+        }, 100000)
     
     
     
