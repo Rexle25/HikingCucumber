@@ -6,9 +6,6 @@ function getRegionData(lat, lon) {
     const north = lat + delta;
     const east = lon + delta;
 
-    console.log(lat);
-    console.log(lon);
-
     const query = `
     [out:json][timeout:25];
     (
@@ -22,19 +19,9 @@ function getRegionData(lat, lon) {
     out body;
     `;
 
-    fetch("https://overpass-api.de/api/interpreter", {
+    return fetch("https://overpass-api.de/api/interpreter", {
         method: "POST",
         body: query,
     })
-    .then((res) => res.json())
-    .then((data) => {
-        console.log("Gefundene Objekte:");
-        return data;
-        data.elements.forEach((el) => {
-            console.log(el.body);
-        });
-    })
-    .catch((err) => {
-        console.error("Fehler bei der Anfrage:", err);
-    });
+    .then((res) => res.json());
 }

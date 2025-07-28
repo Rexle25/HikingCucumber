@@ -64,8 +64,14 @@
             }).addTo(map); 
             
 
-            data = getRegionData(lat, lon);
-            console.log(data);
+            getRegionData(lat, lon).then(data => {
+                console.log("Gefundene Objekte:");
+                data.elements.forEach((el) => {
+                    const tags = el.tags || {};
+                    console.log(tags);
+                });
+            });
+
             
 
             for (let i = 0; i < 10; i++) {
