@@ -215,8 +215,8 @@
                 
 
                 const playerDist = Math.hypot(
-                    markerLat - lat,
-                    markerLon - lon
+                    itemLat - playerLat,
+                    itemLon - playerLon
                 ) * 111000;
 
                 if (playerDist < 200) {
