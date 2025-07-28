@@ -54,7 +54,19 @@ h2 {
     object-fit: cover;
 }
 
-body.red-alert {
-  filter: hue-rotate(-30deg) saturate(2) brightness(0.9);
-  transition: filter 0.5s ease;
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(255, 0, 0, 0.3); /* leicht durchsichtiges Rot */
+  pointer-events: none; /* damit man weiter klicken kann */
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 9999;
 }
+#overlay.active {
+  opacity: 1;
+}
+

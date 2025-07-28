@@ -16,6 +16,8 @@
 
 <body>
 
+    <div id="overlay"></div>
+
     <button onclick="startGame()" id="startknopf">Starte das Spiel</button>
 
     <div id="map"></div>
@@ -184,13 +186,13 @@
             }
 
             if (dist < 0.0007) {
-                document.body.classList.add("red-alert");
+                document.getElementById("overlay").classList.add("active");
                 if (!audioPlaying) {
                     snd.play();
                     audioPlaying = true;
                 }
             } else {
-                document.body.classList.remove("red-alert");
+                document.getElementById("overlay").classList.remove("active");
                 if (audioPlaying) {
                     snd.pause();
                     snd.currentTime = 0;
