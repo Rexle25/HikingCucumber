@@ -119,6 +119,7 @@
                 }
 
 
+                let aktuelleGurke = weighted_random(items, weights);
 
                 let marker = L.marker([markerLat, markerLon ]).addTo(map).on('click', function(e) {
 
@@ -132,7 +133,7 @@
                                 markerLon - lon
                             ) * 111000;
 
-                           let aktuelleGurke = weighted_random(items, weights);
+                           
                            alert(aktuelleGurke);
                             
                             
@@ -153,6 +154,10 @@
 
                         
                 })
+
+                
+
+
 
                 
 
