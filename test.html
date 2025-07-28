@@ -1,360 +1,37 @@
 <!DOCTYPE html>
 
 <head>
-    <title>Play</title>
-    <meta name="description" content="Create your own interactive scavenger hunts with puzzles.
-     Everything is free, open source and without ads.">
-     <meta name="keywords" content="scavenger hunt, free, open source, outdoor, game, no ads, no account, json, map, outside, website, browser game, riddle, 
-     location based game, web app, map based game">
-     <meta name="author" content="Rexle25">
 
-     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-
-     
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-
-      <link rel="stylesheet" href="style.css">
-
-      <link rel="manifest" href="manifest.json">
-
+    <title>TestyMcTestFace</title>
 
 </head>
-
-
 
 <body>
 
 
-     <script src="achievments.js"></script> 
-
-    <button onclick="help()" style="margin-right: auto; border-radius: 200px;">?</button> 
-
-    <button onclick="save()">Speichere das Spiel</button>
-
-    <button onclick="load()">Lade das Spiel vom letzten Speicherstand</button>
-
-
-    <h1>Schnitzeljagd spielen</h1>
-    <p>JSON von Schnitzeljagd hier einfügen</p>
-    <textarea id="JSONinput" rows = "10" cols = "30"></textarea>
-     <button onclick="jsonParse()" id="button">Drücke hier wenn du das JSON eingefügt hast</button> 
-
-     <p id="inventarAnzeige">Inventar: []</p>
-
-     <div id="map"></div>
-
-    
-
-    <script>
-        
-        var map = L.map('map').setView([46.9480900, 7.4474400], 12);
-
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-
-
-
-    </script>
-
     <script>
 
-        let data;
+        const lat = 46.660923;
+        const lon = 7.802994;
 
-        setInterval(() => {
-            achievments();
-            
-            
+        const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];
+        (
+        way(around:1,${lat},${lon})[landuse];
+        way(around:1,${lat},${lon})[natural];
+        way(around:1,${lat},${lon})[leisure];
+        );
+        out tags center;`;
 
-
-
-
-
-
-        }, 10000);
-    
-    
-    
-    
-    
-
-
-        
-        const iframe = document.createElement("iframe");
-        document.body.appendChild(iframe);
-        iframe.width = "200";
-        iframe.height = "200";
-        iframe.frameBorder = "0";
-        iframe.zIndex = "2000";
-
-        var gemachteStationen = [];
-        let verbleibendeStationenSave;
-        
-        
-
-        var inventar = [];
-        inventar.push("Gurke");
-
-        let lat = 0.0
-        let lon = 0.0
-        let verbleibendeStationen = 0;
-        let gesucht = "null"
-
-        
-        function zeigeInventar() {
-            document.getElementById("inventarAnzeige").innerText = "Inventar: " + inventar.join(", ");
-
-
-        }
-            
-        zeigeInventar();
-
-        function help() {
-            var snd = new Audio("audio/sound1.mp3");
-            snd.play();
-            snd.currentTime=0;
-        }
-
-        function stationFertig() {
-            var snd = new Audio("audio/sound4.mp3");
-            snd.play();
-            snd.currentTime=0;
-        }
-
-        function overworldMusic(data) {
-            
-            
-            iframe.src = data.music;
-            
-            
-        }
-
-        function createQuestionOverlay(frageText) {
-          const overlay = document.createElement("div");
-          overlay.style.position = "fixed";
-          overlay.style.top = "0";
-          overlay.style.left = "0";
-          overlay.style.width = "100vw";
-          overlay.style.height = "100vh";
-          overlay.style.zIndex = "1000";
-          overlay.style.backgroundImage = "url(textures/paper.png)";
-          overlay.style.display = "flex";
-          overlay.style.flexDirection = "column";
-          overlay.style.alignItems = "center";
-
-          const frage = document.createElement("p");
-          frage.innerText = frageText;
-          frage.style.color = "black";
-
-          const input = document.createElement("input");
-          input.type = "text";
-          input.style.marginBottom = "60px";
-
-          const btn = document.createElement("button");
-          btn.innerText = "Überprüfen";
-          btn.style.marginBottom = "40px";
-
-          overlay.appendChild(frage);
-          overlay.appendChild(input);
-          overlay.appendChild(btn);
-
-          document.body.appendChild(overlay);
-
-          return {overlay, input, btn};
-
-          
-        }
-
-        function save() {
-
-          localStorage.setItem("inventar", JSON.stringify(inventar));
-          
-          alert("save");
-
-        }
-        
-        function load() {
-
-
-
-            alert("load");
-            temporäresInventar = JSON.parse(localStorage.getItem("inventar"));
-            gemachteStationen = JSON.parse(localStorage.getItem("markers"));
-            inventar = temporäresInventar;
-            zeigeInventar();
-
-            
-            
-           
-
-        
-        
-        
-
-        }
-
-                        
-
-
-                    
-
-    </script>
-
-    <script>
-
-
-        function jsonParse(){
-
-
-            
-             JSONinput = document.getElementById("JSONinput").value;
-             
-
-            try {
-                data = JSON.parse(JSONinput);
-                
-            } catch (e) {
-                alert("Fehler beim Parsen des JSON:\n" + e.message);
+        fetch(overpassUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.elements.length > 0) {
+            const tags = data.elements[0].tags;
+            console.log("Ort:", tags);
+            } else {
+            console.log("Kein Flächentyp gefunden");
             }
-
-            if (!data.stations || !Array.isArray(data.stations)) {
-                alert("Keine gültigen Stationen im JSON gefunden."); 
-            }
-
-
-            const textarea = document.getElementById("JSONinput");
-            const button = document.getElementById("button");
-
-            
-
-            overworldMusic(data);
-
-            
-
-            textarea.remove();
-            button.remove();
-
-            
-             data.stations.forEach((station) => {
-                
-                verbleibendeStationen++;
-
-
-                
-
-                var marker = L.marker([station.lat, station.lon]).addTo(map).on('click', function(e) {
-
-                    gesucht = station.giveItem;
-
-                    if (inventar.includes(gesucht)) {
-
-                    navigator.geolocation.getCurrentPosition(
-                        pos => {
-                            const lat = pos.coords.latitude;
-                            const lon = pos.coords.longitude;
-                            const dist = Math.hypot(
-                                station.lat - lat,
-                                station.lon - lon
-                            ) * 111000;
-
-                            
-                            
-                            if (dist < 50) {
-
-                                iframe.src = station.music;
-
-                                //Generiere das Quiz Station Interface
-
-                                if (station.type == "quiz") {
-                                    const {overlay, input, btn} = createQuestionOverlay(station.question);
-
-
-                                    //Überprüfe Antwort
-                                    btn.onclick = function() {
-                                        const userAntwort = input.value.trim().toLocaleLowerCase();
-                                        const richtigeAntwort = station.answer.trim().toLowerCase();
-
-
-                                        //Entferne Quiz Interface
-                                        if (userAntwort == richtigeAntwort) {
-                                            gemachteStationen.push(station.name);
-                                            map.removeLayer(marker); 
-                                            overlay.remove();
-                                            verbleibendeStationen = verbleibendeStationen - 1;
-                                            addPoints(1);
-
-                                            stationFertig();
-                                            
-
-                                            
-                                            inventar.push(station.getItem);
-                                            zeigeInventar();
-
-                                            overworldMusic(data);
-
-                                            
-
-                                            if (verbleibendeStationen == 0) {
-                                                alert("Du hast alles Abgeschlossen!");
-                                                inventar = []
-                                                zeigeInventar();
-                                                stationFertig();
-                                            }
-
-
-                                        } else {
-                                            alert("Falsche Antwort");
-                                        }
-                                    }
-
-                                    
-                                } else if(station.type = find) {
-
-                                    const myImg = document.createElement('img');
-
-
-                                }
-
-
-                            } else {
-                                alert("Du bist noch " + dist + " Meter von der Station entfernt");
-                            } 
-
-                            
-
-                        }
-
-                        
-
-
-                    )
-                    } else {
-                        alert("Du brauchst erst " + gesucht + " bevor du auf diese Station zugreifen kannst")
-                    }
-
-
-
-                    
-
-                    
-
-                });
-                
-
-             });
-
-        }
-        
-       
+        });
 
     </script>
-
-    
-
-
 </body>
