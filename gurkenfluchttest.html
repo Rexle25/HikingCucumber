@@ -18,6 +18,10 @@
 
     <div id="overlay"></div>
 
+    <p id="info">Wähle deine Konfiguration für das Spiel aus.</p>
+
+    <input type="text" id="speed" placeholder="0.0000006"><br>
+
     <button onclick="startGame()" id="startknopf">Starte das Spiel</button>
 
     <div id="map"></div>
@@ -60,6 +64,7 @@
         let beepInterval;
         let abgelenkt = false;
         let aktuellerEffekt = null;
+        let speedInput;
         const randInt = Math.floor(Math.random() * 2);
 
         function startGame() {
