@@ -65,7 +65,7 @@
         let lon;
         let random;
         let random2;
-        let geoTags;
+        let daten;
         navigator.geolocation.getCurrentPosition(
 
         pos => {
@@ -85,10 +85,10 @@
                 console.log("Gefundene Objekte:");
                 data.elements.forEach((el) => {
                     const tags = el.tags || {};
-                    geoTags = data;
-                    console.log(geoTags);
+                    daten = data;
+                    console.log(daten);
                     console.log(data);
-                    console.log(tagsEnthält(data, "forest"));
+                    console.log(tagsEnthält(daten, "forest"));
                 });
             });
 
@@ -136,7 +136,7 @@
                         });
                     });
 
-                    if (!tagsEnthält(geoTags, forest) && aktuelleGurke === "Waldgurke") {
+                    if (!tagsEnthält(daten, forest) && aktuelleGurke === "Waldgurke") {
                         map.removeLayer(marker);
                     }
                 }
