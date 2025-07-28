@@ -23,8 +23,12 @@
         const query = `
         [out:json][timeout:25];
         (
+        node["landuse"](${south},${west},${north},${east});
         way["landuse"](${south},${west},${north},${east});
+        relation["landuse"](${south},${west},${north},${east});
+        node["natural"](${south},${west},${north},${east});
         way["natural"](${south},${west},${north},${east});
+        relation["natural"](${south},${west},${north},${east});
         );
         out tags;
         `;
