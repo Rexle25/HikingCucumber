@@ -19,6 +19,7 @@
     <div id="map"></div>
 
      
+     <button onclick="startGame()">Starte das Spiel</button>
 
 
     <script>
@@ -56,44 +57,55 @@
         let abgelenkt = false;
         let aktuellerEffekt = null;
         const randInt = Math.floor(Math.random() * 2);
-        navigator.geolocation.getCurrentPosition(
 
-        pos => {
+        function startGame() {
 
-            lat = pos.coords.latitude;
-            lon = pos.coords.longitude;
+            navigator.geolocation.getCurrentPosition(
+
+            pos => {
+
+                lat = pos.coords.latitude;
+                lon = pos.coords.longitude;
+
+                
+
+                const radiusInDegrees = 0.004;
+
+                const angle = Math.random() * 2 * Math.PI;
+                const distance = radiusInDegrees;
+
+                random = Math.cos(angle) * distance;
+                random2 = Math.sin(angle) * distance;
+
+
+                
+                markerLat = lat + random;
+                markerLon = lon + random2;
+
+                gurke = L.marker([markerLat, markerLon ], {icon: greenIcon}).addTo(map)
+
+                player = L.circle([lat, lon], {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: 0.5,
+                    radius: 10
+                }).addTo(map);  
+
+                
+
+
+            }
+
+                
+
+
+            )
 
             
-
-            const radiusInDegrees = 0.004;
-
-            const angle = Math.random() * 2 * Math.PI;
-            const distance = radiusInDegrees;
-
-            random = Math.cos(angle) * distance;
-            random2 = Math.sin(angle) * distance;
-
-
-            
-            markerLat = lat + random;
-            markerLon = lon + random2;
-
-            gurke = L.marker([markerLat, markerLon ], {icon: greenIcon}).addTo(map)
-
-            player = L.circle([lat, lon], {
-                color: 'red',
-                fillColor: '#f03',
-                fillOpacity: 0.5,
-                radius: 10
-            }).addTo(map);  
-
 
         }
 
-            
-
-
-        )
+        
 
         var playerLat;
         var playerLon;
