@@ -19,7 +19,7 @@
     <div id="map"></div>
 
      
-     <button onclick="startGame()">Starte das Spiel</button>
+     <button onclick="startGame()" id="startknopf">Starte das Spiel</button>
 
 
     <script>
@@ -59,6 +59,10 @@
         const randInt = Math.floor(Math.random() * 2);
 
         function startGame() {
+
+            const button = document.getElementById("startknopf");
+
+            button.remove();
 
             navigator.geolocation.getCurrentPosition(
 
