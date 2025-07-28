@@ -71,8 +71,7 @@ h2 {
 }
 
 
-.center-block {
-  display: block;
-  margin-right: auto;
-  margin-left: auto;
+.slider {
+    display: block;
+    margin: auto;
 }
