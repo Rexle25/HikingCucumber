@@ -29,8 +29,10 @@
         node["natural"](${south},${west},${north},${east});
         way["natural"](${south},${west},${north},${east});
         relation["natural"](${south},${west},${north},${east});
+        area["landuse"](${south},${west},${north},${east});
+        area["natural"](${south},${west},${north},${east});
         );
-        out tags;
+        out body;
         `;
 
         fetch("https://overpass-api.de/api/interpreter", {
