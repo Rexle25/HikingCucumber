@@ -25,6 +25,32 @@
     <a-entity material='color: red' geometry='primitive: box' gps-new-entity-place="latitude: 46.661943761175595; longitude: 7.8038544575230825" scale="10 10 10"></a-entity>
     </a-scene>
 
-    <script></script>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Beispielkoordinaten, kannst du dynamisch setzen
+            const lat = 46.661943761175595;
+            const lon = 7.8038544575230825;
+
+            // Szene holen
+            const scene = document.querySelector("a-scene");
+
+            // Neues Entity erstellen
+            const entity = document.createElement("a-entity");
+
+            // Setze die GPS-Position
+            entity.setAttribute("gps-new-entity-place", `latitude: ${lat}; longitude: ${lon}`);
+
+            // Optional: Geometrie, Material, Skalierung
+            entity.setAttribute("geometry", "primitive: box");
+            entity.setAttribute("material", "color: red");
+            entity.setAttribute("scale", "10 10 10");
+
+            // Füge es der Szene hinzu
+            scene.appendChild(entity);
+         });
+
+
+    </script>
 
 </body>
