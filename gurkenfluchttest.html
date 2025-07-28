@@ -64,10 +64,12 @@
         let beepInterval;
         let abgelenkt = false;
         let aktuellerEffekt = null;
-        let speedInput;
+        let speedInput = 0.0000006;
         const randInt = Math.floor(Math.random() * 2);
 
         function startGame() {
+
+            speedInput = parseFloat(document.getElementById("speed").value);
 
             const button = document.getElementById("startknopf");
 
@@ -165,7 +167,7 @@
                 step = 0.0;
 
             } else {
-                step = 0.0000006 + ((dist * 111000) ** 1.01) / 1110000000;
+                step = speedInput + ((dist * 111000) ** 1.01) / 1110000000;
             }
 
             console.log(step);
