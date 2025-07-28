@@ -25,12 +25,7 @@
         fetch(overpassUrl)
         .then(response => response.json())
         .then(data => {
-            if (data.elements.length > 0) {
-            const tags = data.elements[0].tags;
-            console.log("Ort:", tags);
-            } else {
-            console.log("Kein Flächentyp gefunden");
-            }
+            console.log(data);
         });
 
     </script>
