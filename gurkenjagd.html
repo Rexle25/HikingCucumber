@@ -65,6 +65,25 @@
                 let markerLat = lat + random;
                 let markerLon = lon + random2;
 
+                let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke"];
+                let weights = [0.4, 0.05, 0.09, 0.15, 0.02, 0.2, 0.3];
+
+                function weighted_random(items, weights) {
+                    var i;
+
+                    for (i = 1; i < weights.length; i++)
+                        weights[i] += weights[i - 1];
+                    
+                    var random = Math.random() * weights[weights.length - 1];
+                    
+                    for (i = 0; i < weights.length; i++)
+                        if (weights[i] > random)
+                            break;
+                    
+                    return items[i];
+                }
+
+
 
                 let marker = L.marker([markerLat, markerLon ]).addTo(map).on('click', function(e) {
 
@@ -78,9 +97,11 @@
                                 markerLon - lon
                             ) * 111000;
 
+                           let aktuelleGurke = weighted_random(items, weights);
+                           alert(aktuelleGurke);
                             
                             
-                            if (dist < 50) {
+                            if (dist < 500) {
 
                                 addPoints(1);
                                 map.removeLayer(marker); 
