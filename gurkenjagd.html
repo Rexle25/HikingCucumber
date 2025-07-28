@@ -139,78 +139,7 @@
 
 
 
-            for (let i = 0; i < 10; i++) {
-
-                random = (Math.random() * 0.006) -0.003;
-                random2 = (Math.random() * 0.006) -0.003;
-                let markerLat = lat + random;
-                let markerLon = lon + random2;
-
-                let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke"];
-                let weights = [0.4, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.5];
-
-                function weighted_random(items, weights) {
-                    var i;
-
-                    for (i = 1; i < weights.length; i++)
-                        weights[i] += weights[i - 1];
-                    
-                    var random = Math.random() * weights[weights.length - 1];
-                    
-                    for (i = 0; i < weights.length; i++)
-                        if (weights[i] > random)
-                            break;
-                    
-                    return items[i];
-                }
-
-
-                let aktuelleGurke = weighted_random(items, weights);
-
-                let marker = L.marker([markerLat, markerLon ]).addTo(map).on('click', function(e) {
-
-
-                    navigator.geolocation.getCurrentPosition(
-                        pos => {
-                            const lat = pos.coords.latitude;
-                            const lon = pos.coords.longitude;
-                            const dist = Math.hypot(
-                                markerLat - lat,
-                                markerLon - lon
-                            ) * 111000;
-
-                           
-                           alert(aktuelleGurke);
-                            
-                            
-                            if (dist < 500) {
-
-                                addPoints(1);
-                                map.removeLayer(marker); 
-                                alert("Gurke");
-
-                            } else {
-                                alert("Du bist noch " + dist + " Meter von diesem Ort entfernt");
-                            }
-
-                        }
-
-                    )
-                        
-
-                        
-                })
-
-                
-
-
-
-                
-
-
-
-            }
-
+            
 
 
         }
