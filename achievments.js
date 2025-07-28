@@ -16,7 +16,17 @@ function achievments() {
                     }
                     
 
-                }
+                } else if (pos.coords.altitude > 1000) {
+
+                    var berggurke = localStorage.getItem("berggurke");
+                    
+
+                    if (hügelgurke === null) {
+                        
+                        localStorage.setItem("berggurke", "true")
+                    }
+
+                }  
                 
 
 
