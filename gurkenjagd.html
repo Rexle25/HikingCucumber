@@ -134,6 +134,10 @@
                             }
                         });
                     });
+
+                    if (!tagsEnthält(geoTags, forest) && aktuelleGurke === "Waldgurke") {
+                        map.removeLayer(marker);
+                    }
                 }
             }, 20000);
 
