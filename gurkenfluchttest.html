@@ -184,11 +184,13 @@
             }
 
             if (dist < 0.0007) {
+                document.body.classList.add("red-alert");
                 if (!audioPlaying) {
                     snd.play();
                     audioPlaying = true;
                 }
             } else {
+                document.body.classList.remove("red-alert");
                 if (audioPlaying) {
                     snd.pause();
                     snd.currentTime = 0;
