@@ -31,7 +31,7 @@ function getRegionData(lat, lon) {
         console.log("Gefundene Objekte:");
         return data;
         data.elements.forEach((el) => {
-            console.log(el.tags);
+            console.log(el.body);
         });
     })
     .catch((err) => {
