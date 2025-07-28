@@ -63,7 +63,7 @@ h2 {
   background: rgba(255, 0, 0, 0.3); /* leicht durchsichtiges Rot */
   pointer-events: none; /* damit man weiter klicken kann */
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 1.5s ease;
   z-index: 9999;
 }
 #overlay.active {
