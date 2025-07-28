@@ -206,14 +206,42 @@
                 if (randomType === "Ablenkung") {
 
                     abgelenkt = true;
+                    verlangsamt = false;
+                    gestoppt = false;
 
                     map.removeLayer(marker); 
 
                     setTimeout(() => {
                         abgelenkt = false;
+                        
                     }, 20000);
 
                     
+
+                } else if (randomType === "Verlangsamen") {
+
+
+                    verlangsamt = true;
+                    abgelenkt = false;
+                    gestoppt = false;
+
+                    map.removeLayer(marker); 
+
+                    setTimeout(() => {
+                        verlangsamt = false;
+                    }, 20000);
+
+                } else {
+
+                    verlangsamt = false;
+                    abgelenkt = false;
+                    gestoppt = true;
+
+                    map.removeLayer(marker); 
+
+                    setTimeout(() => {
+                        gestoppt = false;
+                    }, 20000);
 
                 }
 
