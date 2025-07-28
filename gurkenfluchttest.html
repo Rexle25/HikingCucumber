@@ -20,7 +20,9 @@
 
     <p id="info">Wähle deine Konfiguration für das Spiel aus.</p>
 
-    <input type="text" id="speed" placeholder="0.0000006"><br>
+    <div class="slidecontainer">
+    <input type="range" min="0.00000001" max="0.001" value="0.0000006" class="slider" id="speedSlider">
+    </div>
 
     <button onclick="startGame()" id="startknopf">Starte das Spiel</button>
 
@@ -69,7 +71,7 @@
 
         function startGame() {
 
-            speedInput = parseFloat(document.getElementById("speed").value);
+            speedInput = parseFloat(document.getElementById("speedSlider").value);
 
             const button = document.getElementById("startknopf");
 
