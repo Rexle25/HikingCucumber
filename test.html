@@ -11,21 +11,37 @@
 
     <script>
 
-        const lat = 46.660923;
-        const lon = 7.802994;
+        const lat = 46.6832;
+        const lon = 7.8502;
+        const delta = 0.0003;
 
-        const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];
+        const south = lat - delta;
+        const west = lon - delta;
+        const north = lat + delta;
+        const east = lon + delta;
+
+        const query = `
+        [out:json][timeout:25];
         (
-        way(around:1,${lat},${lon})[landuse];
-        way(around:1,${lat},${lon})[natural];
-        way(around:1,${lat},${lon})[leisure];
+        way["landuse"](${south},${west},${north},${east});
+        way["natural"](${south},${west},${north},${east});
         );
-        out tags center;`;
+        out tags;
+        `;
 
-        fetch(overpassUrl)
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
+        fetch("https://overpass-api.de/api/interpreter", {
+        method: "POST",
+        body: query,
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            console.log("Gefundene Objekte:");
+            data.elements.forEach((el) => {
+            console.log(el.tags);
+            });
+        })
+        .catch((err) => {
+            console.error("Fehler bei der Anfrage:", err);
         });
 
     </script>
