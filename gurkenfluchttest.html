@@ -214,9 +214,14 @@
 
                 
 
-                alert(randomType);
+                const playerDist = Math.hypot(
+                    markerLat - lat,
+                    markerLon - lon
+                ) * 111000;
 
-                if (randomType === "Ablenkung") {
+                if (playerDist < 70) {
+
+                    if (randomType === "Ablenkung") {
 
                     aktuellerEffekt = randomType;
 
@@ -229,28 +234,32 @@
 
                     
 
-                } else if (randomType === "Verlangsamen") {
+                    } else if (randomType === "Verlangsamen") {
 
 
-                    aktuellerEffekt = randomType;
+                        aktuellerEffekt = randomType;
 
-                    map.removeLayer(marker); 
+                        map.removeLayer(marker); 
 
-                    setTimeout(() => {
-                        aktuellerEffekt = null;
-                    }, 20000);
+                        setTimeout(() => {
+                            aktuellerEffekt = null;
+                        }, 20000);
 
-                } else {
+                    } else {
 
-                    aktuellerEffekt = randomType;
+                        aktuellerEffekt = randomType;
 
-                    map.removeLayer(marker); 
+                        map.removeLayer(marker); 
 
-                    setTimeout(() => {
-                        aktuellerEffekt = null;
-                    }, 20000);
+                        setTimeout(() => {
+                            aktuellerEffekt = null;
+                        }, 20000);
+
+                    }
 
                 }
+
+                
 
 
                 
