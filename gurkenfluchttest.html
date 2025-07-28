@@ -24,6 +24,8 @@
     <input type="range" min="0.00000001" max="0.001" value="0.0000006" class="slider" id="speedSlider">
     </div>
 
+    <p id="speedSliderOutput"></p>
+
     <button onclick="startGame()" id="startknopf">Starte das Spiel</button>
 
     <div id="map"></div>
@@ -53,6 +55,8 @@
         });
 
         
+        
+        document.getElementById("speedSliderInput").innerHTML = document.getElementById("speedSlider").value;
 
         let lat;
         let lon;
