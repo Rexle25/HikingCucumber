@@ -56,7 +56,13 @@
 
         
         
-        document.getElementById("speedSliderInput").innerHTML = document.getElementById("speedSlider").value;
+        var slider = document.getElementById("speedSlider");
+        var output = document.getElementById("speedSliderOutput");
+        output.innerHTML = slider.value;
+
+        slider.oninput = function() {
+        output.innerHTML = this.value;
+} 
 
         let lat;
         let lon;
