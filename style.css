@@ -53,3 +53,8 @@ h2 {
     height: 30vh;
     object-fit: cover;
 }
+
+body.red-alert {
+  filter: hue-rotate(-30deg) saturate(2) brightness(0.9);
+  transition: filter 0.5s ease;
+}
