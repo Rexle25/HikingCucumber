@@ -11,9 +11,9 @@
 
     <script>
 
-        const lat = 46.57619;
-        const lon = 7.92777;
-        const delta = 0.0012;
+        const lat = 46.660840;
+        const lon = 7.802900;
+        const delta = 0.0052;
 
         const south = lat - delta;
         const west = lon - delta;
@@ -29,8 +29,6 @@
         node["natural"](${south},${west},${north},${east});
         way["natural"](${south},${west},${north},${east});
         relation["natural"](${south},${west},${north},${east});
-        area["landuse"](${south},${west},${north},${east});
-        area["natural"](${south},${west},${north},${east});
         );
         out body;
         `;
