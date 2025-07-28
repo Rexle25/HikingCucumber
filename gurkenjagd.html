@@ -45,10 +45,27 @@
     
     <script>
 
+        function tagsEnthält(tags, suchwort) {
+            const suchwortKlein = suchwort.toLowerCase();
+
+            for (let key in tags) {
+                const keyKlein = key.toLowerCase();
+                const valueKlein = String(tags[key]).toLowerCase();
+
+                if (keyKlein.includes(suchwortKlein) || valueKlein.includes(suchwortKlein)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
         let lat;
         let lon;
         let random;
         let random2;
+        let geoTags;
         navigator.geolocation.getCurrentPosition(
 
         pos => {
@@ -68,7 +85,8 @@
                 console.log("Gefundene Objekte:");
                 data.elements.forEach((el) => {
                     const tags = el.tags || {};
-                    console.log(tags);
+                    geoTags = tags;
+                    console.log(geoTags);
                 });
             });
 
