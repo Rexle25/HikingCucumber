@@ -6,6 +6,9 @@ function getRegionData(lat, lon) {
     const north = lat + delta;
     const east = lon + delta;
 
+    console.log(lat);
+    console.log(lon);
+
     const query = `
     [out:json][timeout:25];
     (
