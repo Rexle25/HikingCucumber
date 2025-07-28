@@ -85,8 +85,9 @@
                 console.log("Gefundene Objekte:");
                 data.elements.forEach((el) => {
                     const tags = el.tags || {};
-                    geoTags = tags;
+                    geoTags = data;
                     console.log(geoTags);
+                    console.log(data);
                     console.log(tagsEnthält(geoTags, "forest"));
                 });
             });
