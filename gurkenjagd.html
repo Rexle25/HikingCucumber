@@ -55,10 +55,18 @@
 
             lat = pos.coords.latitude;
             lon = pos.coords.longitude;
+
+            let player = L.circle([lat, lon], {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: 0.5,
+                    radius: 10
+            }).addTo(map); 
             
 
             data = getRegionData(lat, lon);
             console.log(data);
+            
 
             for (let i = 0; i < 10; i++) {
 
