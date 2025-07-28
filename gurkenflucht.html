@@ -18,6 +18,9 @@
 
     <div id="map"></div>
 
+     
+
+
     <script>
 
         var map = L.map('map').setView([46.9480900, 7.4474400], 12);
@@ -38,6 +41,8 @@
             popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
         });
 
+        
+
         let lat;
         let lon;
         let random;
@@ -47,6 +52,9 @@
         let player;
         let gurke;
         let eingelegt;
+        let beepInterval;
+        let abgelenkt = false;
+        let aktuellerEffekt = null;
         const randInt = Math.floor(Math.random() * 2);
         navigator.geolocation.getCurrentPosition(
 
@@ -57,7 +65,7 @@
 
             
 
-            const radiusInDegrees = 0.004; // ca. 400-500 m je nach Breitengrad
+            const radiusInDegrees = 0.004;
 
             const angle = Math.random() * 2 * Math.PI;
             const distance = radiusInDegrees;
@@ -89,6 +97,8 @@
 
         var playerLat;
         var playerLon;
+        var audioPlaying;
+        
 
         navigator.geolocation.watchPosition( pos => {
 
@@ -101,6 +111,10 @@
         
         });
         
+        var dist;
+        var snd = new Audio("audio/music.mp3");
+        snd.loop = true;
+        
 
         setInterval(() => {
 
@@ -111,9 +125,26 @@
             const dLat = playerLat - markerLat;
             const dLon = playerLon - markerLon;
 
-            const dist = Math.sqrt(dLat * dLat + dLon * dLon);
+            dist = Math.sqrt(dLat * dLat + dLon * dLon);
 
-            const step = 0.00006 + dist * 0.001
+            let step;
+
+            if (aktuellerEffekt === "Ablenkung") {
+                step = -0.0000016 + ((dist * 111000) ** 1.09) / 1110000000;
+            } else if (aktuellerEffekt === "Verlangsamen") {
+
+                step = 0.0000002 + ((dist * 111000) ** 1.01) / 1110000000;
+
+            } else if (aktuellerEffekt === "Aufhalten") {
+
+                step = 0.0;
+
+            } else {
+                step = 0.0000006 + ((dist * 111000) ** 1.01) / 1110000000;
+            }
+
+            console.log(step);
+            console.log(aktuellerEffekt);
 
             const dirLat = dLat / dist;
             const dirLon = dLon / dist;
@@ -125,6 +156,8 @@
 
             
 
+            
+
             if (dist < 0.00010) {
 
                 alert ("Du wurdest eingelegt");
@@ -132,12 +165,25 @@
 
             }
 
+            if (dist < 0.0007) {
+                if (!audioPlaying) {
+                    snd.play();
+                    audioPlaying = true;
+                }
+            } else {
+                if (audioPlaying) {
+                    snd.pause();
+                    snd.currentTime = 0;
+                    audioPlaying = false;
+                }
+            }
+
 
 
 
             
 
-        }, 5000)
+        }, 50)
 
         setInterval(() => {
 
@@ -146,9 +192,85 @@
 
 
         }, 600000)
+
+        
+
+
     
+        const types = ["Ablenkung", "Verlangsamen", "Aufhalten"]
+        
     
-    
+        
+        setInterval(() => {
+
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            let randomItem = (Math.random() * 0.005) -0.0025;
+            let random2Item = (Math.random() * 0.005) -0.0025;
+
+
+            let itemLat = playerLat + randomItem;
+            let itemLon = playerLon + random2Item;
+            let marker = L.marker([itemLat, itemLon ]).addTo(map).on('click', function(e) {
+
+                
+
+                const playerDist = Math.hypot(
+                    itemLat - playerLat,
+                    itemLon - playerLon
+                ) * 111000;
+
+                if (playerDist < 50) {
+
+                    if (randomType === "Ablenkung") {
+
+                    aktuellerEffekt = randomType;
+
+                    map.removeLayer(marker); 
+
+                    setTimeout(() => {
+                        aktuellerEffekt = null;
+                        
+                    }, 20000);
+
+                    
+
+                    } else if (randomType === "Verlangsamen") {
+
+
+                        aktuellerEffekt = randomType;
+
+                        map.removeLayer(marker); 
+
+                        setTimeout(() => {
+                            aktuellerEffekt = null;
+                        }, 20000);
+
+                    } else {
+
+                        aktuellerEffekt = randomType;
+
+                        map.removeLayer(marker); 
+
+                        setTimeout(() => {
+                            aktuellerEffekt = null;
+                        }, 20000);
+
+                    }
+
+                }
+
+                
+
+
+                
+
+            })
+
+
+            
+            
+
+        }, 50000)
 
 
     </script>
