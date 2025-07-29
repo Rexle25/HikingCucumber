@@ -15,6 +15,9 @@ function getRegionData(lat, lon) {
       node["natural"](${south},${west},${north},${east});
       way["natural"](${south},${west},${north},${east});
       relation["natural"](${south},${west},${north},${east});
+      node["building"](${south},${west},${north},${east});
+      way["building"](${south},${west},${north},${east});
+      relation["building"](${south},${west},${north},${east});
     );
     out body;
     `;
