@@ -80,6 +80,8 @@
         let parkplatz;
         let restaurant;
         let player;
+        let vorherigeLat;
+        let vorherigeLon;
 
         
 
@@ -188,7 +190,7 @@
                             const lon = pos.coords.longitude;
                             const dist = Math.hypot(markerLat - lat, markerLon - lon) * 111000;
 
-                            if (dist < 70) {
+                            if (dist < 100) {
                                 addPoints(1);
                                 map.removeLayer(marker);
                                 let temporäreGurke = Number(localStorage.getItem(aktuelleGurke)) || 0;
@@ -264,7 +266,11 @@
             lat = pos.coords.latitude;
             lon = pos.coords.longitude;
 
-            player.setLatLng(lat, lon);
+
+            if (player) {
+                player.setLatLng(lat, lon);
+            }
+            
             
             })
 
