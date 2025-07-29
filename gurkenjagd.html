@@ -66,6 +66,8 @@
         let random;
         let random2;
         let daten;
+        let wald;
+        let wasser;
         navigator.geolocation.getCurrentPosition(
 
         pos => {
@@ -85,6 +87,9 @@
                 console.log("Gefundene Objekte:");
                 data.elements.forEach((el) => {
                     const tags = el.tags || {};
+
+
+
                     
                 });
                 daten = data.elements;
@@ -137,12 +142,6 @@
                         });
                     });
 
-                    for (let element of daten) {
-                        if (tagsEnthält(element.tags, suchwort)) {
-                            console.log("Gefunden:", element);
-                        }
-}
-                    }
                 }
             }, 20000);
 
