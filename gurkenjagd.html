@@ -68,6 +68,9 @@
         let daten;
         let wald;
         let wasser;
+        let busch;
+        let klippe;
+        let siedlung;
         let geoTags;
         navigator.geolocation.getCurrentPosition(
 
@@ -94,6 +97,10 @@
                     console.log(tagsEnthält(geoTags, "forest"));
                     if (tagsEnthält(geoTags, "forest")) {
                         wald = true;
+                    }
+                    if (tagsEnthält(geoTags, "water")) {
+                        siedlung = true;
+                        console.log("Siedlung " + siedlung);
                     }
 
 
