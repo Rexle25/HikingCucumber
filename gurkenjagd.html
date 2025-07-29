@@ -160,7 +160,7 @@
                                 addPoints(1);
                                 map.removeLayer(marker);
                                 alert("Gurke");
-                                const temporäreGurke = localStorage.getItem(aktuelleGurke);
+                                const temporäreGurke = localStorage.getItem(aktuelleGurke) || 0;
                                 temporäreGurke = temporäreGurke + 1;
                                 localStorage.setItem(aktuelleGurke, temporäreGurke);
                                 console.log("Gesammelte " + aktuelleGurke + ":" + temporäreGurke);
