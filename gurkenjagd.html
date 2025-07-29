@@ -68,6 +68,7 @@
         let daten;
         let wald;
         let wasser;
+        let geoTags;
         navigator.geolocation.getCurrentPosition(
 
         pos => {
@@ -88,6 +89,9 @@
                 data.elements.forEach((el) => {
                     const tags = el.tags || {};
 
+                    geoTags = tags;
+                    console.log(tagsEnthält(geoTags, "forest"));
+
 
 
                     
@@ -95,7 +99,7 @@
                 daten = data.elements;
                 console.log(daten);
                 console.log(data);
-                console.log(tagsEnthält(daten, "forest"));
+                
             });
 
       
