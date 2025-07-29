@@ -160,6 +160,10 @@
                                 addPoints(1);
                                 map.removeLayer(marker);
                                 alert("Gurke");
+                                const temporäreGurke = localStorage.getItem(aktuelleGurke);
+                                temporäreGurke = temporäreGurke + 1;
+                                localStorage.setItem(aktuelleGurke, temporäreGurke);
+                                console.log("Gesammelte " + aktuelleGurke + ":" + temporäreGurke);
                             } else {
                                 alert("Du bist noch " + Math.round(dist) + " Meter von diesem Ort entfernt");
                             }
