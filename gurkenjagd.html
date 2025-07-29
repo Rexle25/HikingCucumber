@@ -182,7 +182,7 @@
                             const lon = pos.coords.longitude;
                             const dist = Math.hypot(markerLat - lat, markerLon - lon) * 111000;
 
-                            if (dist < 70) {
+                            if (dist < 200) {
                                 addPoints(1);
                                 map.removeLayer(marker);
                                 let temporäreGurke = Number(localStorage.getItem(aktuelleGurke)) || 0;
