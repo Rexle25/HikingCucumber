@@ -92,6 +92,7 @@
                     geoTags = tags;
                     console.log(geoTags);
                     console.log(tagsEnthält(geoTags, "forest"));
+                    wald = tagsEnthält(geoTags, "forest");
 
 
 
@@ -146,6 +147,8 @@
                             }
                         });
                     });
+
+                    console.log("Wald ist " + wald);
 
                 }
             }, 20000);
