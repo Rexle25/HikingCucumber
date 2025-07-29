@@ -1,5 +1,5 @@
 function getRegionData(lat, lon) {
-    const delta = 0.0002;
+    const delta = 0.0032;
 
     const south = lat - delta;
     const west = lon - delta;
