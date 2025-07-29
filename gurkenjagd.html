@@ -182,14 +182,15 @@
                             const lon = pos.coords.longitude;
                             const dist = Math.hypot(markerLat - lat, markerLon - lon) * 111000;
 
-                            alert(aktuelleGurke);
-
                             if (dist < 500) {
                                 addPoints(1);
                                 map.removeLayer(marker);
                                 let temporäreGurke = Number(localStorage.getItem(aktuelleGurke)) || 0;
                                 temporäreGurke = temporäreGurke + 1;
                                 localStorage.setItem(aktuelleGurke, temporäreGurke);
+
+                                alert("Gesammelte " + aktuelleGurke + ":" + temporäreGurke);
+                                
                                 console.log("Gesammelte " + aktuelleGurke + ":" + temporäreGurke);
                             } else {
                                 alert("Du bist noch " + Math.round(dist) + " Meter von diesem Ort entfernt");
