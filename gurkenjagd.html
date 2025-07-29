@@ -75,6 +75,8 @@
         let geoTags;
         let zug;
         let steinbruch;
+        let parkplatz;
+        let restaurant;
         navigator.geolocation.getCurrentPosition(
 
         pos => {
@@ -129,6 +131,14 @@
                         steinbruch = true;
                         console.log("Steinbruch " + steinbruch);
                     }
+                    if (tagsEnthält(tags, "parking")) {
+                        parkplatz = true;
+                        console.log("Parkplatz " + parkplatz);
+                    }
+                    if (tagsEnthält(tags, "restaurant")) {
+                        restaurant = true;
+                        console.log("Restaurant " + restaurant);
+                    }
 
 
 
@@ -155,14 +165,14 @@
                     return items[i];
                 }
 
-                for (let i = 0; i < 20; i++) {
+                for (let i = 0; i < 30; i++) {
                     let random = (Math.random() * 0.006) - 0.003;
                     let random2 = (Math.random() * 0.006) - 0.003;
                     let markerLat = lat + random;
                     let markerLon = lon + random2;
 
-                    let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke", "Hausgurke", "Wassergurke", "Buschgurke", "Klippengurke", "Feuchtgurke", "Schienengurke", "Steinbruchgurke"];
-                    let weights = [0.3, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.4, 0.3, 0.3, 0.5, 0.3, 0.4, 0.1, 0.3];
+                    let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke", "Hausgurke", "Wassergurke", "Buschgurke", "Klippengurke", "Feuchtgurke", "Schienengurke", "Steinbruchgurke", "Parkinggurke", "Fressgurke"];
+                    let weights = [0.3, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.4, 0.3, 0.3, 0.5, 0.3, 0.4, 0.1, 0.3, 0.1, 0.2];
 
                     let aktuelleGurke = weighted_random(items, [...weights]);
 
@@ -227,6 +237,16 @@
                     }
                     if (!steinbruch && aktuelleGurke === "Steinbruchgurke") {
                         console.log("Kein Steinbruch vorhanden. Steinbruchgurke wird entfernt");
+                        map.removeLayer(marker);
+                        
+                    }
+                    if (!restaurant && aktuelleGurke === "Fressgurke") {
+                        console.log("Kein Restaurant vorhanden. Fressgurke wird entfernt");
+                        map.removeLayer(marker);
+                        
+                    }
+                    if (!parkplatz && aktuelleGurke === "Parkinggurke") {
+                        console.log("Kein Parkplatz vorhanden. Parkinggurke wird entfernt");
                         map.removeLayer(marker);
                         
                     }
