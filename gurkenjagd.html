@@ -98,9 +98,13 @@
                     if (tagsEnthält(geoTags, "forest")) {
                         wald = true;
                     }
-                    if (tagsEnthält(geoTags, "water")) {
+                    if (tagsEnthält(geoTags, "residential")) {
                         siedlung = true;
                         console.log("Siedlung " + siedlung);
+                    }
+                    if (tagsEnthält(geoTags, "water")) {
+                        wasser = true;
+                        console.log("Wasser " + wasser);
                     }
 
 
@@ -134,8 +138,8 @@
                     let markerLat = lat + random;
                     let markerLon = lon + random2;
 
-                    let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke"];
-                    let weights = [0.3, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.4];
+                    let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke", "Hausgurke"];
+                    let weights = [0.3, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.4, 0.3];
 
                     let aktuelleGurke = weighted_random(items, [...weights]);
 
