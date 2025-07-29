@@ -137,8 +137,11 @@
                         });
                     });
 
-                    if (!tagsEnthält(daten, forest) && aktuelleGurke === "Waldgurke") {
-                        map.removeLayer(marker);
+                    for (let element of daten) {
+                        if (tagsEnthält(element.tags, suchwort)) {
+                            console.log("Gefunden:", element);
+                        }
+}
                     }
                 }
             }, 20000);
