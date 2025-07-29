@@ -106,6 +106,10 @@
                         wasser = true;
                         console.log("Wasser " + wasser);
                     }
+                    if (tagsEnthält(geoTags, "scrub")) {
+                        busch = true;
+                        console.log("Scrub " + busch);
+                    }
 
 
 
@@ -138,8 +142,8 @@
                     let markerLat = lat + random;
                     let markerLon = lon + random2;
 
-                    let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke", "Hausgurke"];
-                    let weights = [0.3, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.4, 0.3];
+                    let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke", "Hausgurke", "Wassergurke", "Buschgurke"];
+                    let weights = [0.3, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.4, 0.3, 0.3, 0.5];
 
                     let aktuelleGurke = weighted_random(items, [...weights]);
 
@@ -165,6 +169,21 @@
 
                     if (!wald && aktuelleGurke === "Waldgurke") {
                         console.log("Kein Wald vorhanden. Waldgurke wird entfernt");
+                        map.removeLayer(marker);
+                        
+                    }
+                    if (!wasser && aktuelleGurke === "Wassergurke") {
+                        console.log("Kein Wasser vorhanden. Wassergurke wird entfernt");
+                        map.removeLayer(marker);
+                        
+                    }
+                    if (!siedlung && aktuelleGurke === "Hausgurke") {
+                        console.log("Kein Wohnbereich vorhanden. Hausgurke wird entfernt");
+                        map.removeLayer(marker);
+                        
+                    }
+                    if (!busch && aktuelleGurke === "Buschgurke") {
+                        console.log("Kein Busch vorhanden. Buschgurke wird entfernt");
                         map.removeLayer(marker);
                         
                     }
