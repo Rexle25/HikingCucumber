@@ -81,13 +81,7 @@
         let restaurant;
         let player;
 
-        navigator.geolocation.watchPosition( pos => {
-            lat = pos.coords.latitude;
-            lon = pos.coords.longitude;
-
-            player.setLatLng(lat, lon);
-            
-        })
+        
 
         navigator.geolocation.getCurrentPosition(
 
@@ -265,6 +259,14 @@
 
                 }
             }, 20000);
+
+            navigator.geolocation.watchPosition( pos => {
+            lat = pos.coords.latitude;
+            lon = pos.coords.longitude;
+
+            player.setLatLng(lat, lon);
+            
+            })
 
 
 
