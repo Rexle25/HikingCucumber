@@ -187,7 +187,6 @@
                             if (dist < 500) {
                                 addPoints(1);
                                 map.removeLayer(marker);
-                                alert("Gurke");
                                 let temporäreGurke = Number(localStorage.getItem(aktuelleGurke)) || 0;
                                 temporäreGurke = temporäreGurke + 1;
                                 localStorage.setItem(aktuelleGurke, temporäreGurke);
