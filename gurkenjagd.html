@@ -73,6 +73,8 @@
         let siedlung;
         let feucht;
         let geoTags;
+        let zug;
+        let steinbruch;
         navigator.geolocation.getCurrentPosition(
 
         pos => {
@@ -119,6 +121,14 @@
                         klippe = true;
                         console.log("Klippe " + klippe);
                     }
+                    if (tagsEnthält(tags, "rail")) {
+                        zug = true;
+                        console.log("Zug " + zug);
+                    }
+                    if (tagsEnthält(tags, "quarry")) {
+                        steinbruch = true;
+                        console.log("Steinbruch " + steinbruch);
+                    }
 
 
 
@@ -151,8 +161,8 @@
                     let markerLat = lat + random;
                     let markerLon = lon + random2;
 
-                    let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke", "Hausgurke", "Wassergurke", "Buschgurke", "Klippengurke", "Feuchtgurke"];
-                    let weights = [0.3, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.4, 0.3, 0.3, 0.5, 0.3, 0.4];
+                    let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke", "Hausgurke", "Wassergurke", "Buschgurke", "Klippengurke", "Feuchtgurke", "Schienengurke", "Steinbruchgurke"];
+                    let weights = [0.3, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.4, 0.3, 0.3, 0.5, 0.3, 0.4, 0.1, 0.3];
 
                     let aktuelleGurke = weighted_random(items, [...weights]);
 
@@ -207,6 +217,16 @@
                     }
                     if (!klippe && aktuelleGurke === "Feuchtgurke") {
                         console.log("Kein Feuchtgebiet vorhanden. Feuchtgurke wird entfernt");
+                        map.removeLayer(marker);
+                        
+                    }
+                    if (!zug && aktuelleGurke === "Schienengurke") {
+                        console.log("Keine Schienen vorhanden. Schienengurke wird entfernt");
+                        map.removeLayer(marker);
+                        
+                    }
+                    if (!steinbruch && aktuelleGurke === "Steinbruchgurke") {
+                        console.log("Kein Steinbruch vorhanden. Steinbruchgurke wird entfernt");
                         map.removeLayer(marker);
                         
                     }
