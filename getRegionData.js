@@ -18,6 +18,9 @@ function getRegionData(lat, lon) {
       node["tourism"](${south},${west},${north},${east});
       way["tourism"](${south},${west},${north},${east});
       relation["tourism"](${south},${west},${north},${east});
+      node["amenity"](${south},${west},${north},${east});
+      way["amenity"](${south},${west},${north},${east});
+      relation["amenity"](${south},${west},${north},${east});
     );
     out body;
     `;
