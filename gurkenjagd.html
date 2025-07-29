@@ -71,6 +71,7 @@
         let busch;
         let klippe;
         let siedlung;
+        let feucht;
         let geoTags;
         navigator.geolocation.getCurrentPosition(
 
@@ -94,19 +95,19 @@
 
                     geoTags = tags;
                     console.log(geoTags);
-                    console.log(tagsEnthält(geoTags, "forest"));
-                    if (tagsEnthält(geoTags, "forest")) {
+                    console.log(tagsEnthält(tags, "forest"));
+                    if (tagsEnthält(tags, "forest")) {
                         wald = true;
                     }
-                    if (tagsEnthält(geoTags, "residential")) {
+                    if (tagsEnthält(tags, "residential")) {
                         siedlung = true;
                         console.log("Siedlung " + siedlung);
                     }
-                    if (tagsEnthält(geoTags, "water")) {
+                    if (tagsEnthält(tags, "water")) {
                         wasser = true;
                         console.log("Wasser " + wasser);
                     }
-                    if (tagsEnthält(geoTags, "scrub")) {
+                    if (tagsEnthält(tags, "scrub")) {
                         busch = true;
                         console.log("Scrub " + busch);
                     }
