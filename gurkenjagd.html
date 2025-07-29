@@ -152,6 +152,12 @@
 
                     console.log("Wald ist " + wald);
 
+                    if (!wald && aktuelleGurke === "Waldgurke") {
+                        console.log("Kein Wald vorhanden. Waldgurke wird entfernt");
+                        map.removeLayer(marker);
+                        
+                    }
+
                 }
             }, 20000);
 
