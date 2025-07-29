@@ -40,6 +40,8 @@
 
         }, 10000);
 
+        
+
 
      </script>
     
@@ -77,6 +79,16 @@
         let steinbruch;
         let parkplatz;
         let restaurant;
+        let player;
+
+        navigator.geolocation.watchPosition( pos => {
+            lat = pos.coords.latitude;
+            lon = pos.coords.longitude;
+
+            player.setLatLng(lat, lon);
+            
+        })
+
         navigator.geolocation.getCurrentPosition(
 
         pos => {
@@ -84,7 +96,7 @@
             lat = pos.coords.latitude;
             lon = pos.coords.longitude;
 
-            let player = L.circle([lat, lon], {
+            player = L.circle([lat, lon], {
                     color: 'red',
                     fillColor: '#f03',
                     fillOpacity: 0.5,
@@ -166,8 +178,8 @@
                 }
 
                 for (let i = 0; i < 30; i++) {
-                    let random = (Math.random() * 0.006) - 0.003;
-                    let random2 = (Math.random() * 0.006) - 0.003;
+                    let random = (Math.random() * 0.004) - 0.002;
+                    let random2 = (Math.random() * 0.004) - 0.002;
                     let markerLat = lat + random;
                     let markerLon = lon + random2;
 
