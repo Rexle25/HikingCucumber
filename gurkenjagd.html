@@ -205,6 +205,11 @@
                         map.removeLayer(marker);
                         
                     }
+                    if (!klippe && aktuelleGurke === "Feuchtgurke") {
+                        console.log("Kein Feuchtgebiet vorhanden. Feuchtgurke wird entfernt");
+                        map.removeLayer(marker);
+                        
+                    }
 
                 }
             }, 20000);
