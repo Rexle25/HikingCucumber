@@ -151,8 +151,8 @@
                     let markerLat = lat + random;
                     let markerLon = lon + random2;
 
-                    let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke", "Hausgurke", "Wassergurke", "Buschgurke"];
-                    let weights = [0.3, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.4, 0.3, 0.3, 0.5];
+                    let items = ["Gurke", "Goldene Gurke", "Seltene Gurke", "Ungewöhnliche Gurke", "Legendäre Gurke", "Wandergurke", "Essiggurke", "Waldgurke", "Hausgurke", "Wassergurke", "Buschgurke", "Klippengurke", "Feuchtgurke"];
+                    let weights = [0.3, 0.07, 0.09, 0.25, 0.04, 0.2, 0.3, 0.4, 0.3, 0.3, 0.5, 0.3, 0.4];
 
                     let aktuelleGurke = weighted_random(items, [...weights]);
 
@@ -197,6 +197,11 @@
                     }
                     if (!busch && aktuelleGurke === "Buschgurke") {
                         console.log("Kein Busch vorhanden. Buschgurke wird entfernt");
+                        map.removeLayer(marker);
+                        
+                    }
+                    if (!klippe && aktuelleGurke === "Klippengurke") {
+                        console.log("Keine Klippe vorhanden. Klippengurke wird entfernt");
                         map.removeLayer(marker);
                         
                     }
