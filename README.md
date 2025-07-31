@@ -1,3 +1,7 @@
-Gnubound is a scavenger hunt-like website with which you can play scavenger hunts for free and without advertising using a simple JSON.
+# Hiking Cucumber
 
-At the moment it is only available in German and has a few bugs. I am trying to fix these bugs as soon as possible and would like to make it available in English as well.
+## What is Hiking Cucumber?
+
+Hiking Cucumber is a website where you can play various GPS-based games. Players are encouraged to explore the real world in order to win games or collect items. Everything is completely free, with no registration required and no advertising. I am currently still working on improving everything.
+
+
