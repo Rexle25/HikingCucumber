@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://gnubound.netlify.app/</loc>
+    <loc>https://hikingcucumber.netlify.app/</loc>
   </url>
   <url>
-    <loc>https://gnubound.netlify.app/generator</loc>
+    <loc>https://hikingcucumber.netlify.app/generator</loc>
   </url>
   <url>
-    <loc>https://gnubound.netlify.app/play</loc>
+    <loc>https://hikingcucumber.netlify.app/play</loc>
+  </url>
+  <url>
+    <loc>https://hikingcucumber.netlify.app/gurkenjagd</loc>
+  </url>
+  <url>
+    <loc>https://hikingcucumber.netlify.app/gurkenflucht</loc>
   </url>
 </urlset>
