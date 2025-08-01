@@ -62,6 +62,50 @@
             return [newLat, newLon];
         }
 
+        function createFightOverlay() {
+          const overlay = document.createElement("div");
+          overlay.style.position = "fixed";
+          overlay.style.top = "0";
+          overlay.style.left = "0";
+          overlay.style.width = "100vw";
+          overlay.style.height = "100vh";
+          overlay.style.zIndex = "1000";
+          overlay.style.backgroundImage = "url(textures/paper.png)";
+          overlay.style.display = "flex";
+          overlay.style.flexDirection = "column";
+          overlay.style.alignItems = "center";
+
+          
+
+
+          const sprungBTN = document.createElement("button");
+          sprungBTN.innerText = "Sprung Attacke";
+          sprungBTN.style.margin = "auto";
+
+          const fightPlayer = document.createElement("div");
+          fightPlayer.style.float = "right";
+          const fightPlayerImg = document.createElement("img");
+          fightPlayerImg.src = "images/wandergurke.png";
+          fightPlayerImg.width = "100px";
+          fightPlayerImg.height = "auto";
+
+          fightPlayer.appendChild(fightPlayerImg);
+
+
+        
+          
+
+
+          overlay.appendChild(sprungBTN);
+          overlay.appendChild(fightPlayer);
+
+          document.body.appendChild(overlay);
+
+          return {sprungBTN};
+
+          
+        }
+
 
 
         let vorherigeLat;
@@ -70,6 +114,7 @@
         let PlayerLon;
         let player;
         let distToLastSpawn;
+        let pause = false;
 
         navigator.geolocation.getCurrentPosition( pos => {
 
@@ -121,9 +166,11 @@
                     let random1 = ((Math.random() * 2 - 1) * 0.0000002);
                     let random2 = ((Math.random() * 2 -1) * 0.0000002);
 
+                    
+
                     setInterval(() => {
 
-                            
+                            if (pause) return;
                             
                             Spielerentfernung = entfernungInMetern(gurkenLat, gurkenLon, playerLat, playerLon);
                             if (Spielerentfernung < 60) {
@@ -156,6 +203,11 @@
                             gurkenLon += dirLon * step;
 
                             marker.setLatLng([gurkenLat, gurkenLon]);
+
+                            if (Spielerentfernung < 10) {
+                                pause = true;
+                                const {sprungBTN} = createFightOverlay();
+                            }
 
                             
 
