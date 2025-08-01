@@ -118,6 +118,8 @@
                     let zielLat;
                     let ZielLon;
                     let Spielerentfernung;
+                    let random1 = ((Math.random() * 2 - 1) * 0.0000002);
+                    let random2 = ((Math.random() * 2 -1) * 0.0000002);
 
                     setInterval(() => {
 
@@ -127,12 +129,12 @@
                             if (Spielerentfernung < 60) {
                                 zielLat = playerLat;
                                 zielLon = playerLon;
-                                intervalTime = 5;
+                                
 
                             } else {
-                                zielLat = gurkenLat + ((Math.random() * 0.0000004) - 0.0000002);
-                                zielLon = gurkenLon + ((Math.random() * 0.0000004) - 0.0000002);
-                                intervalTime = 500;
+                                zielLat = gurkenLat + random1;
+                                zielLon = gurkenLon + random2;
+                                
                             }
                             console.log(Spielerentfernung);
 
@@ -145,7 +147,7 @@
 
                             console.log(dist);
 
-                            let step = 0.0000003;
+                            let step = 0.0000006;
 
                             const dirLat = dLat / dist;
                             const dirLon = dLon / dist;
@@ -155,9 +157,14 @@
 
                             marker.setLatLng([gurkenLat, gurkenLon]);
 
-                            console.log(intervalTime);
+                            
 
-                        }, 100)
+                        }, 50)
+
+                        setInterval(() => {
+                            random1 = ((Math.random() * 2 - 1) * 0.0000002);
+                            random2 = ((Math.random() * 2 -1) * 0.0000002);
+                        }, 10000)
 
 
 
