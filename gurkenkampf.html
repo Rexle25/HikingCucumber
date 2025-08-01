@@ -107,7 +107,7 @@
 
                 for (let i = 0; i < 5; i++) {
 
-                    const [gurkenLat, gurkenLon] = randomGurkenSpawn(playerLat, playerLon, 30, 100);
+                    let [gurkenLat, gurkenLon] = randomGurkenSpawn(playerLat, playerLon, 30, 100);
 
                     let marker = L.marker([gurkenLat, gurkenLon]).addTo(map).on('click', function(e) {
 
@@ -115,9 +115,31 @@
 
                     });
 
+                    let zielLat;
+                    let ZielLon;
+                    let Spielerentfernung;
+
                     setInterval(() => {
-                            const dLat = playerLat - gurkenLat;
-                            const dLon = playerLon - gurkenLon;
+
+                            
+                            
+                            Spielerentfernung = entfernungInMetern(gurkenLat, gurkenLon, playerLat, playerLon);
+                            if (Spielerentfernung < 60) {
+                                zielLat = playerLat;
+                                zielLon = playerLon;
+                                intervalTime = 5;
+
+                            } else {
+                                zielLat = gurkenLat + ((Math.random() * 0.0000004) - 0.0000002);
+                                zielLon = gurkenLon + ((Math.random() * 0.0000004) - 0.0000002);
+                                intervalTime = 500;
+                            }
+                            console.log(Spielerentfernung);
+
+                            
+
+                            const dLat = zielLat - gurkenLat;
+                            const dLon = zielLon - gurkenLon;
 
                             dist = Math.sqrt(dLat * dLat + dLon * dLon);
 
@@ -131,9 +153,11 @@
                             gurkenLat += dirLat * step;
                             gurkenLon += dirLon * step;
 
-                            marker.setLatLng([markerLat, markerLon]);
+                            marker.setLatLng([gurkenLat, gurkenLon]);
 
-                        }, 50)
+                            console.log(intervalTime);
+
+                        }, 100)
 
 
 
