@@ -41,6 +41,28 @@
             return R * c;
         }
 
+        function randomGurkenSpawn(lat, lon, minDist, maxDist) {
+            const R = 6371000;
+            const θ = Math.random() * 2 * Math.PI;
+            const d = Math.sqrt(Math.random() * (maxDist**2 - minDist**2) + minDist**2);
+
+            const δ = d / R;
+            const φ1 = lat * Math.PI / 180;
+            const λ1 = lon * Math.PI / 180;
+
+            const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) +
+                                Math.cos(φ1) * Math.sin(δ) * Math.cos(θ));
+            
+            const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1),
+                                    Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2));
+
+            const newLat = φ2 * 180 / Math.PI;
+            const newLon = λ2 * 180 / Math.PI;
+
+            return [newLat, newLon];
+        }
+
+
 
         let vorherigeLat;
         let vorherigeLon;
@@ -58,8 +80,8 @@
                 radius: 10
             }).addTo(map);  
 
-            vorherigeLon = pos.coords.longitude -1;
-            vorherigeLat = pos.coords.latitude -1;
+            vorherigeLon = pos.coords.longitude -0.001;
+            vorherigeLat = pos.coords.latitude -0.001;
 
 
 
@@ -78,10 +100,45 @@
 
             console.log(distToLastSpawn);
 
-            if (distToLastSpawn > 0.001) {
+            if (distToLastSpawn > 100) {
                 console.log("Feindliche Gurken werden Gespawnt");
                 vorherigeLat = playerLat;
                 vorherigeLon = playerLon;
+
+                for (let i = 0; i < 5; i++) {
+
+                    const [gurkenLat, gurkenLon] = randomGurkenSpawn(playerLat, playerLon, 30, 100);
+
+                    let marker = L.marker([gurkenLat, gurkenLon]).addTo(map).on('click', function(e) {
+
+                        
+
+                    });
+
+                    setInterval(() => {
+                            const dLat = playerLat - gurkenLat;
+                            const dLon = playerLon - gurkenLon;
+
+                            dist = Math.sqrt(dLat * dLat + dLon * dLon);
+
+                            console.log(dist);
+
+                            let step = 0.0000003;
+
+                            const dirLat = dLat / dist;
+                            const dirLon = dLon / dist;
+
+                            gurkenLat += dirLat * step;
+                            gurkenLon += dirLon * step;
+
+                            marker.setLatLng([markerLat, markerLon]);
+
+                        }, 50)
+
+
+
+
+                }
             }
 
             
