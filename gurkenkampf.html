@@ -62,6 +62,8 @@
             return [newLat, newLon];
         }
 
+        let timer = 0;
+
         function createFightOverlay() {
           const overlay = document.createElement("div");
           overlay.style.position = "fixed";
@@ -75,7 +77,8 @@
           overlay.style.flexDirection = "column";
           overlay.style.alignItems = "center";
 
-          
+          const timerDisplay = document.createElement("h2");
+          timerDisplay.innerText = timer;
 
 
           const sprungBTN = document.createElement("button");
@@ -83,13 +86,41 @@
           sprungBTN.style.margin = "auto";
 
           const fightPlayer = document.createElement("div");
-          fightPlayer.style.float = "right";
+          fightPlayer.style.display = "fixed";
+          fightPlayer.style.position = "absolute";
+          fightPlayer.style.left = "5vh";
+          fightPlayer.style.top = "65vh";
           const fightPlayerImg = document.createElement("img");
           fightPlayerImg.src = "images/wandergurke.png";
-          fightPlayerImg.width = "100px";
-          fightPlayerImg.height = "auto";
+          fightPlayerImg.style.width = "auto";
+          fightPlayerImg.style.height = "30vh";
+          fightPlayerImg.style.left = "5vh";
+
+          const playerHP = document.createElement("p");
+          playerHP.innerText = "10";
 
           fightPlayer.appendChild(fightPlayerImg);
+          fightPlayer.appendChild(playerHP);
+
+
+
+          const enemy = document.createElement("div");
+          enemy.style.display = "fixed";
+          enemy.style.position = "absolute";
+          enemy.style.right = "5vh";
+          enemy.style.top = "65vh";
+          const enemyImg = document.createElement("img");
+          enemyImg.src = "cucumber.png";
+          enemyImg.style.width = "auto";
+          enemyImg.style.height = "30vh";
+          enemyImg.style.left = "5vh";
+
+          const enemyHP = document.createElement("p");
+          enemyHP.innerText = "10";
+
+          enemy.appendChild(enemyImg);
+          enemy.appendChild(enemyHP);
+          
 
 
         
@@ -98,6 +129,25 @@
 
           overlay.appendChild(sprungBTN);
           overlay.appendChild(fightPlayer);
+          overlay.appendChild(enemy);
+          overlay.appendChild(timerDisplay);
+
+          setInterval(() => {
+            if (timer > 5) {
+                timer = 0;
+                timerDisplay.innerText = timer.toFixed(1);
+            } else {
+                timer = timer + 0.1
+                timerDisplay.innerText = timer.toFixed(1);
+            }
+          }, 100)
+
+          sprungBTN.onclick = function() {
+            console.log("Button geklickt")
+          }
+            
+
+          
 
           document.body.appendChild(overlay);
 
@@ -211,7 +261,7 @@
 
                             
 
-                        }, 50)
+                        }, 5)
 
                         setInterval(() => {
                             random1 = ((Math.random() * 2 - 1) * 0.0000002);
@@ -228,6 +278,8 @@
 
 
         });
+
+        
 
 
 
