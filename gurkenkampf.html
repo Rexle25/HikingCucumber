@@ -32,6 +32,7 @@
         let playerLat;
         let PlayerLon;
         let player;
+        let distToLastSpawn;
 
         navigator.geolocation.getCurrentPosition( pos => {
 
@@ -42,6 +43,11 @@
                 radius: 10
             }).addTo(map);  
 
+            vorherigeLon = pos.coords.longitude -1;
+            vorherigeLat = pos.coords.latitude -1;
+
+
+
         });
 
         navigator.geolocation.watchPosition( pos => {
@@ -50,10 +56,25 @@
 
             player.setLatLng([playerLat, playerLon]);
 
+            const dLat = playerLat - vorherigeLat;
+            const dLon = playerLon - vorherigeLon;
 
+            distToLastSpawn = Math.sqrt(dLat * dLat + dLon * dLon);
+
+            console.log(distToLastSpawn);
+
+            if (distToLastSpawn > 0.001) {
+                console.log("Feindliche Gurken werden Gespawnt");
+                vorherigeLat = playerLat;
+                vorherigeLon = playerLon;
+            }
+
+            
 
 
         });
+
+
 
 
     </script>
