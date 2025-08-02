@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<head>
+    <title>Gurkenflucht</title>
+
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+     
+
+
+    <script>
+
+        var map = L.map('map').setView([46.9480900, 7.4474400], 12);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        var greenIcon = L.icon({
+            iconUrl: 'cucumber.png',
+            shadowUrl: '',
+
+            iconSize:     [70, 17], // size of the icon
+            shadowSize:   [50, 64], // size of the shadow
+            iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
+            shadowAnchor: [4, 62],  // the same for the shadow
+            popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+        });
+
+        function entfernungInMetern(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const toRad = x => x * Math.PI / 180;
+
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        function randomSpawn(lat, lon, minDist, maxDist) {
+            const R = 6371000;
+            const θ = Math.random() * 2 * Math.PI;
+            const d = Math.sqrt(Math.random() * (maxDist**2 - minDist**2) + minDist**2);
+
+            const δ = d / R;
+            const φ1 = lat * Math.PI / 180;
+            const λ1 = lon * Math.PI / 180;
+
+            const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) +
+                                Math.cos(φ1) * Math.sin(δ) * Math.cos(θ));
+            
+            const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1),
+                                    Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2));
+
+            const newLat = φ2 * 180 / Math.PI;
+            const newLon = λ2 * 180 / Math.PI;
+
+            return [newLat, newLon];
+        }
+
+        
+
+        let lat;
+        let lon;
+        let random;
+        let random2;
+        let markerLat;
+        let markerLon;
+        let player;
+        let gurke;
+        let eingelegt;
+        let beepInterval;
+        let abgelenkt = false;
+        let aktuellerEffekt = null;
+        let zielLat;
+        let zielLon;
+        let lastPlayerLat;
+        let lastPlayerLon;
+        let heatMap = new Map();
+        let aktuellerZustand = "stroll"
+        let strollLat;
+        let strollLon;
+        const randInt = Math.floor(Math.random() * 2);
+        navigator.geolocation.getCurrentPosition(
+
+        pos => {
+
+            lat = pos.coords.latitude;
+            lon = pos.coords.longitude;
+
+            
+
+            const radiusInDegrees = 0.004;
+
+            const angle = Math.random() * 2 * Math.PI;
+            const distance = radiusInDegrees;
+
+            random = Math.cos(angle) * distance;
+            random2 = Math.sin(angle) * distance;
+
+
+            
+            markerLat = lat + random;
+            markerLon = lon + random2;
+
+            gurke = L.marker([markerLat, markerLon ], {icon: greenIcon}).addTo(map)
+
+            player = L.circle([lat, lon], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.5,
+                radius: 10
+            }).addTo(map);  
+
+
+        }
+
+            
+
+
+        )
+
+        var playerLat;
+        var playerLon;
+        var audioPlaying;
+        
+
+        navigator.geolocation.watchPosition( pos => {
+
+
+            playerLat = pos.coords.latitude;
+            playerLon = pos.coords.longitude;
+
+            player.setLatLng([playerLat, playerLon]);
+
+        
+        });
+        
+        var dist;
+        var snd = new Audio("audio/music.mp3");
+        snd.loop = true;
+        
+
+        setInterval(() => {
+
+            
+
+            
+
+            const dLat = playerLat - markerLat;
+            const dLon = playerLon - markerLon;
+
+            dist = Math.sqrt(dLat * dLat + dLon * dLon);
+
+            let step;
+
+            if (aktuellerEffekt === "Ablenkung") {
+                step = -0.0000016 + ((dist * 111000) ** 1.09) / 1110000000;
+            } else if (aktuellerEffekt === "Verlangsamen") {
+
+                step = 0.0000002 + ((dist * 111000) ** 1.01) / 1110000000;
+
+            } else if (aktuellerEffekt === "Aufhalten") {
+
+                step = 0.0;
+
+            } else {
+                step = 0.0000006 + ((dist * 111000) ** 1.01) / 1110000000;
+            }
+
+            console.log(step);
+            console.log(aktuellerEffekt);
+
+            const dirLat = dLat / dist;
+            const dirLon = dLon / dist;
+
+            markerLat += dirLat * step;
+            markerLon += dirLon * step;
+
+            gurke.setLatLng([markerLat, markerLon]);
+
+            strollLat = markerLat;
+            strollLon = markerLon;
+
+            
+
+            
+
+            if (dist < 0.00010) {
+
+                alert ("Du wurdest eingelegt");
+                eingelegt = true;
+
+            }
+
+            if (dist < 0.0007) {
+                if (!audioPlaying) {
+                    snd.play();
+                    audioPlaying = true;
+                }
+            } else {
+                if (audioPlaying) {
+                    snd.pause();
+                    snd.currentTime = 0;
+                    audioPlaying = false;
+                }
+            }
+
+
+
+
+            
+
+        }, 50)
+
+        setInterval(() => {
+
+            alert("Du hast gewonnen!")
+
+
+
+        }, 600000)
+
+        
+
+
+    
+        const types = ["Ablenkung", "Verlangsamen", "Aufhalten"]
+        
+    
+        
+        setInterval(() => {
+
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            let randomItem = (Math.random() * 0.005) -0.0025;
+            let random2Item = (Math.random() * 0.005) -0.0025;
+
+
+            let itemLat = playerLat + randomItem;
+            let itemLon = playerLon + random2Item;
+            let marker = L.marker([itemLat, itemLon ]).addTo(map).on('click', function(e) {
+
+                
+
+                const playerDist = Math.hypot(
+                    itemLat - playerLat,
+                    itemLon - playerLon
+                ) * 111000;
+
+                if (playerDist < 50) {
+
+                    if (randomType === "Ablenkung") {
+
+                    aktuellerEffekt = randomType;
+
+                    map.removeLayer(marker); 
+
+                    setTimeout(() => {
+                        aktuellerEffekt = null;
+                        
+                    }, 20000);
+
+                    
+
+                    } else if (randomType === "Verlangsamen") {
+
+
+                        aktuellerEffekt = randomType;
+
+                        map.removeLayer(marker); 
+
+                        setTimeout(() => {
+                            aktuellerEffekt = null;
+                        }, 20000);
+
+                    } else {
+
+                        aktuellerEffekt = randomType;
+
+                        map.removeLayer(marker); 
+
+                        setTimeout(() => {
+                            aktuellerEffekt = null;
+                        }, 20000);
+
+                    }
+
+                }
+
+                
+
+
+                
+
+            })
+
+
+            
+            
+
+        }, 50000)
+
+        function checkDistance(sensorLat, sensorLon) {
+
+            let distToPlayer = entfernungInMetern(sensorLat, sensorLon, playerLat, playerLon);
+            console.log("Sensor distance to player: " + distToPlayer);
+
+            if (distToPlayer < 50) {
+                console.log("Spieler nahe an Sensor");
+                const key = sensorLat.toFixed(2) + "," + sensorLon.toFixed(2);
+                console.log(key);
+                let intensity = heatMap.get(key)?.stärke || 0;
+                intensity = intensity + 0.01;
+                heatMap.set(key, {stärke: intensity, lat: sensorLat, lon: sensorLon});
+                console.log("Heatmap intensity: " + intensity);
+            }
+
+        }
+
+        setInterval(() => {
+            let [sensorLat, sensorLon] = randomSpawn(playerLat, playerLon, 10, 50);
+            let sensor = L.circle([sensorLat, sensorLon], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.5,
+                radius: 50
+            }).addTo(map);
+
+            setInterval(() => {
+                checkDistance(sensorLat, sensorLon);
+            }, 100)
+
+            
+        }, 10000)
+        let maxIntensity = -Infinity;
+        let maxKey = null;
+        let maxEntry = null;
+        let random3 = ((Math.random() * 2 - 1) * 0.0000002);
+        let random4 = ((Math.random() * 2 -1) * 0.0000002);
+        
+        setInterval(() => {
+            for (const [key, value] of heatMap.entries()) {
+                if (value.stärke > maxIntensity) {
+                    maxIntensity = value.stärke;
+                    maxKey = key;
+                    maxEntry = value;
+                }
+            }
+            console.log("Heatmap key mit höchster intensity: " + maxKey);
+            console.log("Intensity: " + maxEntry);
+
+            if (maxIntensity > 0.1) {
+                strollLat = heatMap.get(maxKey).lat;
+                strollLon = heatMap.get(maxKey).lon;
+            } else {
+                strollLat = markerLat;
+                strollLon = markerLon;
+            }
+
+            zielLat = strollLat + random3;
+            zielLon = strollLon + random4;
+
+            
+
+            
+        }, 1000)
+
+        setInterval(() => {
+            random3 = ((Math.random() * 2 - 1) * 0.0000002);
+            random4 = ((Math.random() * 2 -1) * 0.0000002);
+        }, 10000)
+
+        
+
+        
+    </script>
+
+
+
+</body>
