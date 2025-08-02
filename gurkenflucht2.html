@@ -333,7 +333,7 @@
 
             if (distToPlayer < 50) {
                 console.log("Spieler nahe an Sensor");
-                const key = sensorLat.toFixed(4) + "," + sensorLon.toFixed(4);
+                const key = sensorLat.toFixed(3) + "," + sensorLon.toFixed(3);
                 console.log(key);
                 let intensity = heatMap.get(key)?.stärke || 0;
                 intensity = intensity + 0.01;
@@ -374,48 +374,61 @@
         
         
         setInterval(() => {
+            let cucumberDistToPlayer = entfernungInMetern(markerLat, markerLon, playerLat, playerLon);
+            console.log("Die Gurke ist noch so weit vom Spieler entfernt: " + cucumberDistToPlayer);
 
-            if (aktuellerZustand == "stroll") {
-                
+            if (cucumberDistToPlayer > 80) {
+
             
-                for (const [key, value] of heatMap.entries()) {
-                    console.log("Heatmap intensity bei " + key + " ist " + value);
-                    heatMap.set(key, value.stärke -0.009);
-                    console.log("Heatmap intensity bei " + key + " ist jetzt " + value);
-                    if (value.stärke > maxIntensity) {
-                        maxIntensity = value.stärke;
-                        maxKey = key;
-                        maxEntry = value;
+
+                if (aktuellerZustand == "stroll") {
+                    
+                
+                    for (const [key, value] of heatMap.entries()) {
+                        console.log("Heatmap intensity bei " + key + " ist " + value);
+                        heatMap.set(key, value.stärke -0.009);
+                        console.log("Heatmap intensity bei " + key + " ist jetzt " + value);
+                        if (value.stärke > maxIntensity) {
+                            maxIntensity = value.stärke;
+                            maxKey = key;
+                            maxEntry = value;
+                        }
                     }
+                    console.log("Heatmap key mit höchster intensity: " + maxKey);
+                    console.log("Intensity: " + maxEntry);
+
+                    if (maxIntensity > 0.1 && maxIntensity != null) {
+                        const [latStr, lonStr] = maxKey.split(",");
+                        strollLat = parseFloat(latStr);
+                        strollLon = parseFloat(lonStr);
+                    } else {
+                        strollLat = markerLat;
+                        strollLon = markerLon;
+                    }
+
+                    zielLat = strollLat + random3;
+                    zielLon = strollLon + random4;
+
+                    console.log("Ziellat: " + zielLat);
+                    console.log("Strolllon: " + strollLat);
+
+                    stepModifikator = 1;
+                } else if (aktuellerZustand == "sensor") {
+                    stepModifikator = 5;
+                    let sensorEntfernung = entfernungInMetern(markerLat, markerLon, zielLat, zielLon);
+                    console.log("Gurke ist noch so viele Meter von Sensor entfernt: " + sensorEntfernung);
+
+                    if (sensorEntfernung < 10) {
+                        aktuellerZustand == "stroll";
+                    }
+
+
                 }
-                console.log("Heatmap key mit höchster intensity: " + maxKey);
-                console.log("Intensity: " + maxEntry);
-
-                if (maxIntensity > 0.1 && maxIntensity != null) {
-                    const [latStr, lonStr] = maxKey.split(",");
-                    strollLat = parseFloat(latStr);
-                    strollLon = parseFloat(lonStr);
-                } else {
-                    strollLat = markerLat;
-                    strollLon = markerLon;
-                }
-
-                zielLat = strollLat + random3;
-                zielLon = strollLon + random4;
-
-                console.log("Ziellat: " + zielLat);
-                console.log("Strolllon: " + strollLat);
-
-                stepModifikator = 1;
-            } else if (aktuellerZustand == "sensor") {
-                stepModifikator = 5;
-                let sensorEntfernung = entfernungInMetern(markerLat, markerLon, zielLat, zielLon);
-                console.log("Gurke ist noch so viele Meter von Sensor entfernt: " + sensorEntfernung);
-
-                if (sensorEntfernung < 10) {
-                    aktuellerZustand == "stroll";
-                }
-
+            } else {
+                console.log("Die Gurke hat den Spieler endeckt!!!");
+                stepModifikator = 1.5; 
+                zielLat = playerLat;
+                zielLon = playerLon;
 
             }
 
@@ -427,8 +440,8 @@
         }, 1000)
 
         setInterval(() => {
-            random3 = ((Math.random() * 2 - 1) * 0.0004002);
-            random4 = ((Math.random() * 2 -1) * 0.0004002);
+            random3 = ((Math.random() * 2 - 1) * 0.0009002);
+            random4 = ((Math.random() * 2 -1) * 0.0009002);
         }, 10000)
 
         
