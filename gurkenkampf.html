@@ -18,6 +18,8 @@
 
     <div id="map"></div>
 
+    <p id="attackTimer">Timer</p>
+
     <script>
 
         var map = L.map('map').setView([46.9480900, 7.4474400], 12);
@@ -26,6 +28,17 @@
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
+
+        var greenIcon = L.icon({
+            iconUrl: 'cucumber.png',
+            shadowUrl: '',
+
+            iconSize:     [70, 17], // size of the icon
+            shadowSize:   [50, 64], // size of the shadow
+            iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
+            shadowAnchor: [4, 62],  // the same for the shadow
+            popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+        });
 
         function entfernungInMetern(lat1, lon1, lat2, lon2) {
             const R = 6371000;
@@ -62,101 +75,11 @@
             return [newLat, newLon];
         }
 
+        
+
         let timer = 0;
 
-        function createFightOverlay() {
-          const overlay = document.createElement("div");
-          overlay.style.position = "fixed";
-          overlay.style.top = "0";
-          overlay.style.left = "0";
-          overlay.style.width = "100vw";
-          overlay.style.height = "100vh";
-          overlay.style.zIndex = "1000";
-          overlay.style.backgroundImage = "url(textures/paper.png)";
-          overlay.style.display = "flex";
-          overlay.style.flexDirection = "column";
-          overlay.style.alignItems = "center";
-
-          const timerDisplay = document.createElement("h2");
-          timerDisplay.innerText = timer;
-
-
-          const sprungBTN = document.createElement("button");
-          sprungBTN.innerText = "Sprung Attacke";
-          sprungBTN.style.margin = "auto";
-
-          const fightPlayer = document.createElement("div");
-          fightPlayer.style.display = "fixed";
-          fightPlayer.style.position = "absolute";
-          fightPlayer.style.left = "5vh";
-          fightPlayer.style.top = "65vh";
-          const fightPlayerImg = document.createElement("img");
-          fightPlayerImg.src = "images/wandergurke.png";
-          fightPlayerImg.style.width = "auto";
-          fightPlayerImg.style.height = "30vh";
-          fightPlayerImg.style.left = "5vh";
-
-          const playerHP = document.createElement("p");
-          playerHP.innerText = "10";
-
-          fightPlayer.appendChild(fightPlayerImg);
-          fightPlayer.appendChild(playerHP);
-
-
-
-          const enemy = document.createElement("div");
-          enemy.style.display = "fixed";
-          enemy.style.position = "absolute";
-          enemy.style.right = "5vh";
-          enemy.style.top = "65vh";
-          const enemyImg = document.createElement("img");
-          enemyImg.src = "cucumber.png";
-          enemyImg.style.width = "auto";
-          enemyImg.style.height = "30vh";
-          enemyImg.style.left = "5vh";
-
-          const enemyHP = document.createElement("p");
-          enemyHP.innerText = "10";
-
-          enemy.appendChild(enemyImg);
-          enemy.appendChild(enemyHP);
-          
-
-
         
-          
-
-
-          overlay.appendChild(sprungBTN);
-          overlay.appendChild(fightPlayer);
-          overlay.appendChild(enemy);
-          overlay.appendChild(timerDisplay);
-
-          setInterval(() => {
-            if (timer > 5) {
-                timer = 0;
-                timerDisplay.innerText = timer.toFixed(1);
-            } else {
-                timer = timer + 0.1
-                timerDisplay.innerText = timer.toFixed(1);
-            }
-          }, 100)
-
-          sprungBTN.onclick = function() {
-            console.log("Button geklickt")
-          }
-            
-
-          
-
-          document.body.appendChild(overlay);
-
-          return {sprungBTN};
-
-          
-        }
-
-
 
         let vorherigeLat;
         let vorherigeLon;
@@ -165,6 +88,12 @@
         let player;
         let distToLastSpawn;
         let pause = false;
+        let playerHP = 10;
+        let unverwundbar = false;
+
+        function unverwundbarStop() {
+            unverwundbar = false;
+        }
 
         navigator.geolocation.getCurrentPosition( pos => {
 
@@ -202,13 +131,35 @@
 
                 for (let i = 0; i < 5; i++) {
 
+                    let gurkeHP = 15;
+
                     let [gurkenLat, gurkenLon] = randomGurkenSpawn(playerLat, playerLon, 30, 100);
 
-                    let marker = L.marker([gurkenLat, gurkenLon]).addTo(map).on('click', function(e) {
+                    let marker = L.marker([gurkenLat, gurkenLon], {icon: greenIcon}).addTo(map).on('click', function(e) {
+                        const distToPlayer = entfernungInMetern(gurkenLat, gurkenLon, playerLat, playerLon);
+
+                        if (distToPlayer < 20) {
+                            if (timer > 5) {
+                                gurkeHP = gurkeHP - timer;
+
+                            }
+                            
+                            
+                        }
+
+                        if (gurkeHP < 0.001) {
+                            map.removeLayer(marker); 
+                            gurkenLat = null;
+                            gurkenLon = null;
+                        }
+
 
                         
 
                     });
+
+                    marker.bindPopup("<b>HP der Gurke</b><br>" + gurkeHP).openPopup();
+                    
 
                     let zielLat;
                     let ZielLon;
@@ -255,18 +206,40 @@
                             marker.setLatLng([gurkenLat, gurkenLon]);
 
                             if (Spielerentfernung < 10) {
-                                pause = true;
-                                const {sprungBTN} = createFightOverlay();
+                                
+                                
+                                console.log("playerHP: " + playerHP);
+
+                                if (!unverwundbar) {
+                                    playerHP = playerHP -0.5;
+                                    unverwundbar = true;
+                                    const unverwundbarTimeout = setTimeout(unverwundbarStop, 5000);
+                                }
                             }
 
                             
 
-                        }, 5)
+                        }, 50)
 
                         setInterval(() => {
                             random1 = ((Math.random() * 2 - 1) * 0.0000002);
                             random2 = ((Math.random() * 2 -1) * 0.0000002);
                         }, 10000)
+
+                        setInterval(() => {
+                            if (timer > 10) {
+                                timer = 0;
+                            } else {
+                                timer = timer + 0.1;
+                            }
+
+                            let timerDisplay = document.getElementById("attackTimer");
+                            timerDisplay.innerText = timer.toFixed(1);
+                            marker.setPopupContent("<b>HP der Gurke</b><br>" + gurkeHP.toFixed(1));
+
+                        }, 50)
+
+                        
 
 
 
