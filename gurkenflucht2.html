@@ -97,6 +97,8 @@
         let aktuellerZustand = "stroll"
         let strollLat;
         let strollLon;
+        let random3 = ((Math.random() * 2 - 1) * 0.00004002);
+        let random4 = ((Math.random() * 2 -1) * 0.00004002);
         const randInt = Math.floor(Math.random() * 2);
         navigator.geolocation.getCurrentPosition(
 
@@ -120,11 +122,16 @@
             markerLat = lat + random;
             markerLon = lon + random2;
 
+            strollLat = markerLat;
+            strollLon = markerLon;
+            zielLat = strollLat + random3;
+            zielLon = strollLon + random4;
+
             gurke = L.marker([markerLat, markerLon ], {icon: greenIcon}).addTo(map)
 
             player = L.circle([lat, lon], {
-                color: 'red',
-                fillColor: '#f03',
+                color: 'deepskyblue',
+                fillColor: '#00BFFF',
                 fillOpacity: 0.5,
                 radius: 10
             }).addTo(map);  
@@ -164,8 +171,8 @@
 
             
 
-            const dLat = playerLat - markerLat;
-            const dLon = playerLon - markerLon;
+            const dLat = zielLat - markerLat;
+            const dLon = zielLon - markerLon;
 
             dist = Math.sqrt(dLat * dLat + dLon * dLon);
 
@@ -196,12 +203,11 @@
 
             gurke.setLatLng([markerLat, markerLon]);
 
-            strollLat = markerLat;
-            strollLon = markerLon;
-
             
 
             
+
+            /*
 
             if (dist < 0.00010) {
 
@@ -222,6 +228,8 @@
                     audioPlaying = false;
                 }
             }
+
+            */
 
 
 
@@ -317,43 +325,45 @@
 
         }, 50000)
 
-        function checkDistance(sensorLat, sensorLon) {
+        function checkDistance(sensorLat, sensorLon, sensor) {
 
             let distToPlayer = entfernungInMetern(sensorLat, sensorLon, playerLat, playerLon);
             console.log("Sensor distance to player: " + distToPlayer);
 
             if (distToPlayer < 50) {
                 console.log("Spieler nahe an Sensor");
-                const key = sensorLat.toFixed(2) + "," + sensorLon.toFixed(2);
+                const key = sensorLat.toFixed(4) + "," + sensorLon.toFixed(4);
                 console.log(key);
                 let intensity = heatMap.get(key)?.stärke || 0;
                 intensity = intensity + 0.01;
                 heatMap.set(key, {stärke: intensity, lat: sensorLat, lon: sensorLon});
                 console.log("Heatmap intensity: " + intensity);
+                sensor.setRadius(50);
+                sensor.setStyle(fillOpacity=0.5);
+
             }
 
         }
 
         setInterval(() => {
-            let [sensorLat, sensorLon] = randomSpawn(playerLat, playerLon, 10, 50);
+            let [sensorLat, sensorLon] = randomSpawn(playerLat, playerLon, 10, 300);
             let sensor = L.circle([sensorLat, sensorLon], {
                 color: 'red',
                 fillColor: '#f03',
-                fillOpacity: 0.5,
-                radius: 50
+                fillOpacity: 0.2,
+                radius: 0
             }).addTo(map);
 
             setInterval(() => {
-                checkDistance(sensorLat, sensorLon);
+                checkDistance(sensorLat, sensorLon, sensor);
             }, 100)
 
             
-        }, 10000)
+        }, 20000)
         let maxIntensity = -Infinity;
         let maxKey = null;
         let maxEntry = null;
-        let random3 = ((Math.random() * 2 - 1) * 0.0000002);
-        let random4 = ((Math.random() * 2 -1) * 0.0000002);
+        
         
         setInterval(() => {
             for (const [key, value] of heatMap.entries()) {
@@ -366,9 +376,10 @@
             console.log("Heatmap key mit höchster intensity: " + maxKey);
             console.log("Intensity: " + maxEntry);
 
-            if (maxIntensity > 0.1) {
-                strollLat = heatMap.get(maxKey).lat;
-                strollLon = heatMap.get(maxKey).lon;
+            if (maxIntensity > 0.1 && maxIntensity != null) {
+                const [latStr, lonStr] = maxKey.split(",");
+                strollLat = parseFloat(latStr);
+                strollLon = parseFloat(lonStr);
             } else {
                 strollLat = markerLat;
                 strollLon = markerLon;
@@ -377,14 +388,19 @@
             zielLat = strollLat + random3;
             zielLon = strollLon + random4;
 
+            console.log("Ziellat: " + zielLat);
+            console.log("Strolllon: " + strollLat);
+
+
+
             
 
             
         }, 1000)
 
         setInterval(() => {
-            random3 = ((Math.random() * 2 - 1) * 0.0000002);
-            random4 = ((Math.random() * 2 -1) * 0.0000002);
+            random3 = ((Math.random() * 2 - 1) * 0.0004002);
+            random4 = ((Math.random() * 2 -1) * 0.0004002);
         }, 10000)
 
         
