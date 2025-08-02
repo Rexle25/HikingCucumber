@@ -341,12 +341,14 @@
                 sensor.setRadius(50);
                 sensor.setStyle(fillOpacity=0.5);
 
+                
+
             }
 
         }
 
         setInterval(() => {
-            let [sensorLat, sensorLon] = randomSpawn(playerLat, playerLon, 10, 300);
+            let [sensorLat, sensorLon] = randomSpawn(playerLat, playerLon, 10, 20);
             let sensor = L.circle([sensorLat, sensorLon], {
                 color: 'red',
                 fillColor: '#f03',
@@ -367,6 +369,9 @@
         
         setInterval(() => {
             for (const [key, value] of heatMap.entries()) {
+                console.log("Heatmap intensity bei " + key + " ist " + value);
+                heatMap.set(key, value.stärke -0.009);
+                console.log("Heatmap intensity bei " + key + " ist jetzt " + value);
                 if (value.stärke > maxIntensity) {
                     maxIntensity = value.stärke;
                     maxKey = key;
