@@ -90,6 +90,8 @@
         let pause = false;
         let playerHP = 10;
         let unverwundbar = false;
+        let lastPolygonLat;
+        let lastPolygonLon;
 
         function unverwundbarStop() {
             unverwundbar = false;
@@ -106,6 +108,9 @@
 
             vorherigeLon = pos.coords.longitude -0.001;
             vorherigeLat = pos.coords.latitude -0.001;
+            lastPolygonLat = pos.coords.longitude -0.011;
+            lastPolygonLon = pos.coords.latitude -0.011;
+            
 
 
 
@@ -248,9 +253,32 @@
             }
 
             
+            const distToLastPolygonSpawn = entfernungInMetern(lastPolygonLat, lastPolygonLon, playerLat, playerLon);
+            console.log("Dist to last polygon spawn " + distToLastPolygonSpawn);
 
+            if (distToLastPolygonSpawn > 500) {
+                lastPolygonLat = playerLat;
+                lastPolygonLon = playerLon;
+                for (let i = 0; i < 3; i++) {
+                    let [polygonLat, polygonLon] = randomGurkenSpawn(playerLat, playerLon, 50, 250);
+                    let polygonBounds = [
+                        randomGurkenSpawn(polygonLat, polygonLon, 20, 80),
+                        randomGurkenSpawn(polygonLat, polygonLon, 20, 80),
+                        randomGurkenSpawn(polygonLat, polygonLon, 20, 80)
+                        
+                    ];
+                    var polygon = L.polygon(polygonBounds).addTo(map);
+
+                    const polygonCalculation = polygonBounds.map(([lat, lng]) => [lng, lat]);
+                    
+                }
+                
+
+            }
 
         });
+
+        
 
         
 
