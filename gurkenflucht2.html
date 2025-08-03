@@ -80,7 +80,7 @@
 
         
         function getNextPositionFromArray(currentPosition) {
-            let index = lastSighting.indexOf(currentPosition);
+            let index = lastSighting.lastIndexOf(currentPosition);
             console.log(index);
             
             nextPosition = lastSighting[index + 1];
@@ -388,7 +388,7 @@
             }, 100)
 
             
-        }, 20000)
+        }, 19000)
         let maxIntensity = -Infinity;
         let maxKey = null;
         let maxEntry = null;
@@ -398,13 +398,19 @@
             let cucumberDistToPlayer = entfernungInMetern(markerLat, markerLon, playerLat, playerLon);
             console.log("Die Gurke ist noch so weit vom Spieler entfernt: " + cucumberDistToPlayer);
 
-            if (cucumberDistToPlayer > 70) {
+            if (cucumberDistToPlayer > 50) {
 
             
 
                 if (aktuellerZustand == "stroll") {
+
+                    
+                    
+
+                    
                     
                 
+
                     for (const [key, value] of heatMap.entries()) {
                         console.log("Heatmap intensity bei " + key + " ist " + value);
                         heatMap.set(key, value.stärke - 0.005);
@@ -433,13 +439,13 @@
                     console.log("Ziellat: " + zielLat);
                     console.log("Strolllon: " + strollLat);
 
-                    stepModifikator = 1;
+                    stepModifikator = 0.7;
                 } else if (aktuellerZustand == "sensor") {
-                    stepModifikator = 5;
+                    stepModifikator = 1.5;
                     let sensorEntfernung = entfernungInMetern(markerLat, markerLon, zielLat, zielLon);
                     console.log("Gurke ist noch so viele Meter von Sensor entfernt: " + sensorEntfernung);
 
-                    if (sensorEntfernung < 10) {
+                    if (sensorEntfernung < 30) {
                         aktuellerZustand == "stroll";
                     }
 
@@ -447,7 +453,7 @@
                 }
             } else {
                 console.log("Die Gurke hat den Spieler endeckt!!!");
-                stepModifikator = 1.2; 
+                stepModifikator = 1.0; 
                 zielLat = playerLat;
                 zielLon = playerLon;
 
@@ -461,8 +467,8 @@
         }, 1000)
 
         setInterval(() => {
-            random3 = ((Math.random() * 2 - 1) * 0.0009002);
-            random4 = ((Math.random() * 2 -1) * 0.0009002);
+            random3 = ((Math.random() * 2 - 1) * 0.0019002);
+            random4 = ((Math.random() * 2 -1) * 0.0019002);
             timer = timer - 10;
             console.log("Alle sichtungen: " + lastSighting);
             console.log("Index der aktuellen Position in Sichtungen: " + getNextPositionFromArray(markerLat.toFixed(3) + "," + markerLon.toFixed(3)));
