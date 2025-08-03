@@ -77,6 +77,20 @@
 
         
 
+
+        
+        function getNextPositionFromArray(currentPosition) {
+            let index = lastSighting.indexOf(currentPosition);
+            console.log(index);
+            
+            nextPosition = lastSighting[index + 1];
+            console.log("Die nächste Position ist: " + nextPosition);
+            return(nextPosition);
+        }
+
+
+        
+
         let lat;
         let lon;
         let random;
@@ -98,6 +112,8 @@
         let strollLat;
         let strollLon;
         let stepModifikator = 1;
+        let lastSighting = [];
+        let timer = 0;
         let random3 = ((Math.random() * 2 - 1) * 0.00004002);
         let random4 = ((Math.random() * 2 -1) * 0.00004002);
         const randInt = Math.floor(Math.random() * 2);
@@ -347,6 +363,11 @@
 
                 aktuellerZustand = "sensor";
 
+                if (timer < 1) {
+                    lastSighting.push(sensorLat.toFixed(3) + "," + sensorLon.toFixed(3));
+                    timer = 10;
+                }
+
                 
 
             }
@@ -354,7 +375,7 @@
         }
 
         setInterval(() => {
-            let [sensorLat, sensorLon] = randomSpawn(playerLat, playerLon, 10, 20);
+            let [sensorLat, sensorLon] = randomSpawn(playerLat, playerLon, 20, 300);
             let sensor = L.circle([sensorLat, sensorLon], {
                 color: 'red',
                 fillColor: '#f03',
@@ -377,7 +398,7 @@
             let cucumberDistToPlayer = entfernungInMetern(markerLat, markerLon, playerLat, playerLon);
             console.log("Die Gurke ist noch so weit vom Spieler entfernt: " + cucumberDistToPlayer);
 
-            if (cucumberDistToPlayer > 80) {
+            if (cucumberDistToPlayer > 70) {
 
             
 
@@ -426,7 +447,7 @@
                 }
             } else {
                 console.log("Die Gurke hat den Spieler endeckt!!!");
-                stepModifikator = 1.5; 
+                stepModifikator = 1.2; 
                 zielLat = playerLat;
                 zielLon = playerLon;
 
@@ -442,6 +463,10 @@
         setInterval(() => {
             random3 = ((Math.random() * 2 - 1) * 0.0009002);
             random4 = ((Math.random() * 2 -1) * 0.0009002);
+            timer = timer - 10;
+            console.log("Alle sichtungen: " + lastSighting);
+            console.log("Index der aktuellen Position in Sichtungen: " + getNextPositionFromArray(markerLat.toFixed(3) + "," + markerLon.toFixed(3)));
+            getNextPositionFromArray(markerLat.toFixed(3) + "," + markerLon.toFixed(3));
         }, 10000)
 
         
