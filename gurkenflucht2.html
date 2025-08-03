@@ -347,7 +347,7 @@
             let distToPlayer = entfernungInMetern(sensorLat, sensorLon, playerLat, playerLon);
             console.log("Sensor distance to player: " + distToPlayer);
 
-            if (distToPlayer < 50) {
+            if (distToPlayer < 45) {
                 console.log("Spieler nahe an Sensor");
                 const key = sensorLat.toFixed(3) + "," + sensorLon.toFixed(3);
                 console.log(key);
@@ -355,7 +355,7 @@
                 intensity = intensity + 0.01;
                 heatMap.set(key, {stärke: intensity, lat: sensorLat, lon: sensorLon});
                 console.log("Heatmap intensity: " + intensity);
-                sensor.setRadius(50);
+                sensor.setRadius(45);
                 sensor.setStyle(fillOpacity=0.5);
 
                 zielLat = sensorLat;
@@ -375,7 +375,7 @@
         }
 
         setInterval(() => {
-            let [sensorLat, sensorLon] = randomSpawn(playerLat, playerLon, 20, 300);
+            let [sensorLat, sensorLon] = randomSpawn(playerLat, playerLon, 5, 300);
             let sensor = L.circle([sensorLat, sensorLon], {
                 color: 'red',
                 fillColor: '#f03',
@@ -388,7 +388,7 @@
             }, 100)
 
             
-        }, 10000)
+        }, 20000)
         let maxIntensity = -Infinity;
         let maxKey = null;
         let maxEntry = null;
