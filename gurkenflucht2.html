@@ -379,7 +379,7 @@
             let sensor = L.circle([sensorLat, sensorLon], {
                 color: 'red',
                 fillColor: '#f03',
-                fillOpacity: 0.2,
+                fillOpacity: 0.0,
                 radius: 0
             }).addTo(map);
 
@@ -407,7 +407,7 @@
                 
                     for (const [key, value] of heatMap.entries()) {
                         console.log("Heatmap intensity bei " + key + " ist " + value);
-                        heatMap.set(key, value.stärke -0.009);
+                        heatMap.set(key, value.stärke - 0.005);
                         console.log("Heatmap intensity bei " + key + " ist jetzt " + value);
                         if (value.stärke > maxIntensity) {
                             maxIntensity = value.stärke;
