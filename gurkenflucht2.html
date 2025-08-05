@@ -407,13 +407,45 @@
                 if (aktuellerZustand == "stroll") {
 
                    if (nächstePositionImArray == undefined) {
-                    console.log("Nächste Position im Array ist nicht vorhanden");
+                        console.log("Nächste Position im Array ist nicht vorhanden");
+                        for (const [key, value] of heatMap.entries()) {
+                            console.log("Heatmap intensity bei " + key + " ist " + value);
+                            heatMap.set(key, value.stärke - 0.005);
+                            console.log("Heatmap intensity bei " + key + " ist jetzt " + value);
+                            if (value.stärke > maxIntensity) {
+                                maxIntensity = value.stärke;
+                                maxKey = key;
+                                maxEntry = value;
+                            }
+                        }
+                        console.log("Heatmap key mit höchster intensity: " + maxKey);
+                        console.log("Intensity: " + maxEntry);
+
+                        if (maxIntensity > 0.1 && maxIntensity != null) {
+                            const [latStr, lonStr] = maxKey.split(",");
+                            strollLat = parseFloat(latStr);
+                            strollLon = parseFloat(lonStr);
+                        } else {
+                            strollLat = markerLat;
+                            strollLon = markerLon;
+                        }
+
+                        zielLat = strollLat + random3;
+                        zielLon = strollLon + random4;
+
+                        console.log("Ziellat: " + zielLat);
+                        console.log("Strolllon: " + strollLat);
+
+                        stepModifikator = 0.7;
+                        
                    } else {
-                    console.log("Nächste Position ist " + nächstePositionImArray);
-                    const [latStr, lonStr] = nächstePositionImArray.split(",");
-                    zielLat = parseFloat(latStr);
-                    zielLon = parseFloat(lonStr);
+                        console.log("Nächste Position ist " + nächstePositionImArray);
+                        const [latStr, lonStr] = nächstePositionImArray.split(",");
+                        zielLat = parseFloat(latStr);
+                        zielLon = parseFloat(lonStr);
                    }
+                        
+            
 
                     
 
@@ -421,35 +453,7 @@
                     
                 
 
-                    for (const [key, value] of heatMap.entries()) {
-                        console.log("Heatmap intensity bei " + key + " ist " + value);
-                        heatMap.set(key, value.stärke - 0.005);
-                        console.log("Heatmap intensity bei " + key + " ist jetzt " + value);
-                        if (value.stärke > maxIntensity) {
-                            maxIntensity = value.stärke;
-                            maxKey = key;
-                            maxEntry = value;
-                        }
-                    }
-                    console.log("Heatmap key mit höchster intensity: " + maxKey);
-                    console.log("Intensity: " + maxEntry);
-
-                    if (maxIntensity > 0.1 && maxIntensity != null) {
-                        const [latStr, lonStr] = maxKey.split(",");
-                        strollLat = parseFloat(latStr);
-                        strollLon = parseFloat(lonStr);
-                    } else {
-                        strollLat = markerLat;
-                        strollLon = markerLon;
-                    }
-
-                    zielLat = strollLat + random3;
-                    zielLon = strollLon + random4;
-
-                    console.log("Ziellat: " + zielLat);
-                    console.log("Strolllon: " + strollLat);
-
-                    stepModifikator = 0.7;
+                    
                 } else if (aktuellerZustand == "sensor") {
                     stepModifikator = 10.5;
                     let sensorEntfernung = entfernungInMetern(markerLat, markerLon, zielLat, zielLon);
