@@ -12,12 +12,14 @@ h1 {
      color: bisque;
      text-align: center;
      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+     max-width: 80vw;
 }
 
 p {
      font-family: 'Courier New', Courier, monospace;
      color: blanchedalmond;
      text-align: center;
+     max-width: 80vw;
 }
 
 input {
@@ -74,4 +76,10 @@ h2 {
 .slider {
     display: block;
     margin: auto;
+}
+
+main, header, nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
