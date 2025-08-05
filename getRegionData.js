@@ -22,8 +22,10 @@ function getRegionData(lat, lon) {
       way["amenity"](${south},${west},${north},${east});
       relation["amenity"](${south},${west},${north},${east});
       way["highway"](${south},${west},${north},${east});
+      node["highway"](${south},${west},${north},${east});
     );
     out body;
+    >;
     `;
 
     return fetch("https://overpass.private.coffee/api/interpreter", {

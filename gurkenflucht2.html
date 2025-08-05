@@ -186,7 +186,7 @@
 
             
 
-            
+            console.time("Bewegung");
 
             const dLat = zielLat - markerLat;
             const dLon = zielLon - markerLon;
@@ -219,6 +219,8 @@
             markerLon += dirLon * step;
 
             gurke.setLatLng([markerLat, markerLon]);
+
+            console.timeEnd("Bewegung");
 
             
 
@@ -344,6 +346,8 @@
 
         function checkDistance(sensorLat, sensorLon, sensor) {
 
+            
+
             let distToPlayer = entfernungInMetern(sensorLat, sensorLon, playerLat, playerLon);
             console.log("Sensor distance to player: " + distToPlayer);
 
@@ -384,7 +388,9 @@
             }).addTo(map);
 
             setInterval(() => {
+                console.time("Sensoren");
                 checkDistance(sensorLat, sensorLon, sensor);
+                console.timeEnd("Sensoren");
             }, 100)
 
             
