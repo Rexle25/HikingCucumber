@@ -21,6 +21,7 @@ function getRegionData(lat, lon) {
       node["amenity"](${south},${west},${north},${east});
       way["amenity"](${south},${west},${north},${east});
       relation["amenity"](${south},${west},${north},${east});
+      way["highway"](${south},${west},${north},${east});
     );
     out body;
     `;

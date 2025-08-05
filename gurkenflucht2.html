@@ -388,7 +388,7 @@
             }, 100)
 
             
-        }, 19)
+        }, 19000)
         let maxIntensity = -Infinity;
         let maxKey = null;
         let maxEntry = null;
@@ -402,10 +402,16 @@
             if (cucumberDistToPlayer > 50) {
 
             
+            let nächstePositionImArray = getNextPositionFromArray(markerLat.toFixed(3) + "," + markerLon.toFixed(3));   
 
                 if (aktuellerZustand == "stroll") {
 
-                    
+                   if (nächstePositionImArray == undefined) {
+                    console.log("Nächste Position im Array ist nicht vorhanden");
+                   } else {
+                    console.log("Nächste Position ist " + nächstePositionImArray);
+                   }
+
                     
 
                     
