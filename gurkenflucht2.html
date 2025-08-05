@@ -410,6 +410,9 @@
                     console.log("Nächste Position im Array ist nicht vorhanden");
                    } else {
                     console.log("Nächste Position ist " + nächstePositionImArray);
+                    const [latStr, lonStr] = nächstePositionImArray.split(",");
+                    zielLat = parseFloat(latStr);
+                    zielLon = parseFloat(lonStr);
                    }
 
                     
