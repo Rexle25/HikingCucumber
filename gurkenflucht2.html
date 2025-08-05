@@ -75,6 +75,22 @@
             return [newLat, newLon];
         }
 
+        function calculateBearing(lat1, lon1, lat2, lon2) {
+        const toRadians = deg => deg * Math.PI / 180;
+        const toDegrees = rad => rad * 180 / Math.PI;
+
+        const φ1 = toRadians(lat1);
+        const φ2 = toRadians(lat2);
+        const Δλ = toRadians(lon2 - lon1);
+
+        const y = Math.sin(Δλ) * Math.cos(φ2);
+        const x = Math.cos(φ1) * Math.sin(φ2) -
+                    Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+        const θ = Math.atan2(y, x);
+
+        return (toDegrees(θ) + 360) % 360;
+        }
+
         
 
 
@@ -114,6 +130,13 @@
         let stepModifikator = 1;
         let lastSighting = [];
         let timer = 0;
+        let averageSpeed;
+        let speedTimer = 0;
+        let lastLat;
+        let lastLon;
+        let speedDist;
+        let speeds = JSON.parse(localStorage.getItem("speed")) || [];
+        let directions = [];
         let random3 = ((Math.random() * 2 - 1) * 0.00004002);
         let random4 = ((Math.random() * 2 -1) * 0.00004002);
         const randInt = Math.floor(Math.random() * 2);
@@ -121,8 +144,13 @@
 
         pos => {
 
+            lastLat = pos.coords.latitude;
+            lastLon = pos.coords.longitude;
+
             lat = pos.coords.latitude;
             lon = pos.coords.longitude;
+
+            
 
             
 
@@ -169,10 +197,56 @@
         navigator.geolocation.watchPosition( pos => {
 
 
+            
+
             playerLat = pos.coords.latitude;
             playerLon = pos.coords.longitude;
 
             player.setLatLng([playerLat, playerLon]);
+
+            const dLatSpeed = playerLat - lastLat;
+            const dLonSpeed = playerLon - lastLon;
+
+            speedDist = Math.sqrt(dLatSpeed * dLatSpeed + dLonSpeed * dLonSpeed);
+            const aktuellerSpeed = speedDist / speedTimer;
+
+            if (aktuellerSpeed != null) {
+                speeds.push(aktuellerSpeed);
+            }
+            
+            
+            const sum = speeds.reduce((acc, val) => acc + val, 0);
+            averageSpeed = sum / speeds.length;
+
+            const aktuelleRichtung = calculateBearing(playerLat, playerLon, lastLat, lastLon);
+
+            if (aktuelleRichtung != null) {
+                directions.push(aktuelleRichtung);
+            }
+            
+
+            localStorage.setItem("speed", JSON.stringify(speeds));
+            localStorage.setItem("directions", (directions));
+
+            console.log("Aktuelle Entfernung pro update " + speedDist);
+            console.log("Aktuelle Geschwindigkeit: " + aktuellerSpeed);
+            console.log("Durchschnittliche Geschwindigkeit: " + averageSpeed);
+            console.log("Alle Elemente in Speeds Array: " + speeds);
+            console.log("Aktuelle Richtung: " + aktuelleRichtung);
+            console.log("Speed Array vom localstorage: " + localStorage.getItem("speed"));
+
+
+
+
+
+            lastLat = playerLat;
+            lastLon = playerLon;
+
+            speedTimer = 0;
+
+
+
+            
 
         
         });
@@ -497,6 +571,10 @@
             console.log("Index der aktuellen Position in Sichtungen: " + getNextPositionFromArray(markerLat.toFixed(3) + "," + markerLon.toFixed(3)));
             getNextPositionFromArray(markerLat.toFixed(3) + "," + markerLon.toFixed(3));
         }, 10000)
+
+        setInterval(() =>{
+            speedTimer = speedTimer + 0.05;
+        }, 50)
 
         
 
