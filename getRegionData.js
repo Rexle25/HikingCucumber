@@ -25,7 +25,7 @@ function getRegionData(lat, lon) {
     out body;
     `;
 
-    return fetch("https://overpass-api.de/api/interpreter", {
+    return fetch("https://overpass.private.coffee/api/interpreter", {
         method: "POST",
         body: query,
     })

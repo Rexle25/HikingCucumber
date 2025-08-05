@@ -397,6 +397,7 @@
         setInterval(() => {
             let cucumberDistToPlayer = entfernungInMetern(markerLat, markerLon, playerLat, playerLon);
             console.log("Die Gurke ist noch so weit vom Spieler entfernt: " + cucumberDistToPlayer);
+            console.log("Aktueller Zustand: " + aktuellerZustand);
 
             if (cucumberDistToPlayer > 50) {
 
@@ -441,12 +442,15 @@
 
                     stepModifikator = 0.7;
                 } else if (aktuellerZustand == "sensor") {
-                    stepModifikator = 1.5;
+                    stepModifikator = 10.5;
                     let sensorEntfernung = entfernungInMetern(markerLat, markerLon, zielLat, zielLon);
                     console.log("Gurke ist noch so viele Meter von Sensor entfernt: " + sensorEntfernung);
 
                     if (sensorEntfernung < 30) {
-                        aktuellerZustand == "stroll";
+                        aktuellerZustand = "stroll";
+                        console.log("Gurke strollt jetzt wieder");
+                    } else {
+                        console.log("Die Gurke ist noch zu weit weg");
                     }
 
 

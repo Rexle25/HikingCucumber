@@ -260,14 +260,14 @@
                 lastPolygonLat = playerLat;
                 lastPolygonLon = playerLon;
                 for (let i = 0; i < 3; i++) {
-                    let [polygonLat, polygonLon] = randomGurkenSpawn(playerLat, playerLon, 50, 250);
+                    let [polygonLat, polygonLon] = randomGurkenSpawn(playerLat, playerLon, 50, 500);
                     let polygonBounds = [
-                        randomGurkenSpawn(polygonLat, polygonLon, 20, 80),
-                        randomGurkenSpawn(polygonLat, polygonLon, 20, 80),
-                        randomGurkenSpawn(polygonLat, polygonLon, 20, 80)
+                        randomGurkenSpawn(polygonLat, polygonLon, 90, 260),
+                        randomGurkenSpawn(polygonLat, polygonLon, 90, 260),
+                        randomGurkenSpawn(polygonLat, polygonLon, 90, 260)
                         
                     ];
-                    var polygon = L.polygon(polygonBounds).addTo(map);
+                    var polygon = L.polygon(polygonBounds, {color: "Tomato"}).addTo(map);
 
                     const polygonCalculation = polygonBounds.map(([lat, lng]) => [lng, lat]);
                     
