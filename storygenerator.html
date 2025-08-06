@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>JSON-Generator für Hiking Cucumber Story</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <style>
+    body { margin:0; font-family:sans-serif }
+    #map { height:200px }
+    form { display:grid; gap:8px; padding:16px }
+    input, select, textarea, button { padding:8px; font-size:14px; width:100% }
+    .station { border-top:1px solid #ccc; padding-top:8px; margin-top:8px }
+    #output { width:100%; height:200px }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <form id="stationForm">
+    <input id="name" placeholder="name" required />
+    <select id="type">
+      <option value="text">text</option>
+      <option value="choice">choice</option>
+      <option value="question">question</option>
+      <option value="media">media</option>
+    </select>
+    <textarea id="text" placeholder="text"></textarea>
+    <input id="answer1" placeholder="answer1" />
+    <input id="answer2" placeholder="answer2" />
+    <input id="next1" placeholder="next1" />
+    <input id="next2" placeholder="next2" />
+    <input id="url" placeholder="url" />
+    <button type="button" id="setNull">pos auf null setzen</button>
+    <button type="submit">Station hinzufügen</button>
+  </form>
+  <div id="list"></div>
+  <button id="generate">JSON generieren</button>
+  <textarea id="output" readonly></textarea>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    var map = L.map('map').setView([46.94809,7.44744],12)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map)
+
+    var currentPos = null
+    var posMarker = null
+
+    map.on('click', function(e){
+      // alte Markierung entfernen
+      if(posMarker) map.removeLayer(posMarker)
+      // neue Position merken und Marker setzen
+      currentPos = [e.latlng.lat, e.latlng.lng]
+      posMarker = L.marker(currentPos).addTo(map)
+    })
+
+    var stations = []
+    var form = document.getElementById('stationForm')
+    var list = document.getElementById('list')
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault()
+      var s = {
+        name: document.getElementById('name').value,
+        pos: currentPos,
+        type: document.getElementById('type').value,
+        text: document.getElementById('text').value,
+        answer1: document.getElementById('answer1').value,
+        answer2: document.getElementById('answer2').value,
+        next1: document.getElementById('next1').value,
+        next2: document.getElementById('next2').value,
+        url: document.getElementById('url').value
+      }
+      stations.push(s)
+      var div = document.createElement('div'); 
+      div.className = 'station'
+      div.textContent = s.name + ' (' + (s.pos ? s.pos.join(', ') : 'null') + ')'
+      list.appendChild(div)
+      form.reset()
+      currentPos = null
+      if(posMarker) { map.removeLayer(posMarker); posMarker = null }
+    })
+
+    document.getElementById('setNull').addEventListener('click', function(){
+      currentPos = null
+      if(posMarker) { map.removeLayer(posMarker); posMarker = null }
+    })
+
+    document.getElementById('generate').addEventListener('click', function(){
+      var obj = {
+        stations: stations.map(function(s){
+          return {
+            name: s.name,
+            pos: s.pos === null ? null : [s.pos[0], s.pos[1]],
+            type: s.type,
+            text: s.text,
+            answer1: s.answer1,
+            answer2: s.answer2,
+            next1: s.next1,
+            next2: s.next2,
+            url: s.url
+          }
+        })
+      }
+      document.getElementById('output').value = JSON.stringify(obj, null, 2)
+    })
+  </script>
+</body>
+</html>

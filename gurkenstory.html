@@ -29,8 +29,6 @@
 <body>
 
 
-    <h1>Schnitzeljagd spielen</h1>
-    <p>JSON von Schnitzeljagd hier einfügen</p>
     <textarea id="JSONinput" rows = "10" cols = "30"></textarea>
      <button onclick="jsonParse()" id="button">Drücke hier wenn du das JSON eingefügt hast</button> 
 
@@ -164,6 +162,43 @@
           
         }
 
+        function createMediaOverlay(url) {
+          const overlay = document.createElement("div");
+          overlay.style.position = "fixed";
+          overlay.style.top = "0";
+          overlay.style.left = "0";
+          overlay.style.width = "100vw";
+          overlay.style.height = "100vh";
+          overlay.style.zIndex = "1000";
+          overlay.style.backgroundImage = "url(textures/paper.png)";
+          overlay.style.display = "flex";
+          overlay.style.flexDirection = "column";
+          overlay.style.alignItems = "center";
+
+          const iframe = document.createElement("iframe");
+          iframe.frameBorder = "0";
+          iframe.zIndex = "2000";
+          iframe.src = url;
+
+          const btn = document.createElement("button");
+          btn.innerText = "Weiter";
+          btn.style.marginBottom = "40px";
+
+          
+
+          overlay.appendChild(iframe);
+          overlay.appendChild(btn);
+          
+
+          document.body.appendChild(overlay);
+
+          return {overlay, btn};
+
+          
+
+          
+        }
+
         function jsonParse() {
 
             JSONinput = document.getElementById("JSONinput").value;
@@ -262,6 +297,16 @@
                 }
             } else if (stationsTyp == "text") {
                 const {overlay, btn} = createTextOverlay(station.text);
+
+                btn.onclick = function() {
+                    overlay.remove();
+                    const nextName = station.next1;
+                    const nächsteStation = data.stations.find(s => s.name == nextName);
+                    markerCheck(nächsteStation);
+                }
+            } else if (stationsTyp = "media") {
+                console.log("Media");
+                const {overlay, btn} = createMediaOverlay(station.url);
 
                 btn.onclick = function() {
                     overlay.remove();
