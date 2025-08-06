@@ -28,8 +28,6 @@
 
 <body>
 
-    <button onclick="help()" style="margin-right: auto; border-radius: 200px;">?</button> 
-
 
     <h1>Schnitzeljagd spielen</h1>
     <p>JSON von Schnitzeljagd hier einfügen</p>
@@ -42,6 +40,11 @@
     
 
     <script>
+
+        let data;
+        let playerLon;
+        let playerLat;
+        let player;
         
         var map = L.map('map').setView([46.9480900, 7.4474400], 12);
 
@@ -125,7 +128,7 @@
           
         }
 
-        function createChoiceOverlay(text, antwort1, antwort2) {
+        function createTextOverlay(text) {
           const overlay = document.createElement("div");
           overlay.style.position = "fixed";
           overlay.style.top = "0";
@@ -161,10 +164,105 @@
           
         }
 
+        function jsonParse() {
+
+            JSONinput = document.getElementById("JSONinput").value;
+             
+
+            try {
+                data = JSON.parse(JSONinput);
+                
+            } catch (e) {
+                alert("Fehler beim Parsen des JSON:\n" + e.message);
+            }
+
+            if (!data.stations || !Array.isArray(data.stations)) {
+                alert("Keine gültigen Stationen im JSON gefunden."); 
+            }
+
+            const textarea = document.getElementById("JSONinput");
+            const button = document.getElementById("button");
+            textarea.remove();
+            button.remove();
+
+            console.log("JSON erfolgreich geparset");
+            console.log(data);
+
+            let ersteStation = data.stations.find(s => s.name === "Start");
+            console.log(ersteStation);
+            markerCheck(ersteStation);
+        }
+
+        function markerCheck(station) {
+            let aktuelleStation = station;
+            let stationsPosition = station.pos;
+            console.log("Position der Station ist " + stationsPosition);
+
+            if (stationsPosition == null) {
+                startStation(aktuelleStation);
+            } else {
+                let marker = L.marker(stationsPosition).addTo(map).on('click', function(e) {
+                    const playerDist = Math.hypot(
+                        stationsPosition[0] - playerLat,
+                        stationsPosition[1] - playerLon
+                    ) * 111000;
+
+                    console.log("Du bist noch so viele Meter von der Station entfernt: " + playerDist);
+
+                    if (playerDist < 500000) {
+                        console.log("Spieler ist nahe genug an Station")
+                        map.removeLayer(marker);
+                        startStation(aktuelleStation);
+                    }
+
+                });
+            }
+        }
+
+        function startStation(station) {
+            let stationsTyp = station.type;
+            console.log("Der Typ der aktuellen Station ist: " + stationsTyp);
+
+            if (stationsTyp == "choice") {
+                const {overlay, btn1, btn2} = createChoiceOverlay(station.text, station.answer1, station.answer2);
+
+                btn1.onclick = function() {
+                    const nextName = station.next1;
+                    console.log("NextName: " + nextName);
+                    const nächsteStation = data.stations.find(s => s.name == nextName);
+                    console.log("Nächste Station ist: ", nächsteStation);
+                    markerCheck(nächsteStation);
+                }
+                btn2.onclick = function() {
+                    const nextName = station.next2;
+                    console.log("NextName: " + nextName);
+                    const nächsteStation = data.stations.find(s => s.name == nextName);
+                    console.log(nächsteStation);
+                    markerCheck(nächsteStation);
+                }
+            } 
+        }
+
+        navigator.geolocation.watchPosition((position) =>{
+            playerLat = position.coords.latitude;
+            playerLon = position.coords.longitude;
+            if (player == undefined) {
+                player = L.circle([playerLat, playerLon], {
+                    color: 'deepskyblue',
+                    fillColor: '#00BFFF',
+                    fillOpacity: 0.5,
+                    radius: 10
+                }).addTo(map);  
+            } else {
+                player.setLatLng([playerLat, playerLon]);
+
+            }
+        });
+
         
 
 
 
     </script>
 
-    <script>
+    
