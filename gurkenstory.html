@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Play</title>
+    <meta name="description" content="Create your own interactive scavenger hunts with puzzles.
+     Everything is free, open source and without ads.">
+     <meta name="keywords" content="scavenger hunt, free, open source, outdoor, game, no ads, no account, json, map, outside, website, browser game, riddle, 
+     location based game, web app, map based game">
+     <meta name="author" content="Rexle25">
+
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+     
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+      <link rel="stylesheet" href="style.css">
+
+      <link rel="manifest" href="manifest.json">
+
+
+</head>
+
+
+
+<body>
+
+    <button onclick="help()" style="margin-right: auto; border-radius: 200px;">?</button> 
+
+
+    <h1>Schnitzeljagd spielen</h1>
+    <p>JSON von Schnitzeljagd hier einfügen</p>
+    <textarea id="JSONinput" rows = "10" cols = "30"></textarea>
+     <button onclick="jsonParse()" id="button">Drücke hier wenn du das JSON eingefügt hast</button> 
+
+     
+     <div id="map"></div>
+
+    
+
+    <script>
+        
+        var map = L.map('map').setView([46.9480900, 7.4474400], 12);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+
+        function createQuestionOverlay(frageText) {
+          const overlay = document.createElement("div");
+          overlay.style.position = "fixed";
+          overlay.style.top = "0";
+          overlay.style.left = "0";
+          overlay.style.width = "100vw";
+          overlay.style.height = "100vh";
+          overlay.style.zIndex = "1000";
+          overlay.style.backgroundImage = "url(textures/paper.png)";
+          overlay.style.display = "flex";
+          overlay.style.flexDirection = "column";
+          overlay.style.alignItems = "center";
+
+          const frage = document.createElement("p");
+          frage.innerText = frageText;
+          frage.style.color = "black";
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.style.marginBottom = "60px";
+
+          const btn = document.createElement("button");
+          btn.innerText = "Überprüfen";
+          btn.style.marginBottom = "40px";
+
+          overlay.appendChild(frage);
+          overlay.appendChild(input);
+          overlay.appendChild(btn);
+
+          document.body.appendChild(overlay);
+
+          return {overlay, input, btn};
+
+          
+        }
+
+        function createChoiceOverlay(text, antwort1, antwort2) {
+          const overlay = document.createElement("div");
+          overlay.style.position = "fixed";
+          overlay.style.top = "0";
+          overlay.style.left = "0";
+          overlay.style.width = "100vw";
+          overlay.style.height = "100vh";
+          overlay.style.zIndex = "1000";
+          overlay.style.backgroundImage = "url(textures/paper.png)";
+          overlay.style.display = "flex";
+          overlay.style.flexDirection = "column";
+          overlay.style.alignItems = "center";
+
+          const frage = document.createElement("p");
+          frage.innerText = text;
+          frage.style.color = "black";
+
+          const btn1 = document.createElement("button");
+          btn1.innerText = antwort1;
+          btn1.style.marginBottom = "40px";
+
+          const btn2 = document.createElement("button");
+          btn2.innerText = antwort2;
+          btn2.style.marginBottom = "40px";
+
+          overlay.appendChild(frage);
+          overlay.appendChild(btn1);
+          overlay.appendChild(btn2);
+
+          document.body.appendChild(overlay);
+
+          return {overlay, btn1, btn2};
+
+          
+
+          
+        }
+
+        function createChoiceOverlay(text, antwort1, antwort2) {
+          const overlay = document.createElement("div");
+          overlay.style.position = "fixed";
+          overlay.style.top = "0";
+          overlay.style.left = "0";
+          overlay.style.width = "100vw";
+          overlay.style.height = "100vh";
+          overlay.style.zIndex = "1000";
+          overlay.style.backgroundImage = "url(textures/paper.png)";
+          overlay.style.display = "flex";
+          overlay.style.flexDirection = "column";
+          overlay.style.alignItems = "center";
+
+          const frage = document.createElement("p");
+          frage.innerText = text;
+          frage.style.color = "black";
+
+          const btn = document.createElement("button");
+          btn1.innerText = "Weiter";
+          btn1.style.marginBottom = "40px";
+
+          
+
+          overlay.appendChild(frage);
+          overlay.appendChild(btn);
+          
+
+          document.body.appendChild(overlay);
+
+          return {overlay, btn};
+
+          
+
+          
+        }
+
+        
+
+
+
+    </script>
+
+    <script>
