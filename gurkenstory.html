@@ -146,8 +146,8 @@
           frage.style.color = "black";
 
           const btn = document.createElement("button");
-          btn1.innerText = "Weiter";
-          btn1.style.marginBottom = "40px";
+          btn.innerText = "Weiter";
+          btn.style.marginBottom = "40px";
 
           
 
@@ -232,6 +232,7 @@
                     const nächsteStation = data.stations.find(s => s.name == nextName);
                     console.log("Nächste Station ist: ", nächsteStation);
                     markerCheck(nächsteStation);
+                    overlay.remove();
                 }
                 btn2.onclick = function() {
                     const nextName = station.next2;
@@ -239,8 +240,36 @@
                     const nächsteStation = data.stations.find(s => s.name == nextName);
                     console.log(nächsteStation);
                     markerCheck(nächsteStation);
+                    overlay.remove();
                 }
-            } 
+            } else if (stationsTyp == "question") {
+                const {overlay, input, btn} = createQuestionOverlay(station.text);
+
+                btn.onclick = function() {
+
+                    const userAntwort = input.value.trim().toLocaleLowerCase();
+                    const richtigeAntwort = station.answer1.trim().toLowerCase();
+                    
+                    if (userAntwort == richtigeAntwort) {
+                        console.log("Das war die richtige Antwort!");
+                        overlay.remove();
+                        const nextName = station.next1;
+                        const nächsteStation = data.stations.find(s => s.name == nextName);
+                        markerCheck(nächsteStation);
+                    } else {
+                        alert("Das war Falsch");
+                    }
+                }
+            } else if (stationsTyp == "text") {
+                const {overlay, btn} = createTextOverlay(station.text);
+
+                btn.onclick = function() {
+                    overlay.remove();
+                    const nextName = station.next1;
+                    const nächsteStation = data.stations.find(s => s.name == nextName);
+                    markerCheck(nächsteStation);
+                }
+            }
         }
 
         navigator.geolocation.watchPosition((position) =>{
