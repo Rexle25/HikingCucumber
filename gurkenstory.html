@@ -43,6 +43,7 @@
         let playerLon;
         let playerLat;
         let player;
+        let items = [];
         
         var map = L.map('map').setView([46.9480900, 7.4474400], 12);
 
@@ -257,6 +258,7 @@
         function startStation(station) {
             let stationsTyp = station.type;
             console.log("Der Typ der aktuellen Station ist: " + stationsTyp);
+            
 
             if (stationsTyp == "choice") {
                 const {overlay, btn1, btn2} = createChoiceOverlay(station.text, station.answer1, station.answer2);
@@ -304,7 +306,7 @@
                     const nächsteStation = data.stations.find(s => s.name == nextName);
                     markerCheck(nächsteStation);
                 }
-            } else if (stationsTyp = "media") {
+            } else if (stationsTyp == "media") {
                 console.log("Media");
                 const {overlay, btn} = createMediaOverlay(station.url);
 
@@ -314,7 +316,29 @@
                     const nächsteStation = data.stations.find(s => s.name == nextName);
                     markerCheck(nächsteStation);
                 }
+            } else if (stationsTyp == "item") {
+                const requiredItem = station.itemCheck;
+                console.log("Item check wird gemacht");
+                
+                if (items.includes(requiredItem)) {
+                    console.log("Item vorhanden");
+                    const nextName = station.next1;
+                    const nächsteStation = data.stations.find(s => s.name == nextName);
+                    markerCheck(nächsteStation);
+                    
+                } else {
+                    console.log("Item nicht vorhanden");
+                    const nextName = station.next2;
+                    const nächsteStation = data.stations.find(s => s.name == nextName);
+                    markerCheck(nächsteStation);
+                    
+                }
+
             }
+
+            const getItem = station.itemGet;
+            console.log("Spieler bekommt: " + getItem);
+            items.push(getItem);
         }
 
         navigator.geolocation.watchPosition((position) =>{
