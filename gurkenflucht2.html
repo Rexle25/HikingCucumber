@@ -124,7 +124,7 @@
         let lastPlayerLat;
         let lastPlayerLon;
         let heatMap = new Map();
-        let aktuellerZustand = "stroll"
+        let aktuellerZustand = "search"
         let strollLat;
         let strollLon;
         let stepModifikator = 1;
@@ -135,6 +135,7 @@
         let lastLat;
         let lastLon;
         let speedDist;
+        let schonGesucht = [];
         let speeds = JSON.parse(localStorage.getItem("speed")) || [];
         let directions = [];
         let random3 = ((Math.random() * 2 - 1) * 0.00004002);
@@ -381,8 +382,6 @@
                     
 
                     } else if (randomType === "Verlangsamen") {
-
-
                         aktuellerEffekt = randomType;
 
                         map.removeLayer(marker); 
@@ -435,6 +434,8 @@
                 console.log("Heatmap intensity: " + intensity);
                 sensor.setRadius(45);
                 sensor.setStyle(fillOpacity=0.5);
+                lastLat = sensorLat;
+                lastLon = sensorLon;
 
                 zielLat = sensorLat;
                 zielLon = sensorLon;
@@ -540,12 +541,18 @@
                     console.log("Gurke ist noch so viele Meter von Sensor entfernt: " + sensorEntfernung);
 
                     if (sensorEntfernung < 30) {
-                        aktuellerZustand = "stroll";
+                        aktuellerZustand = "search";
                         console.log("Gurke strollt jetzt wieder");
                     } else {
                         console.log("Die Gurke ist noch zu weit weg");
                     }
 
+
+                } else if (aktuellerZustand == "search") {
+                    
+                        
+                    
+                    
 
                 }
             } else {
@@ -575,6 +582,54 @@
         setInterval(() =>{
             speedTimer = speedTimer + 0.05;
         }, 50)
+
+        setInterval(() => {
+            if (aktuellerZustand == "search") {
+                let suchEntfernung = 80;
+                    let PositionErfolgreichGefunden = false;
+                    console.log("Gurke sucht jetzt");
+                    console.log(PositionErfolgreichGefunden);
+
+                    for (let i = 0; i < 50 && !PositionErfolgreichGefunden; i++) {
+                        let [planLat, planLon] = randomSpawn(markerLat, markerLon, suchEntfernung, suchEntfernung);   
+                        suchEntfernung = suchEntfernung + 10
+
+                        
+
+                        console.log("Schon gesuche Positionen: " + schonGesucht);
+
+                        if (schonGesucht.length == 0 && planLat != NaN) {
+                            zielLat = planLat;
+                            zielLon = planLon;
+                            const key = planLat.toFixed(3) + "," + planLon.toFixed(3);
+                            schonGesucht.push(key);
+                            
+                        } else {
+                            schonGesucht.forEach(Element => {
+                                const key = planLat.toFixed(3) + "," + planLon.toFixed(3);
+                                
+                                if (!schonGesucht.includes(key)) {
+                                    zielLat = planLat;
+                                    zielLon = planLon;
+                                    const key = planLat.toFixed(3) + "," + planLon.toFixed(3);
+                                    schonGesucht.push(key);
+
+                                    PositionErfolgreichGefunden = true;
+
+                                    console.log("Position noch nicht vorhanden");
+                                    
+                                } else {
+                                    console.log("Position wurde bereits abgesucht");
+                                }
+                            })
+                        }
+                    }
+                    
+
+                    console.log("Nächstes Suchgebiet der Gurke: " + zielLat + ", " + zielLon);
+                    stepModifikator = 2;
+                }
+        }, 1500)
 
         
 
